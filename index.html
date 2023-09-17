@@ -12,7 +12,6 @@
         }else{
           cur_img.src = "";
         }
-        
       }
 
       function add_target_directory(){
@@ -41,12 +40,13 @@
         margin: 0px;
         display: grid;
         grid-template-columns: min-content auto min-content;
+        justify-items: center;
+        align-items: center;
       }
 
       #current-image {
         width:90%;
         height:90%;
-        margin: 5%;
       } 
 
       #controls {
@@ -80,16 +80,15 @@
 
   <body onload=main()>
       <div id="images">
-        <img alt="IMMAGINE" />
-        <img alt="IMMAGINE" />
-        <img alt="IMMAGINE" />
-        <img alt="IMMAGINE" />
+        <img alt="IMMAGINE"/>
+        <img alt="IMMAGINE"/>
+        <img alt="IMMAGINE"/>
       </div>
       <img id="current-image" alt="IMMAGINE" onclick=set_current_image() />
       <div>
         <div id="controls">
-          <button>Salva</button>
           <button>Muovi</button>
+          <button>Salva</button>
           <button onclick=add_target_directory() >Crea nuova directory</button>
           <input id=new-directory type=text></input>
         </div>
