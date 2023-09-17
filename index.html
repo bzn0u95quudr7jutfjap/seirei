@@ -1,0 +1,99 @@
+
+<html>
+  <head>
+    <script>
+      function main(){
+      }
+
+      function set_current_image(){
+        var cur_img = document.getElementById("current-image");
+        if(cur_img.src == ""){
+          cur_img.src = "/tmp/a.jpg";
+        }else{
+          cur_img.src = "";
+        }
+        
+      }
+
+      function add_target_directory(){
+        var newdir = document.getElementById("new-directory");
+
+        var newbutton = document.createElement("button");
+        newbutton.onclick = function(){
+          alert(newbutton.innerText);
+        };
+        newbutton.innerText = newdir.value;
+
+        var dirs = document.getElementById("target-directories");
+        dirs.append(newbutton);
+
+        newdir.value = "";
+      }
+    </script>
+
+    <style>
+      html {
+        height:100%;
+      }
+
+      body {
+        height:100%;
+        margin: 0px;
+        display: grid;
+        grid-template-columns: min-content auto min-content;
+      }
+
+      #current-image {
+        width:90%;
+        height:90%;
+        margin: 5%;
+      } 
+
+      #controls {
+        display: grid;
+        grid-template-rows: auto auto auto;
+      }
+
+      #images {
+        overflow: scroll;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #target-directories {
+        overflow: scroll;
+      }
+
+      #images img, #target-directories button {
+        margin: 20px
+      }
+
+      #controls button, #controls input {
+        margin: 10px
+      }
+
+      #images, #target-directories, #controls {
+          margin: 20px;
+      }
+    </style>
+  </head>
+
+  <body onload=main()>
+      <div id="images">
+        <img alt="IMMAGINE" />
+        <img alt="IMMAGINE" />
+        <img alt="IMMAGINE" />
+        <img alt="IMMAGINE" />
+      </div>
+      <img id="current-image" alt="IMMAGINE" onclick=set_current_image() />
+      <div>
+        <div id="controls">
+          <button>Salva</button>
+          <button>Muovi</button>
+          <button onclick=add_target_directory() >Crea nuova directory</button>
+          <input id=new-directory type=text></input>
+        </div>
+        <div id="target-directories"> </div>
+      </div>
+  </body>
+</html>
