@@ -57,6 +57,7 @@
         var path = URL.createObjectURL(file);
         images.append(make_miniatura(i, path, file.name));
         etichette[file.name] = null;
+        console.log(file.webkitRelativePath););
         i += 1;
       }
       set_current_image(0);
