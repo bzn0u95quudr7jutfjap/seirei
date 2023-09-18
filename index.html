@@ -8,10 +8,12 @@
     var current_image;
     var newdir;
     var dirs;
+    var fileslist;
 
     function main() {
       newdir = document.getElementById("new-directory");
       dirs = document.getElementById("target-directories");
+      fileslist = document.getElementById("pick-directory");
 
       current_image = document.getElementById("current-image");
       images = document.getElementById("images");
@@ -38,9 +40,11 @@
 
     function load_images(elem) {
       var i = 0;
+      etichette = {};
       for (const file of elem.files) {
         var path = URL.createObjectURL(file);
         images.append(make_miniatura(i, path, file.name));
+        etichette[file.name] = "";
         i += 1;
       }
     }
@@ -50,7 +54,7 @@
       etichetta.type = "radio";
       etichetta.name = "etichetta";
       etichetta.onclick = function () {
-        set_current_image((currentindex + 1) % 144);
+        set_current_image((currentindex + 1) % fileslist.files.length);
         etichetta.checked = false;
       };
       var name = document.createElement("label");
