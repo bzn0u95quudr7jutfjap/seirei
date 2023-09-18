@@ -2,19 +2,7 @@
 
 <head>
   <script>
-    function load_images(elem) {
-      var s = "";
-      // for(var i = 0; i < elem.files.length ; i+=1){
-      //   s +=  JSON.stringify(elem.files[i]) + "\n";
-      // } 
-      var i = 0;
-      for (const file of elem.files) {
-        var path = URL.createObjectURL(file);
-        images.append(make_miniatura(i, path, file.name));
-        i += 1;
-      }
-      alert(s);
-    }
+
     var currentindex = 0;
     var images;
     var current_image;
@@ -27,12 +15,6 @@
 
       current_image = document.getElementById("current-image");
       images = document.getElementById("images");
-
-      // for (let i = 0; i < 144; i += 1) {
-      //   images.append(make_miniatura(i, "/tmp/a.jpg"));
-      // }
-      // images.children[0].style.border = "thick solid #6666FF";
-      // current_image.src = images.children[0].src;
     }
 
     function set_current_image(i) {
@@ -52,6 +34,15 @@
         set_current_image(i);
       }
       return img;
+    }
+
+    function load_images(elem) {
+      var i = 0;
+      for (const file of elem.files) {
+        var path = URL.createObjectURL(file);
+        images.append(make_miniatura(i, path, file.name));
+        i += 1;
+      }
     }
 
     function make_etichetta(label_name) {
