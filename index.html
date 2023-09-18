@@ -1,18 +1,31 @@
-
 <html>
   <head>
     <script>
       function main(){
+        var images = document.getElementById("images");
+        for(let i = 0; i < 144; i+= 1){
+          var newimage = document.createElement("img");
+          newimage.src = "/tmp/a.jpg";
+          images.append(newimage);
+        }
+        var cur_img = document.getElementById("current-image");
+        cur_img.src = "/tmp/a.jpg";
       }
 
       function set_current_image(){
         var cur_img = document.getElementById("current-image");
-        if(cur_img.src == ""){
-          cur_img.src = "/tmp/a.jpg";
-        }else{
-          cur_img.src = "";
-        }
+        cur_img.src = "/tmp/a.jpg";
       }
+
+      function make_etichetta(label_name){
+        var etichetta = document.createElement("input");
+        etichetta.type = "radio";
+        etichetta.name = "etichetta";
+        var name = document.createElement("label");
+        name.append(etichetta);
+        name.append(label_name);
+        return name;
+      } 
 
       function add_target_directory(){
         var newdir = document.getElementById("new-directory");
@@ -24,7 +37,7 @@
         newbutton.innerText = newdir.value;
 
         var dirs = document.getElementById("target-directories");
-        dirs.append(newbutton);
+        dirs.append(make_etichetta(newdir.value));
 
         newdir.value = "";
       }
@@ -40,58 +53,68 @@
         margin: 0px;
         display: grid;
         grid-template-columns: min-content auto min-content;
+        grid-template-rows: 100%;
         justify-items: center;
         align-items: center;
       }
 
       #current-image {
-        width:90%;
-        height:90%;
+        max-width:90%;
+        max-height:90%;
       } 
-
-      #controls {
-        display: grid;
-        grid-template-rows: auto auto auto;
-      }
 
       #images {
         overflow: scroll;
-        display: flex;
-        flex-direction: column;
+        height: 90%;
+      }
+
+      #images img {
+        width: 160px;
+        margin: 10px;
+        margin-right: 20px;
+      }
+
+      #images, #controls {
+        margin: 20px;
+      }
+
+      #controls {
+        height: 90%;
+        display: grid;
+        grid-template-rows: min-content min-content min-content min-content auto;
+        grid-gap: 10px;
       }
 
       #target-directories {
         overflow: scroll;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex-gap: 20px;
       }
 
-      #images img, #target-directories button {
-        margin: 20px
+      #target-directories label {
+        width: 100%;
+        heigth: 100%;
+        font-size: 22px;
       }
 
-      #controls button, #controls input {
-        margin: 10px
+      #target-directories label input {
+        height: 20px;
+        width:  20px;
       }
 
-      #images, #target-directories, #controls {
-          margin: 20px;
-      }
     </style>
   </head>
 
   <body onload=main()>
-      <div id="images">
-        <img alt="IMMAGINE"/>
-        <img alt="IMMAGINE"/>
-        <img alt="IMMAGINE"/>
-      </div>
+      <div id="images"> </div>
       <img id="current-image" alt="IMMAGINE" onclick=set_current_image() />
-      <div>
-        <div id="controls">
-          <button>Muovi</button>
-          <button>Salva</button>
-          <button onclick=add_target_directory() >Crea nuova directory</button>
-          <input id=new-directory type=text></input>
-        </div>
+      <div id="controls">
+        <button>Muovi</button>
+        <button>Salva</button>
+        <button onclick=add_target_directory() >Nuova directory</button>
+        <input id=new-directory type=text></input>
         <div id="target-directories"> </div>
       </div>
   </body>
