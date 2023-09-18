@@ -9,6 +9,7 @@
     var newdir;
     var dirs;
     var fileslist;
+    var etichette;
 
     function main() {
       newdir = document.getElementById("new-directory");
@@ -19,13 +20,24 @@
       images = document.getElementById("images");
     }
 
+    function select_image(image, border, check) {
+      image.style.border = border;
+      var label = etichette[image.alt];
+      if (label != null) {
+        label.checked = check;
+      }
+    }
+
     function set_current_image(i) {
-      images.children[currentindex].style.border = "none";
-      var img = images.children[i];
-      img.style.border = "thick solid #6666FF";
+      select_image(images.children[currentindex], "none", false);
+
       currentindex = i;
-      current_image.src = img.src;
-      current_image.alt = img.alt;
+
+      var image = images.children[currentindex];
+      select_image(image, "thick solid #6666FF", true);
+
+      current_image.src = image.src;
+      current_image.alt = image.alt;
     }
 
     function make_miniatura(i, path, alt) {
@@ -55,7 +67,6 @@
       etichetta.name = "etichetta";
       etichetta.onclick = function () {
         set_current_image((currentindex + 1) % fileslist.files.length);
-        etichetta.checked = false;
       };
       var name = document.createElement("label");
       name.append(etichetta);
