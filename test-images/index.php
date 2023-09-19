@@ -178,7 +178,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       }
     }
 
-    function call_php(command) {
+    function get_dataform() {
       const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
       const data_associazioni = Object.values(images.children)
         .map(i => i.alt)
@@ -193,14 +193,33 @@ if (file_exists($CONFIG_FILE_JSON)) {
       });
 
       var dataform = new FormData();
-      dataform.append("command", command);
       dataform.append("data", data);
+      return dataform;
+
+    }
+
+    function save(){
+      var dataform = get_dataform();
+      dataform.append("command", "save");
 
       const xmlhttp = new XMLHttpRequest();
-      xmlhttp.onload = function() {
-        console.log(this.responseText);
-      }
       xmlhttp.open("POST", "index.php", true);
+      xmlhttp.onload = function() {
+        alert(this.responseText);
+      }
+      xmlhttp.send(dataform);
+    }
+
+    function apply(){
+      var dataform = get_dataform();
+      dataform.append("command", "apply_changes");
+
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", "index.php", true);
+      xmlhttp.onload = function() {
+        alert(this.responseText);
+        window.location.reload(false);
+      }
       xmlhttp.send(dataform);
     }
   </script>
@@ -273,11 +292,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
   <div id="images"> </div>
   <img id="current-image" alt="IMMAGINE" />
   <div id="controls">
-    <button onclick="call_php('save')">Salva</button>
+    <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
     <input id="new-directory" type="text"></input>
     <div id="target-directories"> </div>
-    <button onclick="call_php('apply_changes'); // window.location.reload(false)">Applica modifiche</button>
+    <button onclick="apply()">Applica modifiche</button>
   </div>
 </body>
 
