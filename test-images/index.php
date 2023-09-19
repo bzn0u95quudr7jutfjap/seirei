@@ -33,14 +33,14 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_chan
   });
 
   foreach ($associazioni as $o) {
-    $p = $o->path;
-    $l = $o->label;
-    if (rename($p, "$l/$p")) {
-      echo "Spostamento di '$p' in '$l' : SUCCESSO\n";
+    $from = $o->path;
+    $to = $o->label . '/' . $o->path;
+    if (rename($from, $to)) {
+      echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
     } else {
       $bad_files[] = $o;
-      $bad_dirs[] = $l;
-      echo "Spostamento di '$p' in '$l' : ERRORE\n";
+      $bad_dirs[] = $o->label;
+      echo "Spostamento di '$from' in '$to' : ERRORE\n";
     }
   }
 
@@ -57,8 +57,8 @@ if (count($_POST) != 0) {
   die();
 }
 
-$script_file = str_replace(__DIR__ . "/","",__FILE__);
-$files = array_values(array_filter(glob('*'), function ($f) use($script_file) {
+$script_file = str_replace(__DIR__ . "/", "", __FILE__);
+$files = array_values(array_filter(glob('*'), function ($f) use ($script_file) {
   return !is_dir($f) && $f != $script_file;
 }));
 
