@@ -13,14 +13,17 @@ if ($len != 0) {
 }
 
 $CONFIGJSON = ".immagio.json";
-$etichette = [];
+$etichette = null;
+$associazioni = null;
 if (file_exists($CONFIGJSON)) {
   $conf = json_decode(file_get_contents($CONFIGJSON));
   $etichette = $conf->etichette;
+  $associazioni = $conf->associazini;
 }
 
 ?>
 
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -54,6 +57,7 @@ if (file_exists($CONFIGJSON)) {
       foreach (glob('*') as $file) {
         if (!is_dir($file)) {
           echo "images.append(make_miniatura($i,'$file','$file'));\n";
+          echo "etichette['$file'] = null;\n";
           $i += 1;
         }
       }
