@@ -155,23 +155,12 @@ if (file_exists($CONFIG_FILE_JSON)) {
         }
       });
 
-      //for (var i = 0; i < images.children.length; i += 1) {
-      //  const img = images.children[i];
-      //  const lbl = etichette[img.alt];
-      //  if (etichette[img.alt] != null) {
-      //    salvatore.push({
-      //      path: img.alt,
-      //      label: etichette[img.alt].value
-      //    });
-      //  }
-      //}
       var cartelle = [];
-      var labls = document.getElementsByName("etichetta");
-      for (var i = 0; i < labls.length; i += 1) {
+      foreach(document.getElementsByName("etichetta"), function(i, lbl) {
         cartelle.push({
-          nome: labls[i].value
+          nome: lbl.value
         });
-      }
+      });
 
       var data = JSON.stringify({
         etichette: cartelle,
