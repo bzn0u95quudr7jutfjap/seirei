@@ -1,8 +1,16 @@
+<?php
+
+$len = count($_POST);
+
+if($len != 0){
+  die();
+}
+?>
+
 <html>
 
 <head>
   <script>
-
     var currentindex = 0;
     var images;
     var current_image;
@@ -44,7 +52,7 @@
       var img = document.createElement("img");
       img.src = path;
       img.alt = alt;
-      img.onclick = function () {
+      img.onclick = function() {
         set_current_image(i);
       }
       return img;
@@ -57,7 +65,7 @@
         var path = URL.createObjectURL(file);
         images.append(make_miniatura(i, path, file.name));
         etichette[file.name] = null;
-        console.log(file.webkitRelativePath););
+        console.log(file.webkitRelativePath);
         i += 1;
       }
       set_current_image(0);
@@ -68,7 +76,7 @@
       etichetta.type = "radio";
       etichetta.name = "etichetta";
       etichetta.value = label_name;
-      etichetta.onclick = function () {
+      etichetta.onclick = function() {
         var img = images.children[currentindex].alt
         var etichetta_vecchia = etichette[img];
         etichette[img] = etichetta;
@@ -94,18 +102,28 @@
         const lbl = etichette[img.alt];
 
         if (etichette[img.alt] != null) {
-          salvatore.push({path: img.alt, label: etichette[img.alt].value});
+          salvatore.push({
+            path: img.alt,
+            label: etichette[img.alt].value
+          });
         }
 
       }
       var cartelle = [];
       var labls = document.getElementsByName("etichetta");
       for (var i = 0; i < labls.length; i += 1) {
-        cartelle.push({nome: labls[i].value});
+        cartelle.push({
+          nome: labls[i].value
+        });
       }
 
-      var data = JSON.stringify({etichette: cartelle, associazioni: salvatore});
-      var file = new Blob([data], {type: "text/plain"});
+      var data = JSON.stringify({
+        etichette: cartelle,
+        associazioni: salvatore
+      });
+      var file = new Blob([data], {
+        type: "text/plain"
+      });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(file);
       a.download = "immagiosorter.json";
@@ -161,12 +179,10 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      flex-gap: 20px;
     }
 
     #target-directories label {
       width: 100%;
-      heigth: 100%;
       font-size: 22px;
     }
 
