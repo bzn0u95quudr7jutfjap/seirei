@@ -15,12 +15,19 @@ if (count($_POST) != 0) {
   die();
 }
 
-$etichette = null;
-$associazioni = null;
+$files = array_values(array_filter(glob('*'), function ($f) {
+  return !is_dir($f);
+}));
+
+$etichette = [];
+$associazioni = [];
+
 if (file_exists($CONFIG_FILE_JSON)) {
   $conf = json_decode(file_get_contents($CONFIG_FILE_JSON));
   $etichette = $conf->etichette;
-  $associazioni = $conf->associazioni;
+  $associazioni = array_values(array_filter($conf->associazioni, function ($i) use ($files) {
+    return in_array($i->path, $files);
+  }));
 }
 
 ?>
@@ -51,35 +58,20 @@ if (file_exists($CONFIG_FILE_JSON)) {
         var e = make_etichetta(nome);
         associazioni[nome] = e.children[0];
         dirs.append(e);
-      }
-
-      <?php
-      foreach ($etichette as $label) {
-        echo "create_etichetta('$label->nome');\n";
-      }
-      ?>
-
-      <?php
-      $files = array_values(array_filter(glob('*'), function ($f) {
-        return !is_dir($f);
-      }));
-      foreach ($files as $i => $file) {
-        echo "images.append(make_miniatura($i,'$file','$file'));\n";
-        echo "etichette['$file'] = null;\n";
-      }
-      ?>
-
-      function set_associazione(path, label) {
-        if (etichette.hasOwnProperty(path)) {
-          etichette[path] = associazioni[label];
-        }
       };
 
-      <?php
-      foreach ($associazioni as $a) {
-        echo "set_associazione('" . $a->path . "','" . $a->label . "');\n";
-      }
-      ?>
+      <?php echo json_encode($etichette); ?>.forEach(create_etichetta);
+
+      function create_miniatura(nome) {
+        images.append(make_miniatura(images.children.length, nome, nome));
+      };
+
+      <?php echo json_encode($files); ?>.forEach(create_miniatura);
+
+      function associa_categorie_a_immagini(o) {
+        etichette[o.path] = associazioni[o.label];
+      };
+      <?php echo json_encode($associazioni); ?>.forEach(associa_categorie_a_immagini);
       set_current_image(0);
     }
 
