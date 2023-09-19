@@ -11,6 +11,14 @@ if ($len == 2) {
 if ($len != 0) {
   die();
 }
+
+$CONFIGJSON = ".immagio.json";
+$etichette = [];
+if (file_exists($CONFIGJSON)) {
+  $conf = json_decode(file_get_contents($CONFIGJSON));
+  $etichette = $conf->etichette;
+}
+
 ?>
 
 <html>
@@ -32,6 +40,22 @@ if ($len != 0) {
 
       current_image = document.getElementById("current-image");
       images = document.getElementById("images");
+
+      <?php
+      echo "// BEGIN PHP : LOAD LABELS\n";
+      foreach ($etichette as $label) {
+        echo 'dirs.append(make_etichetta("' . $label->nome . '"));' . "\n";
+      }
+      echo "// END PHP : LOAD LABELS\n";
+
+      echo "// BEGIN PHP : LOAD IMAGES\n";
+      foreach (glob('*') as $file) {
+        if (!is_dir($file)) {
+          echo "'$file';\n";
+        }
+      }
+      echo "// END PHP : LOAD IMAGES\n";
+      ?>
     }
 
     function select_image(image, border, check) {
