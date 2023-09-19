@@ -1,22 +1,24 @@
 <?php
 
-$len = count($_POST);
+$CONFIG_FILE_JSON = ".immagio.json";
 
-if ($len == 2) {
-  var_dump($_POST);
-  echo $_POST["etichette"] . "\n";
-  echo $_POST["associazioni"] . "\n";
+if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
+  //var_dump($_POST);
+  if (file_put_contents($CONFIG_FILE_JSON,$_POST['data'])) {
+    echo "Salvato con sucecsso\n";
+  } else {
+    echo "Errore\n";
+  }
 }
 
-if ($len != 0) {
+if (count($_POST) != 0) {
   die();
 }
 
-$CONFIGJSON = ".immagio.json";
 $etichette = null;
 $associazioni = null;
-if (file_exists($CONFIGJSON)) {
-  $conf = json_decode(file_get_contents($CONFIGJSON));
+if (file_exists($CONFIG_FILE_JSON)) {
+  $conf = json_decode(file_get_contents($CONFIG_FILE_JSON));
   $etichette = $conf->etichette;
   $associazioni = $conf->associazioni;
 }
@@ -137,7 +139,7 @@ if (file_exists($CONFIGJSON)) {
 
     function save_to_file() {
       var salvatore = [];
-      for (var i = 0; i < fileslist.files.length; i += 1) {
+      for (var i = 0; i < images.children.length; i += 1) {
         const img = images.children[i];
         const lbl = etichette[img.alt];
 
@@ -165,8 +167,11 @@ if (file_exists($CONFIGJSON)) {
       console.log(data);
 
       var data_post = new FormData();
-      data_post.append("etichette", cartelle);
-      data_post.append("associazioni", salvatore);
+      //data_post.append("etichette", JSON.stringify(cartelle));
+      //data_post.append("associazioni", JSON.stringify(salvatore));
+      data_post.append("command", "save");
+      data_post.append("data", data);
+
 
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.onload = function() {
