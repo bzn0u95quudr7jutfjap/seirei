@@ -58,8 +58,9 @@ if (count($_POST) != 0) {
   die();
 }
 
-$files = array_values(array_filter(glob('*'), function ($f) {
-  return !is_dir($f);
+$script_file = str_replace(__DIR__ . "/","",__FILE__);
+$files = array_values(array_filter(glob('*'), function ($f) use($script_file) {
+  return !is_dir($f) && $f != $script_file;
 }));
 
 $etichette = [];
