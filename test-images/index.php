@@ -3,7 +3,6 @@
 $CONFIG_FILE_JSON = ".immagio.json";
 
 if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
-  //var_dump($_POST);
   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
     echo "Salvato con successo\n";
   } else {
@@ -168,8 +167,15 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function add_target_directory() {
-      dirs.append(make_etichetta(newdir.value));
-      newdir.value = "";
+      const label = newdir.value;
+      const duplicates = Object.values(dirs.children)
+        .map(i => i.children[0])
+        .filter(i => i.value == label)
+        .length;
+      if (label != "" && duplicates == 0) {
+        dirs.append(make_etichetta(label));
+        newdir.value = "";
+      }
     }
 
     function call_php(command) {
