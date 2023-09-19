@@ -35,8 +35,7 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_chan
   foreach ($associazioni as $o) {
     $p = $o->path;
     $l = $o->label;
-    // TODO armare il rename
-    if (false && rename($p, "$l/$p")) {
+    if (rename($p, "$l/$p")) {
       echo "Spostamento di '$p' in '$l' : SUCCESSO\n";
     } else {
       $bad_files[] = $o;
