@@ -3,6 +3,7 @@
 $CONFIG_FILE_JSON = ".immagio.json";
 
 if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
+  //var_dump($_POST);
   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
     echo "Salvato con sucecsso\n";
   } else {
@@ -54,7 +55,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
       <?php
       foreach ($etichette as $label) {
-        echo 'create_etichetta("' . $label->nome . '");' . "\n";
+        echo "create_etichetta('$label->nome');\n";
       }
       ?>
 
@@ -136,52 +137,31 @@ if (file_exists($CONFIG_FILE_JSON)) {
       newdir.value = "";
     }
 
-    function foreach(array, func) {
-      for (var i = 0; i < array.length; i += 1) {
-        func(i, array[i]);
-      }
-    }
-
     function save_to_file() {
 
-      var salvatore = [];
-      foreach(images.children, function(i, img) {
-        const lbl = etichette[img.alt];
-        if (lbl != null) {
-          salvatore.push({
-            path: img.alt,
-            label: lbl.value
-          });
-        }
+      const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
+      const data_associazioni = Object.values(images.children)
+        .map(i => i.alt)
+        .filter(i => etichette[i])
+        .map(i => ({
+          path: i,
+          label: etichette[i].value
+        }));
+      const data = JSON.stringify({
+        etichette: data_etichette,
+        associazioni: data_associazioni
       });
 
-      var cartelle = [];
-      foreach(document.getElementsByName("etichetta"), function(i, lbl) {
-        cartelle.push({
-          nome: lbl.value
-        });
-      });
-
-      var data = JSON.stringify({
-        etichette: cartelle,
-        associazioni: salvatore
-      });
-
-      console.log(data);
-
-      var data_post = new FormData();
-      //data_post.append("etichette", JSON.stringify(cartelle));
-      //data_post.append("associazioni", JSON.stringify(salvatore));
-      data_post.append("command", "save");
-      data_post.append("data", data);
-
+      var dataform = new FormData();
+      dataform.append("command", "save");
+      dataform.append("data", data);
 
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.onload = function() {
         console.log(this.responseText);
       }
       xmlhttp.open("POST", "index.php", true);
-      xmlhttp.send(data_post);
+      xmlhttp.send(dataform);
     }
   </script>
 
@@ -256,7 +236,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
     <button onclick=add_target_directory()>Nuova directory</button>
     <input id=new-directory type=text></input>
     <div id="target-directories"> </div>
-    <button>Muovi</button>
+    <button>Applica modifiche</button>
   </div>
 </body>
 
