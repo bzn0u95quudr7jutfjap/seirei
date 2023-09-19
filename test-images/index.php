@@ -35,7 +35,11 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_chan
   foreach ($associazioni as $o) {
     $from = $o->path;
     $to = $o->label . '/' . $o->path;
-    if (rename($from, $to)) {
+    if(file_exists($to)){
+      $bad_files[] = $o;
+      $bad_dirs[] = $o->label;
+      echo "Spostamento di '$from' in '$to' : FILE GIÀ ESISTENTE\n";
+    }else if (rename($from, $to)) {
       echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
     } else {
       $bad_files[] = $o;
