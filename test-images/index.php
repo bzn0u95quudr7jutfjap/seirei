@@ -5,10 +5,54 @@ $CONFIG_FILE_JSON = ".immagio.json";
 if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
   //var_dump($_POST);
   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
-    echo "Salvato con sucecsso\n";
+    echo "Salvato con successo\n";
   } else {
     echo "Errore\n";
   }
+}
+
+if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_changes") == 0) {
+  $data = json_decode($_POST['data']);
+
+  $bad_dirs = [];
+  foreach ($data->etichette as $dir) {
+    $e = file_exists($dir);
+    if (($e && is_dir($dir)) || (!$e && mkdir($dir))) {
+      echo "Creazione di '$dir' : SUCCESSO\n";
+    } else {
+      echo "Creazione di '$dir' : ERRORE\n";
+      $bad_dirs[] = $dir;
+    }
+  }
+  echo "\n";
+
+  $bad_files = [];
+  $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs, $bad_files) {
+    $bad_files[] = $i;
+    return !in_array($i->label, $bad_dirs);
+  });
+
+  var_dump($bad_files);
+
+  foreach ($associazioni as $o) {
+    $p = $o->path;
+    $l = $o->label;
+    if (rename($p, "$l/$p")) {
+      echo "Spostamento di '$p' in '$l' : SUCCESSO\n";
+    } else {
+      $bad_files[] = $o;
+      echo "Spostamento di '$p' in '$l' : ERRORE\n";
+    }
+  }
+
+  var_dump((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]);
+  echo json_encode((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]);
+
+  //if (file_put_contents($CONFIG_FILE_JSON, json_encode((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]))) {
+  //  echo "Salvato con successo\n";
+  //} else {
+  //  echo "Errore\n";
+  //}
 }
 
 if (count($_POST) != 0) {
@@ -128,8 +172,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       newdir.value = "";
     }
 
-    function save_to_file() {
-
+    function call_php(command) {
       const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
       const data_associazioni = Object.values(images.children)
         .map(i => i.alt)
@@ -144,7 +187,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       });
 
       var dataform = new FormData();
-      dataform.append("command", "save");
+      dataform.append("command", command);
       dataform.append("data", data);
 
       const xmlhttp = new XMLHttpRequest();
@@ -218,16 +261,15 @@ if (file_exists($CONFIG_FILE_JSON)) {
   </style>
 </head>
 
-
-<body onload=main()>
+<body onload="main()">
   <div id="images"> </div>
   <img id="current-image" alt="IMMAGINE" />
   <div id="controls">
-    <button onclick=save_to_file()>Salva</button>
-    <button onclick=add_target_directory()>Nuova directory</button>
-    <input id=new-directory type=text></input>
+    <button onclick="call_php('save')">Salva</button>
+    <button onclick="add_target_directory()">Nuova directory</button>
+    <input id="new-directory" type="text"></input>
     <div id="target-directories"> </div>
-    <button>Applica modifiche</button>
+    <button onclick="call_php('apply_changes'); // window.location.reload(false)">Applica modifiche</button>
   </div>
 </body>
 
