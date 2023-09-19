@@ -26,33 +26,33 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_chan
   }
   echo "\n";
 
-  $bad_files = [];
-  $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs, $bad_files) {
-    $bad_files[] = $i;
+  $bad_files = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
+    return in_array($i->label, $bad_dirs);
+  });
+  $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
     return !in_array($i->label, $bad_dirs);
   });
-
-  var_dump($bad_files);
 
   foreach ($associazioni as $o) {
     $p = $o->path;
     $l = $o->label;
-    if (rename($p, "$l/$p")) {
+    // TODO armare il rename
+    if (false && rename($p, "$l/$p")) {
       echo "Spostamento di '$p' in '$l' : SUCCESSO\n";
     } else {
       $bad_files[] = $o;
+      $bad_dirs[] = $l;
       echo "Spostamento di '$p' in '$l' : ERRORE\n";
     }
   }
 
-  var_dump((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]);
-  echo json_encode((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]);
+  $associazioni = (object)["etichette" => array_unique($bad_dirs), "associazioni" => $bad_files];
 
-  //if (file_put_contents($CONFIG_FILE_JSON, json_encode((object)["etichette" => $bad_dirs, "associazioni" => $bad_files]))) {
-  //  echo "Salvato con successo\n";
-  //} else {
-  //  echo "Errore\n";
-  //}
+  if (file_put_contents($CONFIG_FILE_JSON, json_encode($associazioni))) {
+    echo "Salvato con successo\n";
+  } else {
+    echo "Errore\n";
+  }
 }
 
 if (count($_POST) != 0) {
