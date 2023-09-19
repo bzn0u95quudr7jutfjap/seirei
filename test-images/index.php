@@ -3,8 +3,7 @@
 $CONFIG_FILE_JSON = ".immagio.json";
 
 if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
-  //var_dump($_POST);
-  if (file_put_contents($CONFIG_FILE_JSON,$_POST['data'])) {
+  if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
     echo "Salvato con sucecsso\n";
   } else {
     echo "Errore\n";
@@ -137,20 +136,35 @@ if (file_exists($CONFIG_FILE_JSON)) {
       newdir.value = "";
     }
 
-    function save_to_file() {
-      var salvatore = [];
-      for (var i = 0; i < images.children.length; i += 1) {
-        const img = images.children[i];
-        const lbl = etichette[img.alt];
+    function foreach(array, func) {
+      for (var i = 0; i < array.length; i += 1) {
+        func(i, array[i]);
+      }
+    }
 
-        if (etichette[img.alt] != null) {
+    function save_to_file() {
+
+      var salvatore = [];
+      foreach(images.children, function(i, img) {
+        const lbl = etichette[img.alt];
+        if (lbl != null) {
           salvatore.push({
             path: img.alt,
-            label: etichette[img.alt].value
+            label: lbl.value
           });
         }
+      });
 
-      }
+      //for (var i = 0; i < images.children.length; i += 1) {
+      //  const img = images.children[i];
+      //  const lbl = etichette[img.alt];
+      //  if (etichette[img.alt] != null) {
+      //    salvatore.push({
+      //      path: img.alt,
+      //      label: etichette[img.alt].value
+      //    });
+      //  }
+      //}
       var cartelle = [];
       var labls = document.getElementsByName("etichetta");
       for (var i = 0; i < labls.length; i += 1) {
