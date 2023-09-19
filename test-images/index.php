@@ -111,9 +111,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
       etichetta.name = "etichetta";
       etichetta.value = label_name;
       etichetta.onclick = function() {
-        var img = images.children[currentindex].alt
-        var etichetta_vecchia = etichette[img];
-        etichette[img] = etichetta;
+        var etichetta_vecchia = etichette[current_image.alt];
+        etichette[current_image.alt] = etichetta;
         if (etichetta_vecchia == null) {
           set_current_image((currentindex + 1) % images.children.length);
         }
