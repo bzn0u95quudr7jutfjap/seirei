@@ -2,7 +2,13 @@
 
 $len = count($_POST);
 
-if($len != 0){
+if ($len == 2) {
+  var_dump($_POST);
+  echo $_POST["etichette"] . "\n";
+  echo $_POST["associazioni"] . "\n";
+}
+
+if ($len != 0) {
   die();
 }
 ?>
@@ -121,13 +127,28 @@ if($len != 0){
         etichette: cartelle,
         associazioni: salvatore
       });
-      var file = new Blob([data], {
-        type: "text/plain"
-      });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(file);
-      a.download = "immagiosorter.json";
-      a.click();
+
+      console.log(data);
+
+      var data_post = new FormData();
+      data_post.append("etichette", cartelle);
+      data_post.append("associazioni", salvatore);
+
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.onload = function() {
+        console.log(this.responseText);
+      }
+      xmlhttp.open("POST", "index.php", true);
+      xmlhttp.send(data_post);
+
+      //var file = new Blob([data], {
+      //  type: "text/plain"
+      //});
+      //
+      //var a = document.createElement("a");
+      //a.href = URL.createObjectURL(file);
+      //a.download = "immagiosorter.json";
+      //a.click();
     }
   </script>
 
