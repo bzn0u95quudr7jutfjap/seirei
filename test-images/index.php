@@ -33,13 +33,11 @@ if (file_exists($CONFIGJSON)) {
     var current_image;
     var newdir;
     var dirs;
-    var fileslist;
     var etichette;
 
     function main() {
       newdir = document.getElementById("new-directory");
       dirs = document.getElementById("target-directories");
-      fileslist = document.getElementById("pick-directory");
 
       current_image = document.getElementById("current-image");
       images = document.getElementById("images");
@@ -52,7 +50,6 @@ if (file_exists($CONFIGJSON)) {
         associazioni[nome] = e.children[0];
         dirs.append(e);
       }
-      console.log(associazioni);
 
       <?php
       foreach ($etichette as $label) {
@@ -177,15 +174,6 @@ if (file_exists($CONFIGJSON)) {
       }
       xmlhttp.open("POST", "index.php", true);
       xmlhttp.send(data_post);
-
-      //var file = new Blob([data], {
-      //  type: "text/plain"
-      //});
-      //
-      //var a = document.createElement("a");
-      //a.href = URL.createObjectURL(file);
-      //a.download = "immagiosorter.json";
-      //a.click();
     }
   </script>
 
