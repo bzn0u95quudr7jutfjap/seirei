@@ -222,6 +222,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
     #images {
       overflow: scroll;
       height: 90%;
+      display: flex;
+      flex-direction: column;
     }
 
     #images img {
