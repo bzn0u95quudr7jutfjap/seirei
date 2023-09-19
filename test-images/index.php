@@ -114,19 +114,6 @@ if (file_exists($CONFIGJSON)) {
       return img;
     }
 
-    function load_images(elem) {
-      var i = 0;
-      etichette = {};
-      for (const file of elem.files) {
-        var path = URL.createObjectURL(file);
-        images.append(make_miniatura(i, path, file.name));
-        etichette[file.name] = null;
-        console.log(file.webkitRelativePath);
-        i += 1;
-      }
-      set_current_image(0);
-    }
-
     function make_etichetta(label_name) {
       var etichetta = document.createElement("input");
       etichetta.type = "radio";
@@ -241,7 +228,7 @@ if (file_exists($CONFIGJSON)) {
     #controls {
       height: 90%;
       display: grid;
-      grid-template-rows: min-content min-content min-content min-content auto min-content;
+      grid-template-rows: min-content min-content min-content auto min-content;
       grid-gap: 10px;
     }
 
@@ -269,7 +256,6 @@ if (file_exists($CONFIGJSON)) {
   <div id="images"> </div>
   <img id="current-image" alt="IMMAGINE" />
   <div id="controls">
-    <input type=file accept="image/*" webkitdirectory directory id=pick-directory onchange="load_images(this)"></input>
     <button onclick=save_to_file()>Salva</button>
     <button onclick=add_target_directory()>Nuova directory</button>
     <input id=new-directory type=text></input>
