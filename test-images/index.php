@@ -18,7 +18,7 @@ $associazioni = null;
 if (file_exists($CONFIGJSON)) {
   $conf = json_decode(file_get_contents($CONFIGJSON));
   $etichette = $conf->etichette;
-  $associazioni = $conf->associazini;
+  $associazioni = $conf->associazioni;
 }
 
 ?>
@@ -45,23 +45,41 @@ if (file_exists($CONFIGJSON)) {
       images = document.getElementById("images");
       etichette = {};
 
-      <?php
-      echo "// BEGIN PHP : LOAD LABELS\n";
-      foreach ($etichette as $label) {
-        echo 'dirs.append(make_etichetta("' . $label->nome . '"));' . "\n";
-      }
-      echo "// END PHP : LOAD LABELS\n";
+      var associazioni = {};
 
-      echo "// BEGIN PHP : LOAD IMAGES\n";
-      $i = 0;
-      foreach (glob('*') as $file) {
-        if (!is_dir($file)) {
-          echo "images.append(make_miniatura($i,'$file','$file'));\n";
-          echo "etichette['$file'] = null;\n";
-          $i += 1;
-        }
+      function create_etichetta(nome) {
+        var e = make_etichetta(nome);
+        associazioni[nome] = e.children[0];
+        dirs.append(e);
       }
-      echo "// END PHP : LOAD IMAGES\n";
+      console.log(associazioni);
+
+      <?php
+      foreach ($etichette as $label) {
+        echo 'create_etichetta("' . $label->nome . '");' . "\n";
+      }
+      ?>
+
+      <?php
+      $files = array_values(array_filter(glob('*'), function ($f) {
+        return !is_dir($f);
+      }));
+      foreach ($files as $i => $file) {
+        echo "images.append(make_miniatura($i,'$file','$file'));\n";
+        echo "etichette['$file'] = null;\n";
+      }
+      ?>
+
+      function set_associazione(path, label) {
+        if (etichette.hasOwnProperty(path)) {
+          etichette[path] = associazioni[label];
+        }
+      };
+
+      <?php
+      foreach ($associazioni as $a) {
+        echo "set_associazione('" . $a->path . "','" . $a->label . "');\n";
+      }
       ?>
       set_current_image(0);
     }
