@@ -115,7 +115,7 @@ if (file_exists($CONFIGJSON)) {
         var etichetta_vecchia = etichette[img];
         etichette[img] = etichetta;
         if (etichetta_vecchia == null) {
-          set_current_image((currentindex + 1) % fileslist.files.length);
+          set_current_image((currentindex + 1) % images.children.length);
         }
       };
       var name = document.createElement("label");
