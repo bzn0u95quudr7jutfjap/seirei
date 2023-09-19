@@ -40,6 +40,7 @@ if (file_exists($CONFIGJSON)) {
 
       current_image = document.getElementById("current-image");
       images = document.getElementById("images");
+      etichette = {};
 
       <?php
       echo "// BEGIN PHP : LOAD LABELS\n";
@@ -49,13 +50,16 @@ if (file_exists($CONFIGJSON)) {
       echo "// END PHP : LOAD LABELS\n";
 
       echo "// BEGIN PHP : LOAD IMAGES\n";
+      $i = 0;
       foreach (glob('*') as $file) {
         if (!is_dir($file)) {
-          echo "'$file';\n";
+          echo "images.append(make_miniatura($i,'$file','$file'));\n";
+          $i += 1;
         }
       }
       echo "// END PHP : LOAD IMAGES\n";
       ?>
+      set_current_image(0);
     }
 
     function select_image(image, border, check) {
