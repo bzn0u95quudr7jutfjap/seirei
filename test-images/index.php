@@ -35,13 +35,13 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_chan
   foreach ($associazioni as $o) {
     $from = $o->path;
     $to = $o->label . '/' . $o->path;
-    $e =file_exists($to);
+    $e = file_exists($to);
     if (!$e && rename($from, $to)) {
       echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
     } else {
       $bad_files[] = $o;
       $bad_dirs[] = $o->label;
-      echo "Spostamento di '$from' in '$to' : " . ( $e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
+      echo "Spostamento di '$from' in '$to' : " . ($e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
     }
   }
 
@@ -137,6 +137,9 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
       current_image.src = image.src;
       current_image.alt = image.alt;
+
+      image.scrollIntoView();
+
     }
 
     function make_miniatura(i, path, alt) {
@@ -199,7 +202,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     }
 
-    function save(){
+    function save() {
       var dataform = get_dataform();
       dataform.append("command", "save");
 
@@ -211,7 +214,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       xmlhttp.send(dataform);
     }
 
-    function apply(){
+    function apply() {
       var dataform = get_dataform();
       dataform.append("command", "apply_changes");
 
