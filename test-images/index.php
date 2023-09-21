@@ -154,6 +154,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function make_etichetta(label_name) {
       var etichetta = document.createElement("input");
+      etichetta.classList.add("radio");
       etichetta.type = "radio";
       etichetta.name = "etichetta";
       etichetta.value = label_name;
@@ -164,10 +165,14 @@ if (file_exists($CONFIG_FILE_JSON)) {
           set_current_image((currentindex + 1) % images.children.length);
         }
       };
-      var name = document.createElement("label");
-      name.append(etichetta);
-      name.append(label_name);
-      return name;
+      var name = document.createElement("input");
+      name.classList.add("text");
+      name.type = "text";
+      name.value = label_name;
+      var row = document.createElement("div");
+      row.append(etichetta);
+      row.append(name);
+      return row;
     }
 
     function add_target_directory() {
@@ -280,12 +285,17 @@ if (file_exists($CONFIG_FILE_JSON)) {
       flex-direction: column;
     }
 
-    #target-directories label {
-      width: 100%;
-      font-size: 22px;
+    #target-directories div {
+      display: grid;
+      grid-template-columns: min-content auto;
     }
 
-    #target-directories label input {
+    #target-directories .text {
+      font-size: 22px;
+      width: 90%;
+    }
+
+    #target-directories .radio {
       height: 20px;
       width: 20px;
     }
