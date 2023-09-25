@@ -204,32 +204,30 @@ if (file_exists($CONFIG_FILE_JSON)) {
       var dataform = new FormData();
       dataform.append("data", data);
       return dataform;
+    }
 
+    function call_php(data, func) {
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", "index.php", true);
+      xmlhttp.onload = func;
+      xmlhttp.send(data);
     }
 
     function save() {
-      var dataform = get_dataform();
-      dataform.append("command", "save");
-
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = function() {
+      var data = get_dataform();
+      data.append("command", "save");
+      call_php(data, function() {
         alert(this.responseText);
-      }
-      xmlhttp.send(dataform);
+      });
     }
 
     function apply() {
-      var dataform = get_dataform();
-      dataform.append("command", "apply");
-
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = function() {
+      var data = get_dataform();
+      data.append("command", "apply");
+      call_php(data, function() {
         alert(this.responseText);
         window.location.reload(false);
-      }
-      xmlhttp.send(dataform);
+      });
     }
   </script>
 
