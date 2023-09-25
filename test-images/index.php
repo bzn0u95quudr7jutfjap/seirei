@@ -195,10 +195,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
       return Object.values(document.getElementsByName("label_text")).map(i => i.value);
     }
 
-    function get_asdafac() {
-      return Object.values(document.getElementsByName("miniatura")).filter(i => etichette.hasOwnProperty(i.alt));
-    }
-
     function get_pair_image_label() {
       return Object.values(images.children)
         .map(i => i.alt)
