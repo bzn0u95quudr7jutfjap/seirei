@@ -218,15 +218,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function save() {
       var data = new FormData();
-      //data.append("data", get_pair_image_label());
       data.append("command", "save");
-      data.append("etichette", JSON.stringify(get_labels_text()));
-      data.append("associazioni", JSON.stringify(get_pair_image_label()));
-
-      console.log(data);
-
-      return;
-
+      data.append("data", JSON.stringify({
+        etichette: get_labels_text(),
+        associazioni: get_pair_image_label()
+      }));
       call_php(data, function() {
         alert(this.responseText);
       });
@@ -234,8 +230,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function apply() {
       var data = new FormData();
-      //data.append("data", get_pair_image_label());
       data.append("command", "apply");
+      data.append("data", JSON.stringify({
+        etichette: get_labels_text(),
+        associazioni: get_pair_image_label()
+      }));
       call_php(data, function() {
         alert(this.responseText);
         window.location.reload(false);
