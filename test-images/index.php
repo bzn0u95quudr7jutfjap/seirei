@@ -187,7 +187,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       }
     }
 
-    function get_dataform() {
+    function get_pair_image_label() {
       const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
       const data_associazioni = Object.values(images.children)
         .map(i => i.alt)
@@ -200,10 +200,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
         etichette: data_etichette,
         associazioni: data_associazioni
       });
-
-      var dataform = new FormData();
-      dataform.append("data", data);
-      return dataform;
+      return data;
     }
 
     function call_php(data, func) {
@@ -214,7 +211,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function save() {
-      var data = get_dataform();
+      var data = new FormData();
+      data.append("data", get_pair_image_label());
       data.append("command", "save");
       call_php(data, function() {
         alert(this.responseText);
@@ -222,7 +220,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function apply() {
-      var data = get_dataform();
+      var data = new FormData();
+      data.append("data", get_pair_image_label());
       data.append("command", "apply");
       call_php(data, function() {
         alert(this.responseText);
