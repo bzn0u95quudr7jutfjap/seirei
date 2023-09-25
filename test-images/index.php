@@ -196,23 +196,17 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function get_asdafac() {
-      return Object.values(document.getElementsByName("miniatura")).filter(i => etichette.hasOwnProperty(i.alt))
+      return Object.values(document.getElementsByName("miniatura")).filter(i => etichette.hasOwnProperty(i.alt));
     }
 
     function get_pair_image_label() {
-      const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
-      const data_associazioni = Object.values(images.children)
+      return Object.values(images.children)
         .map(i => i.alt)
-        .filter(i => etichette[i].radio.checked)
+        .filter(i => etichette.hasOwnProperty(i))
         .map(i => ({
           path: i,
-          label: etichette[i].value
+          label: etichette[i].text.value
         }));
-      const data = JSON.stringify({
-        etichette: data_etichette,
-        associazioni: data_associazioni
-      });
-      return data;
     }
 
     function call_php(data, func) {
@@ -224,8 +218,15 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function save() {
       var data = new FormData();
-      data.append("data", get_pair_image_label());
+      //data.append("data", get_pair_image_label());
       data.append("command", "save");
+      data.append("etichette", JSON.stringify(get_labels_text()));
+      data.append("associazioni", JSON.stringify(get_pair_image_label()));
+
+      console.log(data);
+
+      return;
+
       call_php(data, function() {
         alert(this.responseText);
       });
@@ -233,7 +234,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function apply() {
       var data = new FormData();
-      data.append("data", get_pair_image_label());
+      //data.append("data", get_pair_image_label());
       data.append("command", "apply");
       call_php(data, function() {
         alert(this.responseText);
