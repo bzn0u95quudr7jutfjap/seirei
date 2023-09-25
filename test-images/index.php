@@ -121,9 +121,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function select_image(image, border, check) {
       image.style.border = border;
-      var label = etichette[image.alt];
-      if (label != null) {
-        label.checked = check;
+      if (etichette.hasOwnProperty(image.alt)) {
+        etichette[image.alt].radio.checked = check;
       }
     }
 
@@ -145,6 +144,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
     function make_miniatura(i, path, alt) {
       var img = document.createElement("img");
       img.src = path;
+      img.name = "miniatura";
       img.alt = alt;
       img.onclick = function() {
         set_current_image(i);
@@ -157,14 +157,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
       radio.classList.add("radio");
       radio.type = "radio";
       radio.name = "label_radio";
-      radio.value = label_name;
-      radio.onclick = function() {
-        var etichetta_vecchia = etichette[current_image.alt];
-        etichette[current_image.alt] = etichetta;
-        if (etichetta_vecchia == null) {
-          set_current_image((currentindex + 1) % images.children.length);
-        }
-      };
       var text = document.createElement("input");
       text.classList.add("text");
       text.type = "text";
@@ -173,6 +165,17 @@ if (file_exists($CONFIG_FILE_JSON)) {
       var row = document.createElement("div");
       row.append(radio);
       row.append(text);
+      radio.onclick = function() {
+        var b = !etichette.hasOwnProperty(current_image.alt);
+        etichette[current_image.alt] = {
+          radio: radio,
+          text: text
+        };
+
+        if (b) {
+          set_current_image((currentindex + 1) % images.children.length);
+        }
+      };
       return row;
     }
 
@@ -192,11 +195,15 @@ if (file_exists($CONFIG_FILE_JSON)) {
       return Object.values(document.getElementsByName("label_text")).map(i => i.value);
     }
 
+    function get_asdafac() {
+      return Object.values(document.getElementsByName("miniatura")).filter(i => etichette.hasOwnProperty(i.alt))
+    }
+
     function get_pair_image_label() {
       const data_etichette = Object.values(document.getElementsByName("etichetta")).map(i => i.value);
       const data_associazioni = Object.values(images.children)
         .map(i => i.alt)
-        .filter(i => etichette[i])
+        .filter(i => etichette[i].radio.checked)
         .map(i => ({
           path: i,
           label: etichette[i].value
