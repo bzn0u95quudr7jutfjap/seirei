@@ -153,25 +153,26 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function make_etichetta(label_name) {
-      var etichetta = document.createElement("input");
-      etichetta.classList.add("radio");
-      etichetta.type = "radio";
-      etichetta.name = "etichetta";
-      etichetta.value = label_name;
-      etichetta.onclick = function() {
+      var radio = document.createElement("input");
+      radio.classList.add("radio");
+      radio.type = "radio";
+      radio.name = "label_radio";
+      radio.value = label_name;
+      radio.onclick = function() {
         var etichetta_vecchia = etichette[current_image.alt];
         etichette[current_image.alt] = etichetta;
         if (etichetta_vecchia == null) {
           set_current_image((currentindex + 1) % images.children.length);
         }
       };
-      var name = document.createElement("input");
-      name.classList.add("text");
-      name.type = "text";
-      name.value = label_name;
+      var text = document.createElement("input");
+      text.classList.add("text");
+      text.type = "text";
+      text.name = "label_text";
+      text.value = label_name;
       var row = document.createElement("div");
-      row.append(etichetta);
-      row.append(name);
+      row.append(radio);
+      row.append(text);
       return row;
     }
 
@@ -185,6 +186,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
         dirs.append(make_etichetta(label));
         newdir.value = "";
       }
+    }
+
+    function get_labels_text() {
+      return Object.values(document.getElementsByName("label_text")).map(i => i.value);
     }
 
     function get_pair_image_label() {
