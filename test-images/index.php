@@ -10,7 +10,7 @@ if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 
   }
 }
 
-if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply_changes") == 0) {
+if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply") == 0) {
   $data = json_decode($_POST['data']);
 
   $bad_dirs = [];
@@ -221,7 +221,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
     function apply() {
       var dataform = get_dataform();
-      dataform.append("command", "apply_changes");
+      dataform.append("command", "apply");
 
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
@@ -254,6 +254,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     #images {
+      margin: 20px;
       overflow: scroll;
       height: 90%;
       display: flex;
@@ -266,12 +267,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
       margin-right: 20px;
     }
 
-    #images,
     #controls {
       margin: 20px;
-    }
-
-    #controls {
       height: 90%;
       display: grid;
       grid-template-rows: min-content min-content min-content auto min-content;
