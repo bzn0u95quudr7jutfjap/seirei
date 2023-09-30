@@ -100,8 +100,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
       function create_etichetta(nome) {
         var e = make_etichetta(nome);
-        associazioni[nome] = e.children[0];
-        dirs.append(e);
+        associazioni[nome] = ({
+          radio: e.radio,
+          text: e.text
+        });
+        dirs.append(e.row);
       };
 
       <?php echo json_encode($etichette); ?>.forEach(create_etichetta);
@@ -176,7 +179,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
           set_current_image((currentindex + 1) % images.children.length);
         }
       };
-      return row;
+      return ({
+        row: row,
+        radio: radio,
+        text: text
+      });
     }
 
     function add_target_directory() {
@@ -186,7 +193,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
         .filter(i => i.value == label)
         .length;
       if (label != "" && duplicates == 0) {
-        dirs.append(make_etichetta(label));
+        dirs.append(make_etichetta(label).row);
         newdir.value = "";
       }
     }
