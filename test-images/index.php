@@ -1,5 +1,20 @@
 <?php
 
+if (count($_GET) > 0) { {
+    if (array_key_exists("file", $_GET)) {
+      $f = $_GET["file"];
+      $mime = mime_content_type($f);
+      if (strpos($mime, "text") === false) {
+        header("Location: http://localhost:8888/$f");
+      } else {
+        header("Content-Type: text/plain; charset=utf-8");
+        readfile($f);
+      }
+    }
+  }
+  return;
+}
+
 $CONFIG_FILE_JSON = ".immagio.json";
 
 if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
@@ -320,14 +335,33 @@ if (file_exists($CONFIG_FILE_JSON)) {
   </style>
 </head>
 
-<body onload="main()">
-  <div id="images"> </div>
-  <iframe name="fullpage" id="current-image" alt="IMMAGINE"></iframe>
+<!-- <body onload="main()"> -->
+
+<body>
+  <div id="images">
+    <?php
+    foreach ($files as $i => $f) {
+      echo "<a target=fullpage href='./?file=$f'>
+      <img src=$f alt=$f onclick='this.scrollIntoView();'>
+      </a>\n";
+    }
+    ?>
+  </div>
+  <iframe name=fullpage id="current-image" alt="IMMAGINE" resize=both></iframe>
   <div id="controls">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
-    <input id="new-directory" type="text"></input>
-    <div id="target-directories"> </div>
+    <input id="new-directory" type="text">
+    <div id="target-directories">
+      <?php
+      foreach ($etichette as $i => $e) {
+        echo "<div>
+        <input class=radio type=radio name=label_radio>
+        <input class=text  type=text  name=label_text  value='$e'>
+        </div>\n";
+      }
+      ?>
+    </div>
     <button onclick="apply()">Applica modifiche</button>
   </div>
 </body>
