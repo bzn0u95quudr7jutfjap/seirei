@@ -149,10 +149,17 @@ if (file_exists($CONFIG_FILE_JSON)) {
       img.src = path;
       img.name = "miniatura";
       img.alt = alt;
-      img.onclick = function() {
-        set_current_image(i);
+      // img.onclick = function() {
+      //   set_current_image(i);
+      // }
+      var a = document.createElement("A");
+      a.href = path;
+      if(alt == "r2.hs"){
+        a.href = "view-source:http://localhost:8888/" + path
       }
-      return img;
+      a.target="fullpage";
+      a.appendChild(img);
+      return a;
     }
 
     function make_etichetta(label_name) {
@@ -263,6 +270,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
     #current-image {
       max-width: 90%;
       max-height: 90%;
+      height: 90%;
+      width: 90%;
     }
 
     #images {
@@ -313,7 +322,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
 <body onload="main()">
   <div id="images"> </div>
-  <img id="current-image" alt="IMMAGINE" />
+  <iframe name="fullpage" id="current-image" alt="IMMAGINE"></iframe>
   <div id="controls">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
