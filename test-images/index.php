@@ -130,40 +130,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
     var dirs;
     var etichette;
 
-    function main() {
-      newdir = document.getElementById("new-directory");
-      dirs = document.getElementById("target-directories");
-
-      current_image = document.getElementById("current-image");
-      images = document.getElementById("images");
-      etichette = {};
-
-      var associazioni = {};
-
-      function create_etichetta(nome) {
-        var e = make_etichetta(nome);
-        associazioni[nome] = ({
-          radio: e.radio,
-          text: e.text
-        });
-        dirs.append(e.row);
-      };
-
-      <?php echo json_encode($etichette); ?>.forEach(create_etichetta);
-
-      function create_miniatura(nome) {
-        images.append(make_miniatura(images.children.length, nome, nome));
-      };
-
-      <?php echo json_encode($files); ?>.forEach(create_miniatura);
-
-      function associa_categorie_a_immagini(o) {
-        etichette[o.path] = associazioni[o.label];
-      };
-      <?php echo json_encode($associazioni); ?>.forEach(associa_categorie_a_immagini);
-      set_current_image(0);
-    }
-
     function select_image(image, border, check) {
       image.style.border = border;
       if (etichette.hasOwnProperty(image.alt)) {
@@ -184,24 +150,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
 
       image.scrollIntoView();
 
-    }
-
-    function make_miniatura(i, path, alt) {
-      var img = document.createElement("img");
-      img.src = path;
-      img.name = "miniatura";
-      img.alt = alt;
-      // img.onclick = function() {
-      //   set_current_image(i);
-      // }
-      var a = document.createElement("A");
-      a.href = path;
-      if(alt == "r2.hs"){
-        a.href = "view-source:http://localhost:8888/" + path
-      }
-      a.target="fullpage";
-      a.appendChild(img);
-      return a;
     }
 
     function make_etichetta(label_name) {
@@ -361,8 +309,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
   </style>
 </head>
-
-<!-- <body onload="main()"> -->
 
 <body>
   <div id="images">
