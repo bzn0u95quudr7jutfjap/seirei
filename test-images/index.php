@@ -4,11 +4,38 @@ if (count($_GET) > 0) { {
     if (array_key_exists("file", $_GET)) {
       $f = $_GET["file"];
       $mime = mime_content_type($f);
-      if (strpos($mime, "text") === false) {
-        header("Location: http://localhost:8888/$f");
-      } else {
+      if (strpos($mime, "text") !== false) {
         header("Content-Type: text/plain; charset=utf-8");
         readfile($f);
+      } else if (strpos($mime, "image") !== false) {
+      ?>
+        <html>
+          <style>
+            html, body {
+              margin: 0px;
+              padding: 0px;
+              width: 100%;
+              height: 100%;
+            }
+            body {
+              display: grid;
+              grid-template-column: auto;
+              grid-template-row:    auto;
+              justify-items: center;
+              align-content: center;
+            }
+            img {
+              max-width: 100%;
+              max-height: 100%;
+            }
+          </style>
+          <body>
+            <img src="<?php echo $f ;?>">
+          </body>
+        </html>
+      <?php
+      } else {
+        header("Location: http://localhost:8888/$f");
       }
     }
   }
