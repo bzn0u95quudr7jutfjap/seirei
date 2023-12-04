@@ -124,7 +124,6 @@ if (file_exists($CONFIG_FILE_JSON)) {
 <head>
   <script>
     var currentindex = 0;
-    var images;
     var current_image;
     var newdir;
     var dirs;
@@ -137,19 +136,11 @@ if (file_exists($CONFIG_FILE_JSON)) {
       }
     }
 
-    function set_current_image(i) {
-      select_image(images.children[currentindex], "none", false);
-
-      currentindex = i;
-
-      var image = images.children[currentindex];
-      select_image(image, "thick solid #6666FF", true);
-
-      current_image.src = image.src;
-      current_image.alt = image.alt;
-
-      image.scrollIntoView();
-
+    function setCurrentImage(i) {
+      if(this.images == undefined){
+            this.images = document.getElementById("images");
+      }
+      images.children[i].click();
     }
 
     function make_etichetta(label_name) {
@@ -298,6 +289,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
       grid-template-columns: min-content auto;
     }
 
+    a.highlighted img {
+      border: solid blue 2px;
+    }
+
     #target-directories .text {
       font-size: 22px;
       width: 90%;
@@ -314,8 +309,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
   <div id="images">
     <?php
     foreach ($files as $i => $f) {
-      echo "<a target=fullpage href='./?file=$f'>
-      <img src=$f alt=$f onclick='this.scrollIntoView();'>
+      echo "<a target=fullpage href='./?file=$f' onclick='this.scrollIntoView();'>
+      <img src=$f alt=$f >
       </a>\n";
     }
     ?>
