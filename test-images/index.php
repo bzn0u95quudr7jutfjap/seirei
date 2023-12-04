@@ -347,7 +347,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
     ?>
   </div>
-  <iframe name=fullpage id="current-image" alt="IMMAGINE" resize=both></iframe>
+    <iframe name=fullpage id="current-image" alt="IMMAGINE" <?php echo (count($files) > 0 ? ("src='./?file=" . $files[0]) . "'" : "") ?>" ></iframe>
   <div id="controls">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
