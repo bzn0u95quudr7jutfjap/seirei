@@ -8,32 +8,37 @@ if (count($_GET) > 0) { {
         header("Content-Type: text/plain; charset=utf-8");
         readfile($f);
       } else if (strpos($mime, "image") !== false) {
-      ?>
+?>
         <html>
-          <style>
-            html, body {
-              margin: 0px;
-              padding: 0px;
-              width: 100%;
-              height: 100%;
-            }
-            body {
-              display: grid;
-              grid-template-column: auto;
-              grid-template-row:    auto;
-              justify-items: center;
-              align-content: center;
-            }
-            img {
-              max-width: 100%;
-              max-height: 100%;
-            }
-          </style>
-          <body>
-            <img src="<?php echo $f ;?>">
-          </body>
+        <style>
+          html,
+          body {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+          }
+
+          body {
+            display: grid;
+            grid-template-columns: auto;
+            grid-template-rows: auto;
+            justify-items: center;
+            align-content: center;
+          }
+
+          img {
+            max-width: 100%;
+            max-height: 100%;
+          }
+        </style>
+
+        <body>
+          <img src="<?php echo $f; ?>">
+        </body>
+
         </html>
-      <?php
+<?php
       } else {
         header("Location: http://localhost:8888/$f");
       }
@@ -137,8 +142,8 @@ if (file_exists($CONFIG_FILE_JSON)) {
     }
 
     function setCurrentImage(i) {
-      if(this.images == undefined){
-            this.images = document.getElementById("images");
+      if (this.images == undefined) {
+        this.images = document.getElementById("images");
       }
       images.children[i].click();
     }
@@ -308,14 +313,14 @@ if (file_exists($CONFIG_FILE_JSON)) {
 <body>
   <div id="images">
     <?php
-    foreach ($files as $i => $f) {
+    foreach ($files as $f) {
       echo "<a target=fullpage href='./?file=$f' onclick='this.scrollIntoView();'>
       <img src=$f alt=$f >
       </a>\n";
     }
     ?>
   </div>
-    <iframe name=fullpage id="current-image" alt="IMMAGINE" <?php echo (count($files) > 0 ? ("src='./?file=" . $files[0]) . "'" : "") ?>" ></iframe>
+  <iframe name=fullpage id="current-image" <?php echo (count($files) > 0 ? ("src='./?file=" . $files[0]) . "'" : "") ?>"></iframe>
   <div id="controls">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
@@ -332,6 +337,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
     </div>
     <button onclick="apply()">Applica modifiche</button>
   </div>
+</body>
+
+</html> <button onclick="apply()">Applica modifiche</button>
+</div>
 </body>
 
 </html>
