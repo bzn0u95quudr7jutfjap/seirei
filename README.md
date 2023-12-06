@@ -1,6 +1,6 @@
 # 視野仕切る
 
-Questo NON è un sito web.
+Questo NON è un sito web.  
 Gli standard di separazione dei file non sono applicabili a questo progetto.
 
 ## Come usare　「使い方」
