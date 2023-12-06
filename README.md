@@ -10,7 +10,7 @@ Gli standard di separazione dei file non sono applicabili a questo progetto.
 3. Eseguire il comando riportato qui sotto
 4. Collegarsi $IP:$PORTA dal proprio browser
 
-Esempio:
+## Comando
 
     php -S $IP:$PORTA
 
