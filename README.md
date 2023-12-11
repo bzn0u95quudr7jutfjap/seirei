@@ -1,4 +1,4 @@
-# 清麗
+# 清麗ディレクトリ 
 
 Questo NON è un sito web. 
 Gli standard di separazione dei file non sono applicabili a questo progetto.
