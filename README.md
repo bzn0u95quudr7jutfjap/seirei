@@ -8,7 +8,7 @@ Gli standard di separazione dei file non sono applicabili a questo progetto.
 1. Copiare index.php nella directory che si desidera organizzare.  
 2. Aprire un terminale nella directory.
 3. Eseguire il comando riportato qui sotto.
-4. Collegarsi $IP:$PORTA dal proprio browser.
+4. Collegarsi a $IP:$PORTA dal proprio browser.
 
 ## Comando 「命令」
 
