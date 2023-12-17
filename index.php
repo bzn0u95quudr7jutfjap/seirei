@@ -222,7 +222,7 @@ if (file_exists(CONFIGFILEJSON)) {
 
 <head>
   <script>
-    function caricaPrimo() {
+    function main() {
       document.getElementsByClassName("miniatura")[0].click();
     }
 
@@ -236,6 +236,10 @@ if (file_exists(CONFIGFILEJSON)) {
         block: 'center',
         inline: 'center'
       });
+
+      if (associazioni.hasOwnProperty(filenameAttuale)) {
+        // TODO ripristina il radio selezionato
+      }
     }
 
     function etichettaFile(elem) {
@@ -269,6 +273,7 @@ if (file_exists(CONFIGFILEJSON)) {
       this.miniature[this.idx].click();
     }
 
+    // TODO creazione di un id differente per ogni etichetta
     const etichettaTemplate = `
         <div class='bersaglio'>
           <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
@@ -464,7 +469,7 @@ if (file_exists(CONFIGFILEJSON)) {
   </style>
 </head>
 
-<body onload='caricaPrimo()'>
+<body onload='main()'>
   <div id="miniature">
     <?php echo $miniature; ?>
   </div>
