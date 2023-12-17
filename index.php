@@ -68,58 +68,76 @@ if (count($_GET) != 0) {
 // COMANDI POST
 // =======================================================================================================================================================
 
-$CONFIG_FILE_JSON = ".immagio.json";
+// $CONFIG_FILE_JSON = ".immagio.json";
+// 
+// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
+//   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
+//     echo "Salvato con successo\n";
+//   } else {
+//     echo "Errore\n";
+//   }
+// }
+// 
+// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply") == 0) {
+//   $data = json_decode($_POST['data']);
+// 
+//   $bad_dirs = [];
+//   foreach ($data->etichette as $dir) {
+//     $e = file_exists($dir);
+//     if (($e && is_dir($dir)) || (!$e && mkdir($dir))) {
+//       echo "Creazione di '$dir' : SUCCESSO\n";
+//     } else {
+//       echo "Creazione di '$dir' : ERRORE\n";
+//       $bad_dirs[] = $dir;
+//     }
+//   }
+//   echo "\n";
+// 
+//   $bad_files = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
+//     return in_array($i->label, $bad_dirs);
+//   });
+//   $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
+//     return !in_array($i->label, $bad_dirs);
+//   });
+// 
+//   foreach ($associazioni as $o) {
+//     $from = $o->path;
+//     $to = $o->label . '/' . $o->path;
+//     $e = file_exists($to);
+//     if (!$e && rename($from, $to)) {
+//       echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
+//     } else {
+//       $bad_files[] = $o;
+//       $bad_dirs[] = $o->label;
+//       echo "Spostamento di '$from' in '$to' : " . ($e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
+//     }
+//   }
+// 
+//   $associazioni = (object)["etichette" => array_unique($bad_dirs), "associazioni" => $bad_files];
+// 
+//   if (file_put_contents($CONFIG_FILE_JSON, json_encode($associazioni))) {
+//     echo "Salvato con successo\n";
+//   } else {
+//     echo "Errore\n";
+//   }
+// }
 
-if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
-  if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
-    echo "Salvato con successo\n";
-  } else {
-    echo "Errore\n";
-  }
+function save()
+{
+  echo "save funciton";
 }
 
-if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply") == 0) {
-  $data = json_decode($_POST['data']);
+function apply()
+{
+  echo "apply funciton";
+}
 
-  $bad_dirs = [];
-  foreach ($data->etichette as $dir) {
-    $e = file_exists($dir);
-    if (($e && is_dir($dir)) || (!$e && mkdir($dir))) {
-      echo "Creazione di '$dir' : SUCCESSO\n";
-    } else {
-      echo "Creazione di '$dir' : ERRORE\n";
-      $bad_dirs[] = $dir;
-    }
-  }
-  echo "\n";
-
-  $bad_files = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-    return in_array($i->label, $bad_dirs);
-  });
-  $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-    return !in_array($i->label, $bad_dirs);
-  });
-
-  foreach ($associazioni as $o) {
-    $from = $o->path;
-    $to = $o->label . '/' . $o->path;
-    $e = file_exists($to);
-    if (!$e && rename($from, $to)) {
-      echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
-    } else {
-      $bad_files[] = $o;
-      $bad_dirs[] = $o->label;
-      echo "Spostamento di '$from' in '$to' : " . ($e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
-    }
-  }
-
-  $associazioni = (object)["etichette" => array_unique($bad_dirs), "associazioni" => $bad_files];
-
-  if (file_put_contents($CONFIG_FILE_JSON, json_encode($associazioni))) {
-    echo "Salvato con successo\n";
-  } else {
-    echo "Errore\n";
-  }
+if (array_key_exists('command', $_POST)) {
+  match ($_POST['command']) {
+    "save" => save(),
+    "apply" => apply(),
+    default => null,
+  };
 }
 
 if (count($_POST) != 0) {
@@ -129,10 +147,11 @@ if (count($_POST) != 0) {
 // =======================================================================================================================================================
 // PAGINA PRINCIPALE
 // =======================================================================================================================================================
+  
+$CONFIG_FILE_JSON = ".immagio.json";
 
-$script_file = str_replace(__DIR__ . "/", "", __FILE__);
-$files = array_values(array_filter(glob('*'), function ($f) use ($script_file) {
-  return !is_dir($f) && $f != $script_file;
+$files = array_values(array_filter(glob('*'), function ($f) {
+  return !is_dir($f) && $f != "index.php";
 }));
 
 $etichette = [];
@@ -240,10 +259,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
     function save() {
       var data = new FormData();
       data.append("command", "save");
-      data.append("data", JSON.stringify({
-        etichette: get_labels_text(),
-        associazioni: get_pair_image_label()
-      }));
+      // data.append("data", JSON.stringify({
+      //   etichette: get_labels_text(),
+      //   associazioni: get_pair_image_label()
+      // }));
       call_php(data, function() {
         alert(this.responseText);
       });
@@ -252,10 +271,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
     function apply() {
       var data = new FormData();
       data.append("command", "apply");
-      data.append("data", JSON.stringify({
-        etichette: get_labels_text(),
-        associazioni: get_pair_image_label()
-      }));
+      // data.append("data", JSON.stringify({
+      //   etichette: get_labels_text(),
+      //   associazioni: get_pair_image_label()
+      // }));
       call_php(data, function() {
         alert(this.responseText);
         window.location.reload(false);
