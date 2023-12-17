@@ -13,6 +13,7 @@ function dispaly_text($file)
 function display_image($file)
 {
 ?>
+  <!DOCTYPE html>
   <html>
   <style>
     html,
@@ -167,8 +168,8 @@ $files = filter(
 
 
 const htmlminiatura = "
-  <a target='contenuto' href='./?file={{FILENAME}}' onclick='this.scrollIntoView();'>
-    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' >
+  <a target='contenuto' href='./?file={{FILENAME}}'>
+    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
 
@@ -183,9 +184,9 @@ $miniature = implode(
 );
 
 const htmletichetta = "
-  <div class='bersaglio'>
-    <input class=radio type=radio name=label_radio>
-    <input class=text  type=text  name=label_text  value='{{ETICHETTA}}'>
+  <div class='bersaglio' >
+    <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
+    <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
   </div>
 ";
 
@@ -221,6 +222,69 @@ if (file_exists(CONFIGFILEJSON)) {
 
 <head>
   <script>
+    function caricaPrimo() {
+      document.getElementsByClassName("miniatura")[0].click();
+    }
+
+    var associazioni = {};
+    var filenameAttuale = "";
+
+    function displayFile(elem) {
+      filenameAttuale = elem.alt;
+      elem.scrollIntoView({
+        behavior: 'auto',
+        block: 'center',
+        inline: 'center'
+      });
+    }
+
+    function etichettaFile(elem) {
+      const primoCheck = !associazioni.hasOwnProperty(filenameAttuale);
+      associazioni[filenameAttuale] = elem.value;
+
+      const miniature = document.getElementsByClassName("miniatura");
+      Object.values(miniature).forEach(
+        function(elem) {
+          classname = "evidenziatura";
+          if (associazioni.hasOwnProperty(elem.alt)) {
+            elem.classList.add(classname);
+          } else {
+            elem.classList.remove(classname);
+          }
+        }
+      );
+
+      if (primoCheck) {
+        elem.checked = false;
+        next();
+      }
+    }
+
+    function next() {
+      if (this.miniature === undefined || this.idx === undefined) {
+        this.idx = 0;
+        this.miniature = document.getElementsByClassName("miniatura");
+      }
+      this.idx = ((this.idx + 1) % this.miniature.length);
+      this.miniature[this.idx].click();
+    }
+
+    const etichettaTemplate = `
+        <div class='bersaglio'>
+          <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
+          <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
+        </div>`;
+
+    function aggiungiEtichetta() {
+      const nuovaetichetta = document.getElementById("nuovo-bersaglio");
+      if (nuovaetichetta.value == "") {
+        return;
+      }
+      const etichette = document.getElementById("bersagli");
+      etichette.innerHTML += etichettaTemplate.replace("{{ETICHETTA}}", nuovaetichetta.value);
+      nuovaetichetta.value = "";
+    }
+
     var currentindex = 0;
     var current_image;
     var newdir;
@@ -365,9 +429,10 @@ if (file_exists(CONFIGFILEJSON)) {
       width: 160px;
       margin: 10px;
       margin-right: 20px;
+      border: none;
     }
 
-    a.highlighted .miniatura {
+    .evidenziatura {
       border: solid blue 2px;
     }
 
@@ -399,14 +464,14 @@ if (file_exists(CONFIGFILEJSON)) {
   </style>
 </head>
 
-<body>
+<body onload='caricaPrimo()'>
   <div id="miniature">
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <button onclick="save()">Salva</button>
-    <button onclick="add_target_directory()">Nuova directory</button>
+    <button onclick="aggiungiEtichetta()">Nuova directory</button>
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
       <?php echo $etichette; ?>
