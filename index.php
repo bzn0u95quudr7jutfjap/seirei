@@ -50,18 +50,14 @@ function display_default($file)
   header("Location: http://localhost:8888/$file");
 }
 
-if (count($_GET) > 0) { {
-    if (array_key_exists("file", $_GET)) {
-      $filename = $_GET["file"];
-      $mime = mime_content_type($filename);
-      match (true) {
-        strpos($mime, "text") !== false => dispaly_text($filename),
-        strpos($mime, "image") !== false => display_image($filename),
-        default => display_default($filename),
-      };
-    }
-  }
-  return;
+if (array_key_exists("file", $_GET)) {
+  $filename = $_GET["file"];
+  $mime = mime_content_type($filename);
+  match (true) {
+    strpos($mime, "text") !== false => dispaly_text($filename),
+    strpos($mime, "image") !== false => display_image($filename),
+    default => display_default($filename),
+  };
 }
 
 if (count($_GET) != 0) {
