@@ -4,48 +4,61 @@
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
 
+function dispaly_text($file)
+{
+  header("Content-Type: text/plain; charset=utf-8");
+  readfile($file);
+}
+
+function display_image($file)
+{
+?>
+  <html>
+  <style>
+    html,
+    body {
+      margin: 0px;
+      padding: 0px;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: auto;
+      grid-template-rows: auto;
+      justify-items: center;
+      align-content: center;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+
+  <body>
+    <img src="<?php echo $file; ?>">
+  </body>
+
+  </html>
+<?php
+}
+
+function display_default($file)
+{
+  header("Location: http://localhost:8888/$file");
+}
+
 if (count($_GET) > 0) { {
     if (array_key_exists("file", $_GET)) {
-      $f = $_GET["file"];
-      $mime = mime_content_type($f);
-      if (strpos($mime, "text") !== false) {
-        header("Content-Type: text/plain; charset=utf-8");
-        readfile($f);
-      } else if (strpos($mime, "image") !== false) {
-?>
-        <html>
-        <style>
-          html,
-          body {
-            margin: 0px;
-            padding: 0px;
-            width: 100%;
-            height: 100%;
-          }
-
-          body {
-            display: grid;
-            grid-template-columns: auto;
-            grid-template-rows: auto;
-            justify-items: center;
-            align-content: center;
-          }
-
-          img {
-            max-width: 100%;
-            max-height: 100%;
-          }
-        </style>
-
-        <body>
-          <img src="<?php echo $f; ?>">
-        </body>
-
-        </html>
-<?php
-      } else {
-        header("Location: http://localhost:8888/$f");
-      }
+      $filename = $_GET["file"];
+      $mime = mime_content_type($filename);
+      match (true) {
+        strpos($mime, "text") !== false => dispaly_text($filename),
+        strpos($mime, "image") !== false => display_image($filename),
+        default => display_default($filename),
+      };
     }
   }
   return;
