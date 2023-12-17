@@ -253,7 +253,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       align-items: center;
     }
 
-    #current-image {
+    #contenuto {
       max-width: 90%;
       max-height: 90%;
       height: 90%;
@@ -274,6 +274,10 @@ if (file_exists($CONFIG_FILE_JSON)) {
       margin-right: 20px;
     }
 
+    a.highlighted .miniatura {
+      border: solid blue 2px;
+    }
+
     #controlli {
       margin: 20px;
       height: 90%;
@@ -289,21 +293,13 @@ if (file_exists($CONFIG_FILE_JSON)) {
       flex-direction: column;
     }
 
-    #bersagli div {
-      display: grid;
-      grid-template-columns: min-content auto;
+    .bersaglio .text {
+      display: inline-block;
+      width: 70%;
     }
 
-    a.highlighted img {
-      border: solid blue 2px;
-    }
-
-    #bersagli .text {
-      font-size: 22px;
-      width: 90%;
-    }
-
-    #bersagli .radio {
+    .bersaglio .radio {
+      display: inline-block;
       height: 20px;
       width: 20px;
     }
@@ -314,24 +310,34 @@ if (file_exists($CONFIG_FILE_JSON)) {
   <div id="miniature">
     <?php
     foreach ($files as $f) {
-      echo "<a target='contenuto' href='./?file=$f' onclick='this.scrollIntoView();'>
+      echo "
+    <a target='contenuto' href='./?file=$f' onclick='this.scrollIntoView();'>
       <img class='miniatura' src=$f alt=$f >
-      </a>\n";
+    </a>\n";
     }
     ?>
   </div>
-  <iframe name="contenuto" id="current-image" <?php echo (count($files) > 0 ? ('src="./?file=' . $files[0] . '"') : '') ?>></iframe>
+  <iframe name="contenuto" id="contenuto" <?php echo (count($files) > 0 ? ('src="./?file=' . $files[0] . '"') : '') ?>></iframe>
   <div id="controlli">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
+      <div class='bersaglio'>
+        <input class='radio' type='radio' name='label_radio'>
+        <input class='text' type='text' name='label_text' value='AAAAAAAAAAAAAAAAA'>
+      </div>
+      <div class='bersaglio'>
+        <input class='radio' type='radio' name='label_radio'>
+        <input class='text' type='text' name='label_text' value='BBBBBBBBBBBBBBBBB'>
+      </div>
       <?php
       foreach ($etichette as $i => $e) {
-        echo "<div>
+        echo "
+      <div class='bersaglio'>
         <input class=radio type=radio name=label_radio>
         <input class=text  type=text  name=label_text  value='$e'>
-        </div>\n";
+      </div>\n";
       }
       ?>
     </div>
