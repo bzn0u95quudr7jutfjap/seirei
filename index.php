@@ -147,23 +147,62 @@ if (count($_POST) != 0) {
 // =======================================================================================================================================================
 // PAGINA PRINCIPALE
 // =======================================================================================================================================================
-  
-$CONFIG_FILE_JSON = ".immagio.json";
 
-$files = array_values(array_filter(glob('*'), function ($f) {
-  return !is_dir($f) && $f != "index.php";
-}));
+
+function map($function, $collection)
+{
+  return array_map($function, $collection);
+}
+function filter($function, $collection)
+{
+  return array_filter($collection, $function);
+}
+
+$files = array_values(
+  filter(
+    function ($f) {
+      return !is_dir($f) && $f != "index.php";
+    },
+    glob('*')
+  )
+);
+
 
 $etichette = [];
 $associazioni = [];
 
-if (file_exists($CONFIG_FILE_JSON)) {
-  $conf = json_decode(file_get_contents($CONFIG_FILE_JSON));
+const CONFIGFILEJSON = ".immagio.json";
+if (file_exists(CONFIGFILEJSON)) {
+  $conf = json_decode(file_get_contents(CONFIGFILEJSON));
   $etichette = $conf->etichette;
-  $associazioni = array_values(array_filter($conf->associazioni, function ($i) use ($files) {
-    return in_array($i->path, $files);
-  }));
+  $associazioni = $conf->associazioni;
 }
+
+const htmlminiatura = "
+<a target='contenuto' href='./?file={{FILENAME}}' onclick='this.scrollIntoView();'>
+  <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' >
+</a>
+";
+
+$miniature = implode(
+  "\n",
+  map(
+    function ($filename) {
+      return str_replace("{{FILENAME}}", $filename, htmlminiatura);
+    },
+    filter(
+      function ($filename) use ($files) {
+        return in_array($filename, $files);
+      },
+      map(
+        function ($elem) {
+          return $elem->path;
+        },
+        $associazioni
+      )
+    )
+  )
+);
 
 ?>
 
