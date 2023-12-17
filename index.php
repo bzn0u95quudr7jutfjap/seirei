@@ -260,7 +260,7 @@ if (file_exists($CONFIG_FILE_JSON)) {
       width: 90%;
     }
 
-    #images {
+    #miniature {
       margin: 20px;
       overflow: scroll;
       height: 90%;
@@ -268,13 +268,13 @@ if (file_exists($CONFIG_FILE_JSON)) {
       flex-direction: column;
     }
 
-    #images img {
+    .miniatura {
       width: 160px;
       margin: 10px;
       margin-right: 20px;
     }
 
-    #controls {
+    #controlli {
       margin: 20px;
       height: 90%;
       display: grid;
@@ -282,14 +282,14 @@ if (file_exists($CONFIG_FILE_JSON)) {
       grid-gap: 10px;
     }
 
-    #target-directories {
+    #bersagli {
       overflow: scroll;
       height: 100%;
       display: flex;
       flex-direction: column;
     }
 
-    #target-directories div {
+    #bersagli div {
       display: grid;
       grid-template-columns: min-content auto;
     }
@@ -298,12 +298,12 @@ if (file_exists($CONFIG_FILE_JSON)) {
       border: solid blue 2px;
     }
 
-    #target-directories .text {
+    #bersagli .text {
       font-size: 22px;
       width: 90%;
     }
 
-    #target-directories .radio {
+    #bersagli .radio {
       height: 20px;
       width: 20px;
     }
@@ -311,21 +311,21 @@ if (file_exists($CONFIG_FILE_JSON)) {
 </head>
 
 <body>
-  <div id="images">
+  <div id="miniature">
     <?php
     foreach ($files as $f) {
-      echo "<a target=fullpage href='./?file=$f' onclick='this.scrollIntoView();'>
-      <img src=$f alt=$f >
+      echo "<a target='contenuto' href='./?file=$f' onclick='this.scrollIntoView();'>
+      <img class='miniatura' src=$f alt=$f >
       </a>\n";
     }
     ?>
   </div>
-  <iframe name=fullpage id="current-image" <?php echo (count($files) > 0 ? ("src='./?file=" . $files[0]) . "'" : "") ?>"></iframe>
-  <div id="controls">
+  <iframe name="contenuto" id="current-image" <?php echo (count($files) > 0 ? ('src="./?file=' . $files[0] . '"') : '') ?>></iframe>
+  <div id="controlli">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
-    <input id="new-directory" type="text">
-    <div id="target-directories">
+    <input id="nuovo-bersaglio" type="text">
+    <div id="bersagli">
       <?php
       foreach ($etichette as $i => $e) {
         echo "<div>
