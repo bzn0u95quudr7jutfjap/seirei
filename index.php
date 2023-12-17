@@ -158,30 +158,18 @@ function filter($function, $collection)
   return array_filter($collection, $function);
 }
 
-$files = array_values(
-  filter(
-    function ($f) {
-      return !is_dir($f) && $f != "index.php";
-    },
-    glob('*')
-  )
+$files = filter(
+  function ($f) {
+    return !is_dir($f) && $f != "index.php";
+  },
+  glob('*')
 );
 
 
-$etichette = [];
-$associazioni = [];
-
-const CONFIGFILEJSON = ".immagio.json";
-if (file_exists(CONFIGFILEJSON)) {
-  $conf = json_decode(file_get_contents(CONFIGFILEJSON));
-  $etichette = $conf->etichette;
-  $associazioni = $conf->associazioni;
-}
-
 const htmlminiatura = "
-<a target='contenuto' href='./?file={{FILENAME}}' onclick='this.scrollIntoView();'>
-  <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' >
-</a>
+  <a target='contenuto' href='./?file={{FILENAME}}' onclick='this.scrollIntoView();'>
+    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' >
+  </a>
 ";
 
 $miniature = implode(
@@ -190,19 +178,41 @@ $miniature = implode(
     function ($filename) {
       return str_replace("{{FILENAME}}", $filename, htmlminiatura);
     },
-    filter(
-      function ($filename) use ($files) {
-        return in_array($filename, $files);
-      },
-      map(
-        function ($elem) {
-          return $elem->path;
-        },
-        $associazioni
-      )
-    )
+    $files
   )
 );
+
+const htmletichetta = "
+  <div class='bersaglio'>
+    <input class=radio type=radio name=label_radio>
+    <input class=text  type=text  name=label_text  value='{{ETICHETTA}}'>
+  </div>
+";
+
+$etichette = '';
+$associazioni = '';
+
+const CONFIGFILEJSON = ".immagio.json";
+if (file_exists(CONFIGFILEJSON)) {
+  $conf = json_decode(file_get_contents(CONFIGFILEJSON));
+  $etichette = implode(
+    "\n",
+    map(
+      function ($etichetta) {
+        return str_replace("{{ETICHETTA}}", $etichetta, htmletichetta);
+      },
+      $conf->etichette
+    )
+  );
+  $associazioni = json_encode(
+    filter(
+      function ($elem) use ($files) {
+        return in_array($elem->path, $files);
+      },
+      $conf->associazioni
+    )
+  );
+}
 
 ?>
 
@@ -391,38 +401,15 @@ $miniature = implode(
 
 <body>
   <div id="miniature">
-    <?php
-    foreach ($files as $f) {
-      echo "
-    <a target='contenuto' href='./?file=$f' onclick='this.scrollIntoView();'>
-      <img class='miniatura' src=$f alt=$f >
-    </a>\n";
-    }
-    ?>
+    <?php echo $miniature; ?>
   </div>
-  <iframe name="contenuto" id="contenuto" <?php echo (count($files) > 0 ? ('src="./?file=' . $files[0] . '"') : '') ?>></iframe>
+  <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <button onclick="save()">Salva</button>
     <button onclick="add_target_directory()">Nuova directory</button>
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
-      <div class='bersaglio'>
-        <input class='radio' type='radio' name='label_radio'>
-        <input class='text' type='text' name='label_text' value='AAAAAAAAAAAAAAAAA'>
-      </div>
-      <div class='bersaglio'>
-        <input class='radio' type='radio' name='label_radio'>
-        <input class='text' type='text' name='label_text' value='BBBBBBBBBBBBBBBBB'>
-      </div>
-      <?php
-      foreach ($etichette as $i => $e) {
-        echo "
-      <div class='bersaglio'>
-        <input class=radio type=radio name=label_radio>
-        <input class=text  type=text  name=label_text  value='$e'>
-      </div>\n";
-      }
-      ?>
+      <?php echo $etichette; ?>
     </div>
     <button onclick="apply()">Applica modifiche</button>
   </div>
