@@ -339,8 +339,4 @@ if (file_exists($CONFIG_FILE_JSON)) {
   </div>
 </body>
 
-</html> <button onclick="apply()">Applica modifiche</button>
-</div>
-</body>
-
 </html>
