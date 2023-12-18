@@ -235,14 +235,14 @@ $etichette = json_encode(["a", "b"]);
           inputbox.value = etichetta;
           bottone.click();
         });
+
+      //TODO reinizializzazione delle associazioni
     }
 
     var associazioni = {};
     var filenameAttuale = "";
-    var indiceAttuale = 0;
 
     function displayFile(elem, idx) {
-      indiceAttuale = idx;
       filenameAttuale = elem.alt;
       elem.scrollIntoView({
         behavior: 'auto',
@@ -279,8 +279,14 @@ $etichette = json_encode(["a", "b"]);
       );
 
       if (primoCheck) {
-        indiceAttuale = ((indiceAttuale + 1) % miniature.length);
-        miniature[indiceAttuale].click();
+        const daEtichettare = Object.values(miniature).filter(
+          function(elem) {
+            return !elem.classList.contains("evidenziatura");
+          }
+        );
+        if (daEtichettare.length > 0) {
+          daEtichettare[0].click();
+        }
       }
     }
 
@@ -299,6 +305,10 @@ $etichette = json_encode(["a", "b"]);
       //TODO SORTING DELLE ETICHETTE
       nuovaetichetta.value = "";
     }
+
+    // ===========================================================================================================================
+    // ===========================================================================================================================
+    // ===========================================================================================================================
 
     var currentindex = 0;
     var current_image;
