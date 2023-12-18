@@ -225,6 +225,9 @@ $etichette = json_encode(["a", "b"]);
 
 <head>
   <script>
+    var associazioni = {};
+    var filenameAttuale = "";
+
     function main(etichette) {
       document.getElementsByClassName("miniatura")[0].click();
 
@@ -236,11 +239,11 @@ $etichette = json_encode(["a", "b"]);
           bottone.click();
         });
 
+      //TODO ripensare come salvare le associazioni
       //TODO reinizializzazione delle associazioni
+      
+      //TODO click del primo elemento che non evidenziato
     }
-
-    var associazioni = {};
-    var filenameAttuale = "";
 
     function displayFile(elem, idx) {
       filenameAttuale = elem.alt;
