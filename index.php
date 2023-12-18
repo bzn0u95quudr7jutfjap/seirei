@@ -169,17 +169,18 @@ $files = filter(
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{FILENAME}}'>
-    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
+    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this,{{i}});'>
   </a>
 ";
 
 $miniature = implode(
   "\n",
   map(
-    function ($filename) {
-      return str_replace("{{FILENAME}}", $filename, htmlminiatura);
+    function ($coll) {
+      [$filename, $i] = $coll;
+      return str_replace("{{i}}", $i, str_replace("{{FILENAME}}", $filename, htmlminiatura));
     },
-    $files
+    array_map(null, $files, range(0, count($files) - 1))
   )
 );
 
@@ -190,8 +191,8 @@ const htmletichetta = "
   </div>
 ";
 
-$etichette = '';
-$associazioni = '';
+$etichette = [];
+$associazioni = [];
 
 const CONFIGFILEJSON = ".immagio.json";
 if (file_exists(CONFIGFILEJSON)) {
@@ -215,6 +216,8 @@ if (file_exists(CONFIGFILEJSON)) {
   );
 }
 
+$etichette = json_encode(["a", "b"]);
+
 ?>
 
 <!DOCTYPE html>
@@ -222,14 +225,24 @@ if (file_exists(CONFIGFILEJSON)) {
 
 <head>
   <script>
-    function main() {
+    function main(etichette) {
       document.getElementsByClassName("miniatura")[0].click();
+
+      const inputbox = document.getElementById("nuovo-bersaglio");
+      const bottone = document.getElementById("aggiungi-bersaglio");
+      Object.values(etichette).forEach(
+        function(etichetta) {
+          inputbox.value = etichetta;
+          bottone.click();
+        });
     }
 
     var associazioni = {};
     var filenameAttuale = "";
+    var indiceAttuale = 0;
 
-    function displayFile(elem) {
+    function displayFile(elem, idx) {
+      indiceAttuale = idx;
       filenameAttuale = elem.alt;
       elem.scrollIntoView({
         behavior: 'auto',
@@ -238,13 +251,20 @@ if (file_exists(CONFIGFILEJSON)) {
       });
 
       if (associazioni.hasOwnProperty(filenameAttuale)) {
-        // TODO ripristina il radio selezionato
+        associazioni[filenameAttuale].checked = true;
+      } else {
+        const etichette = document.getElementsByClassName("radio");
+        Object.values(etichette).forEach(
+          function(etichetta) {
+            etichetta.checked = false;
+          }
+        );
       }
     }
 
     function etichettaFile(elem) {
       const primoCheck = !associazioni.hasOwnProperty(filenameAttuale);
-      associazioni[filenameAttuale] = elem.value;
+      associazioni[filenameAttuale] = elem;
 
       const miniature = document.getElementsByClassName("miniatura");
       Object.values(miniature).forEach(
@@ -259,26 +279,10 @@ if (file_exists(CONFIGFILEJSON)) {
       );
 
       if (primoCheck) {
-        elem.checked = false;
-        next();
+        indiceAttuale = ((indiceAttuale + 1) % miniature.length);
+        miniature[indiceAttuale].click();
       }
     }
-
-    function next() {
-      if (this.miniature === undefined || this.idx === undefined) {
-        this.idx = 0;
-        this.miniature = document.getElementsByClassName("miniatura");
-      }
-      this.idx = ((this.idx + 1) % this.miniature.length);
-      this.miniature[this.idx].click();
-    }
-
-    // TODO creazione di un id differente per ogni etichetta
-    const etichettaTemplate = `
-        <div class='bersaglio'>
-          <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
-          <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
-        </div>`;
 
     function aggiungiEtichetta() {
       const nuovaetichetta = document.getElementById("nuovo-bersaglio");
@@ -286,7 +290,13 @@ if (file_exists(CONFIGFILEJSON)) {
         return;
       }
       const etichette = document.getElementById("bersagli");
-      etichette.innerHTML += etichettaTemplate.replace("{{ETICHETTA}}", nuovaetichetta.value);
+      const id = etichette.children.length;
+      etichette.innerHTML += `
+        <div class='bersaglio'>
+          <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
+          <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
+        </div>`;
+      //TODO SORTING DELLE ETICHETTE
       nuovaetichetta.value = "";
     }
 
@@ -469,17 +479,16 @@ if (file_exists(CONFIGFILEJSON)) {
   </style>
 </head>
 
-<body onload='main()'>
+<body onload='main(<?php echo $etichette; ?>)'>
   <div id="miniature">
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <button onclick="save()">Salva</button>
-    <button onclick="aggiungiEtichetta()">Nuova directory</button>
+    <button onclick="aggiungiEtichetta()" id="aggiungi-bersaglio">Nuova directory</button>
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
-      <?php echo $etichette; ?>
     </div>
     <button onclick="apply()">Applica modifiche</button>
   </div>
