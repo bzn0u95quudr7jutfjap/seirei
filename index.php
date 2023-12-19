@@ -169,7 +169,7 @@ $files = filter(
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{FILENAME}}'>
-    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this,{{i}});'>
+    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
 
@@ -178,7 +178,7 @@ $miniature = implode(
   map(
     function ($coll) {
       [$filename, $i] = $coll;
-      return str_replace("{{i}}", $i, str_replace("{{FILENAME}}", $filename, htmlminiatura));
+      return str_replace("{{FILENAME}}", $filename, htmlminiatura);
     },
     array_map(null, $files, range(0, count($files) - 1))
   )
@@ -245,7 +245,7 @@ $etichette = json_encode(["a", "b"]);
       //TODO click del primo elemento che non evidenziato
     }
 
-    function displayFile(elem, idx) {
+    function displayFile(elem) {
       filenameAttuale = elem.alt;
       elem.scrollIntoView({
         behavior: 'auto',
