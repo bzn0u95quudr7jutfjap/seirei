@@ -123,9 +123,16 @@ if (count($_GET) != 0) {
 //   }
 // }
 
+const CONFIGFILEJSON = ".seireidire.json";
+
 function save()
 {
-  echo "save funciton";
+  ["data" => $data] = $_POST;
+  if (file_put_contents(CONFIGFILEJSON, $data)) {
+    echo "Salvato con successo\n";
+  } else {
+    echo "Errore";
+  }
 }
 
 function apply()
@@ -193,26 +200,25 @@ const htmletichetta = "
 $etichette = [];
 $associazioni = [];
 
-const CONFIGFILEJSON = ".immagio.json";
 if (file_exists(CONFIGFILEJSON)) {
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
-  $etichette = implode(
-    "\n",
-    map(
-      function ($etichetta) {
-        return str_replace("{{ETICHETTA}}", $etichetta, htmletichetta);
-      },
-      $conf->etichette
-    )
-  );
-  $associazioni = json_encode(
-    filter(
-      function ($elem) use ($files) {
-        return in_array($elem->filename, $files);
-      },
-      $conf->associazioni
-    )
-  );
+  // $etichette = implode(
+  //   "\n",
+  //   map(
+  //     function ($etichetta) {
+  //       return str_replace("{{ETICHETTA}}", $etichetta, htmletichetta);
+  //     },
+  //     $conf->etichette
+  //   )
+  // );
+  // $associazioni = json_encode(
+  //   filter(
+  //     function ($elem) use ($files) {
+  //       return in_array($elem->filename, $files);
+  //     },
+  //     $conf->associazioni
+  //   )
+  // );
 }
 
 ?>
@@ -383,8 +389,10 @@ if (file_exists(CONFIGFILEJSON)) {
         ));
       let data = new FormData();
       data.append("command", "save");
-      data.append("etichette", etichetteDaSalvare);
-      data.append("associazioni", associazioniDaSalvare);
+      data.append("data", JSON.stringify({
+        etichette: etichetteDaSalvare,
+        associazioni: associazioniDaSalvare
+      }));
       callPhp(data,
         function() {
           console.log(this.responseText);
