@@ -229,10 +229,15 @@ if (file_exists(CONFIGFILEJSON)) {
 
 
       // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
-      etichette = [ "a", "b" ];
-      associazioniLocali = [
-        { filename : "main.hs" , etichetta : "a" },
-        { filename : "main.c" , etichetta : "b" },
+      etichette = ["a", "b"];
+      associazioniLocali = [{
+          filename: "main.hs",
+          etichetta: "a"
+        },
+        {
+          filename: "main.c",
+          etichetta: "b"
+        },
       ];
 
       const miniature = document.getElementsByClassName("miniatura");
@@ -345,6 +350,46 @@ if (file_exists(CONFIGFILEJSON)) {
         </div>`;
       //TODO SORTING DELLE ETICHETTE
       nuovaetichetta.value = "";
+    }
+
+    function callPhp(data, func) {
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", "index.php", true);
+      xmlhttp.onload = func;
+      xmlhttp.send(data);
+    }
+
+    // TODO crea il JASON che salvi le etichette e le associazioni
+    function phpSalvaAssociazioni() {
+      const zip = (a, b) => a.map((v, k) => [v, b[k]]);
+      const etichetteRadio = document.getElementsByClassName("radio");
+      const etichetteTesto = Object.values(etichetteRadio).map(
+        function(etichetta) {
+          return document.getElementById(etichetta.value).value;
+        }
+      );
+      const etichetteRadioTesto = new Map(zip(Object.values(etichetteRadio), Object.values(etichetteTesto)));
+      const etichetteDaSalvare = JSON.stringify(etichetteTesto);
+      const associazioniDaSalvare = JSON.stringify(
+        zip(
+          Object.keys(associazioni),
+          Object.values(associazioni)).map(
+          function(coll) {
+            return {
+              filename: coll[0],
+              etichetta: etichetteRadioTesto.get(coll[1].value)
+            };
+          }
+        ));
+      let data = new FormData();
+      data.append("command", "save");
+      data.append("etichette", etichetteDaSalvare);
+      data.append("associazioni", associazioniDaSalvare);
+      callPhp(data,
+        function() {
+          console.log(this.responseText);
+        }
+      );
     }
 
     // ===========================================================================================================================
