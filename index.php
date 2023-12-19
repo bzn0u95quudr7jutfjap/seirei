@@ -142,6 +142,7 @@ function apply()
 }
 
 if (array_key_exists('command', $_POST)) {
+  var_dump($_POST);
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
@@ -198,28 +199,13 @@ const htmletichetta = "
   </div>
 ";
 
-$etichette = [];
-$associazioni = [];
+$etichette = "[]";
+$associazioni = "[]";
 
 if (file_exists(CONFIGFILEJSON)) {
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
-  // $etichette = implode(
-  //   "\n",
-  //   map(
-  //     function ($etichetta) {
-  //       return str_replace("{{ETICHETTA}}", $etichetta, htmletichetta);
-  //     },
-  //     $conf->etichette
-  //   )
-  // );
-  // $associazioni = json_encode(
-  //   filter(
-  //     function ($elem) use ($files) {
-  //       return in_array($elem->filename, $files);
-  //     },
-  //     $conf->associazioni
-  //   )
-  // );
+  $etichette = $conf->etichette;
+  $associazioni = $conf->associazioni;
 }
 
 ?>
@@ -232,21 +218,23 @@ if (file_exists(CONFIGFILEJSON)) {
     var associazioni = {};
     var filenameAttuale = "";
 
-    function main(etichette, associazioniLocali) {
+    function main() {
+      const etichette = <?php echo $etichette; ?>;
+      const associazioniLocali = <?php echo $associazioni; ?>;
 
       // TODO FUNZIONI DI LOADING
 
       // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
-      etichette = ["a", "b"];
-      associazioniLocali = [{
-          filename: "main.hs",
-          etichetta: "a"
-        },
-        {
-          filename: "main.c",
-          etichetta: "b"
-        },
-      ];
+      // etichette = ["a", "b"];
+      // associazioniLocali = [{
+      //     filename: "main.hs",
+      //     etichetta: "a"
+      //   },
+      //   {
+      //     filename: "main.c",
+      //     etichetta: "b"
+      //   },
+      // ];
 
       const miniature = document.getElementsByClassName("miniatura");
       miniature[0].click();
@@ -584,13 +572,13 @@ if (file_exists(CONFIGFILEJSON)) {
   </style>
 </head>
 
-<body onload='main(<?php echo $etichette; ?>)'>
+<body onload='main()'>
   <div id="miniature">
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
-    <button onclick="save()">Salva</button>
+    <button onclick="phpSalvaAssociazioni()">Salva</button>
     <button onclick="aggiungiEtichetta()" id="aggiungi-bersaglio">Nuova directory</button>
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
