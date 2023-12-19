@@ -215,8 +215,6 @@ if (file_exists(CONFIGFILEJSON)) {
   );
 }
 
-$etichette = json_encode(["a", "b"]);
-
 ?>
 
 <!DOCTYPE html>
@@ -228,6 +226,15 @@ $etichette = json_encode(["a", "b"]);
     var filenameAttuale = "";
 
     function main(etichette, associazioniLocali) {
+
+
+      // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
+      etichette = [ "a", "b" ];
+      associazioniLocali = [
+        { filename : "main.hs" , etichetta : "a" },
+        { filename : "main.c" , etichetta : "b" },
+      ];
+
       const miniature = document.getElementsByClassName("miniatura");
       miniature[0].click();
 
@@ -239,7 +246,6 @@ $etichette = json_encode(["a", "b"]);
           bottone.click();
         });
 
-      //TODO TESTING
       const radio = document.getElementsByClassName("radio");
       Object.values(radio).map(
         function(radio) {
@@ -255,9 +261,6 @@ $etichette = json_encode(["a", "b"]);
               associazioni[associazione.filename] = coll[0];
             });
         });
-
-      //TODO ripensare come salvare le associazioni
-      //TODO reinizializzazione delle associazioni
 
       Object.values(miniature).forEach(
         function(elem) {
