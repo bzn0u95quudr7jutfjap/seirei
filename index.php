@@ -241,8 +241,28 @@ $etichette = json_encode(["a", "b"]);
 
       //TODO ripensare come salvare le associazioni
       //TODO reinizializzazione delle associazioni
-      
-      //TODO click del primo elemento che non evidenziato
+
+
+      const miniature = document.getElementsByClassName("miniatura");
+      Object.values(miniature).forEach(
+        function(elem) {
+          classname = "evidenziatura";
+          if (associazioni.hasOwnProperty(elem.alt)) {
+            elem.classList.add(classname);
+          } else {
+            elem.classList.remove(classname);
+          }
+        }
+      );
+      const daEtichettare = Object.values(miniature).filter(
+        function(elem) {
+          return !elem.classList.contains("evidenziatura");
+        }
+      );
+      if (daEtichettare.length > 0) {
+        daEtichettare[0].click();
+      }
+
     }
 
     function displayFile(elem) {
