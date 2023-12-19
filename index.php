@@ -176,11 +176,10 @@ const htmlminiatura = "
 $miniature = implode(
   "\n",
   map(
-    function ($coll) {
-      [$filename, $i] = $coll;
+    function ($filename) {
       return str_replace("{{FILENAME}}", $filename, htmlminiatura);
     },
-    array_map(null, $files, range(0, count($files) - 1))
+    $files
   )
 );
 
