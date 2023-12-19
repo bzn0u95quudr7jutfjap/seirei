@@ -137,6 +137,7 @@ function save()
 
 function apply()
 {
+  //TODO
   echo "apply funciton";
 }
 
@@ -366,7 +367,6 @@ if (file_exists(CONFIGFILEJSON)) {
       xmlhttp.send(data);
     }
 
-    // TODO crea il JASON che salvi le etichette e le associazioni
     function phpSalvaAssociazioni() {
       const zip = (a, b) => a.map((v, k) => [v, b[k]]);
       const etichetteRadio = document.getElementsByClassName("radio");
