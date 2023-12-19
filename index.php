@@ -209,7 +209,7 @@ if (file_exists(CONFIGFILEJSON)) {
   $associazioni = json_encode(
     filter(
       function ($elem) use ($files) {
-        return in_array($elem->path, $files);
+        return in_array($elem->filename, $files);
       },
       $conf->associazioni
     )
@@ -228,8 +228,9 @@ $etichette = json_encode(["a", "b"]);
     var associazioni = {};
     var filenameAttuale = "";
 
-    function main(etichette) {
-      document.getElementsByClassName("miniatura")[0].click();
+    function main(etichette, associazioniLocali) {
+      const miniature = document.getElementsByClassName("miniatura");
+      miniature[0].click();
 
       const inputbox = document.getElementById("nuovo-bersaglio");
       const bottone = document.getElementById("aggiungi-bersaglio");
@@ -239,11 +240,26 @@ $etichette = json_encode(["a", "b"]);
           bottone.click();
         });
 
+      //TODO TESTING
+      const radio = document.getElementsByClassName("radio");
+      Object.values(radio).map(
+        function(radio) {
+          return [radio, document.getElementById(radio.value)];
+        }).forEach(
+        function(coll) {
+          associazioniLocali.filter(
+            function(associazione) {
+              return associazione.etichetta == coll[1].value;
+            }
+          ).forEach(
+            function(associazione) {
+              associazioni[associazione.filename] = coll[0];
+            });
+        });
+
       //TODO ripensare come salvare le associazioni
       //TODO reinizializzazione delle associazioni
 
-
-      const miniature = document.getElementsByClassName("miniatura");
       Object.values(miniature).forEach(
         function(elem) {
           classname = "evidenziatura";
