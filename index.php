@@ -222,6 +222,9 @@ if (file_exists(CONFIGFILEJSON)) {
       const etichette = <?php echo $etichette; ?>;
       const associazioniLocali = <?php echo $associazioni; ?>;
 
+      console.log(etichette);
+      console.log(associazioniLocali);
+
       // TODO FUNZIONI DI LOADING
 
       // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
@@ -372,10 +375,12 @@ if (file_exists(CONFIGFILEJSON)) {
           function(coll) {
             return {
               filename: coll[0],
-              etichetta: etichetteRadioTesto.get(coll[1].value)
+              etichetta: etichetteRadioTesto.get(coll[1])
             };
           }
         ));
+      console.log(etichetteRadioTesto);
+      console.log(associazioniDaSalvare);
       let data = new FormData();
       data.append("command", "save");
       data.append("data", JSON.stringify({
