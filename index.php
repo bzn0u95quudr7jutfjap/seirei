@@ -233,6 +233,7 @@ if (file_exists(CONFIGFILEJSON)) {
 
     function main(etichette, associazioniLocali) {
 
+      // TODO FUNZIONI DI LOADING
 
       // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
       etichette = ["a", "b"];
