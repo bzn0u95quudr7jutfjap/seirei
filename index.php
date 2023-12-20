@@ -215,29 +215,18 @@ if (file_exists(CONFIGFILEJSON)) {
 
 <head>
   <script>
+    function init() {
+      return [ <?php echo $etichette; ?>, <?php echo $associazioni; ?> ];
+    }
+  </script>
+  <script>
     var associazioni = {};
     var filenameAttuale = "";
 
     function main() {
-      const etichette = <?php echo $etichette; ?>;
-      const associazioniLocali = <?php echo $associazioni; ?>;
-
-      console.log(etichette);
-      console.log(associazioniLocali);
-
-      // TODO FUNZIONI DI LOADING
-
-      // TODO ELIMINARE INIZIALIZZAZIONI DI PROVA
-      // etichette = ["a", "b"];
-      // associazioniLocali = [{
-      //     filename: "main.hs",
-      //     etichetta: "a"
-      //   },
-      //   {
-      //     filename: "main.c",
-      //     etichetta: "b"
-      //   },
-      // ];
+      const iniziali = init();
+      const etichette = iniziali[0];
+      const associazioniLocali = iniziali[1];
 
       const miniature = document.getElementsByClassName("miniatura");
       miniature[0].click();
@@ -379,8 +368,6 @@ if (file_exists(CONFIGFILEJSON)) {
             };
           }
         ));
-      console.log(etichetteRadioTesto);
-      console.log(associazioniDaSalvare);
       let data = new FormData();
       data.append("command", "save");
       data.append("data", JSON.stringify({
