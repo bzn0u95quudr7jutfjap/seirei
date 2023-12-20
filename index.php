@@ -68,60 +68,6 @@ if (count($_GET) != 0) {
 // COMANDI POST
 // =======================================================================================================================================================
 
-// $CONFIG_FILE_JSON = ".immagio.json";
-// 
-// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
-//   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
-//     echo "Salvato con successo\n";
-//   } else {
-//     echo "Errore\n";
-//   }
-// }
-// 
-// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply") == 0) {
-//   $data = json_decode($_POST['data']);
-// 
-//   $bad_dirs = [];
-//   foreach ($data->etichette as $dir) {
-//     $e = file_exists($dir);
-//     if (($e && is_dir($dir)) || (!$e && mkdir($dir))) {
-//       echo "Creazione di '$dir' : SUCCESSO\n";
-//     } else {
-//       echo "Creazione di '$dir' : ERRORE\n";
-//       $bad_dirs[] = $dir;
-//     }
-//   }
-//   echo "\n";
-// 
-//   $bad_files = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-//     return in_array($i->label, $bad_dirs);
-//   });
-//   $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-//     return !in_array($i->label, $bad_dirs);
-//   });
-// 
-//   foreach ($associazioni as $o) {
-//     $from = $o->path;
-//     $to = $o->label . '/' . $o->path;
-//     $e = file_exists($to);
-//     if (!$e && rename($from, $to)) {
-//       echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
-//     } else {
-//       $bad_files[] = $o;
-//       $bad_dirs[] = $o->label;
-//       echo "Spostamento di '$from' in '$to' : " . ($e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
-//     }
-//   }
-// 
-//   $associazioni = (object)["etichette" => array_unique($bad_dirs), "associazioni" => $bad_files];
-// 
-//   if (file_put_contents($CONFIG_FILE_JSON, json_encode($associazioni))) {
-//     echo "Salvato con successo\n";
-//   } else {
-//     echo "Errore\n";
-//   }
-// }
-
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
@@ -435,119 +381,6 @@ if (file_exists(CONFIGFILEJSON)) {
           window.location.reload(false);
         });
     }
-
-    // ===========================================================================================================================
-    // ===========================================================================================================================
-    // ===========================================================================================================================
-
-    var currentindex = 0;
-    var current_image;
-    var newdir;
-    var dirs;
-    var etichette;
-
-    function select_image(image, border, check) {
-      image.style.border = border;
-      if (etichette.hasOwnProperty(image.alt)) {
-        etichette[image.alt].radio.checked = check;
-      }
-    }
-
-    function setCurrentImage(i) {
-      if (this.images == undefined) {
-        this.images = document.getElementById("images");
-      }
-      images.children[i].click();
-    }
-
-    function make_etichetta(label_name) {
-      var radio = document.createElement("input");
-      radio.classList.add("radio");
-      radio.type = "radio";
-      radio.name = "label_radio";
-      var text = document.createElement("input");
-      text.classList.add("text");
-      text.type = "text";
-      text.name = "label_text";
-      text.value = label_name;
-      var row = document.createElement("div");
-      row.append(radio);
-      row.append(text);
-      radio.onclick = function() {
-        var b = !etichette.hasOwnProperty(current_image.alt);
-        etichette[current_image.alt] = {
-          radio: radio,
-          text: text
-        };
-
-        if (b) {
-          set_current_image((currentindex + 1) % images.children.length);
-        }
-      };
-      return ({
-        row: row,
-        radio: radio,
-        text: text
-      });
-    }
-
-    function add_target_directory() {
-      const label = newdir.value;
-      const duplicates = Object.values(dirs.children)
-        .map(i => i.children[0])
-        .filter(i => i.value == label)
-        .length;
-      if (label != "" && duplicates == 0) {
-        dirs.append(make_etichetta(label).row);
-        newdir.value = "";
-      }
-    }
-
-    function get_labels_text() {
-      return Object.values(document.getElementsByName("label_text")).map(i => i.value);
-    }
-
-    function get_pair_image_label() {
-      return Object.values(images.children)
-        .map(i => i.alt)
-        .filter(i => etichette.hasOwnProperty(i))
-        .map(i => ({
-          path: i,
-          label: etichette[i].text.value
-        }));
-    }
-
-    function call_php(data, func) {
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = func;
-      xmlhttp.send(data);
-    }
-
-    function save() {
-      var data = new FormData();
-      data.append("command", "save");
-      // data.append("data", JSON.stringify({
-      //   etichette: get_labels_text(),
-      //   associazioni: get_pair_image_label()
-      // }));
-      call_php(data, function() {
-        alert(this.responseText);
-      });
-    }
-
-    function apply() {
-      var data = new FormData();
-      data.append("command", "apply");
-      // data.append("data", JSON.stringify({
-      //   etichette: get_labels_text(),
-      //   associazioni: get_pair_image_label()
-      // }));
-      call_php(data, function() {
-        alert(this.responseText);
-        window.location.reload(false);
-      });
-    }
   </script>
 
   <style>
@@ -564,7 +397,7 @@ if (file_exists(CONFIGFILEJSON)) {
       justify-items: center;
       align-items: center;
     }
-    
+
     #contenuto {
       max-width: 90%;
       max-height: 90%;
@@ -579,7 +412,7 @@ if (file_exists(CONFIGFILEJSON)) {
       display: flex;
       flex-direction: column;
     }
-      
+
     .miniatura {
       width: 160px;
       margin: 10px;
