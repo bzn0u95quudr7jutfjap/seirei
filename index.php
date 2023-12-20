@@ -137,8 +137,55 @@ function save()
 
 function apply()
 {
-  //TODO
-  echo "apply funciton";
+  function all_true($array)
+  {
+    return array_reduce($array, function ($a, $b) {
+      return $a && $b;
+    }, true);
+  }
+  $content = json_decode(file_get_contents(CONFIGFILEJSON));
+  var_dump($content);
+  $etichette = filter(
+    function ($dir) {
+      $e = file_exists($dir);
+      return ($e && is_dir($e)) || (!$e && mkdir($dir));
+    },
+    json_decode($content->etichette)
+  );
+
+  $files = filter(
+    function ($f) {
+      return !is_dir($f) && $f != "index.php";
+    },
+    glob('*')
+  );
+
+  $associazioni = filter(
+    function ($associazione) use ($etichette, $files) {
+      return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
+    },
+    json_decode($content->associazioni)
+  );
+
+  $results = map(
+    function ($associazione) {
+      $bersaglio = "./" . $associazione->etichetta . "/" . $associazione->filename;
+      return [$associazione->filename, $bersaglio, rename($associazione->filename, $bersaglio)];
+    },
+    $associazioni
+  );
+
+  echo implode(
+    "\n",
+    map(
+      function ($coll) {
+        [$f,$b,$bool] = $coll;
+        return json_encode($bool) . " : $f -> $b";
+      },
+      $results
+    )
+  );
+
 }
 
 if (array_key_exists('command', $_POST)) {
@@ -216,7 +263,7 @@ if (file_exists(CONFIGFILEJSON)) {
 <head>
   <script>
     function init() {
-      return [ <?php echo $etichette; ?>, <?php echo $associazioni; ?> ];
+      return [<?php echo $etichette; ?>, <?php echo $associazioni; ?>];
     }
   </script>
   <script>
@@ -379,6 +426,15 @@ if (file_exists(CONFIGFILEJSON)) {
           console.log(this.responseText);
         }
       );
+    }
+
+    function phpApplicaModifiche() {
+      let data = new FormData();
+      data.append("command", "apply");
+      callPhp(data,
+        function() {
+          console.log(this.responseText);
+        });
     }
 
     // ===========================================================================================================================
@@ -575,7 +631,7 @@ if (file_exists(CONFIGFILEJSON)) {
     <input id="nuovo-bersaglio" type="text">
     <div id="bersagli">
     </div>
-    <button onclick="apply()">Applica modifiche</button>
+    <button onclick="phpApplicaModifiche()">Applica modifiche</button>
   </div>
 </body>
 
