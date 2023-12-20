@@ -179,13 +179,12 @@ function apply()
     "\n",
     map(
       function ($coll) {
-        [$f,$b,$bool] = $coll;
+        [$f, $b, $bool] = $coll;
         return json_encode($bool) . " : $f -> $b";
       },
       $results
     )
   );
-
 }
 
 if (array_key_exists('command', $_POST)) {
@@ -434,6 +433,7 @@ if (file_exists(CONFIGFILEJSON)) {
       callPhp(data,
         function() {
           console.log(this.responseText);
+          window.location.reload(false);
         });
     }
 
