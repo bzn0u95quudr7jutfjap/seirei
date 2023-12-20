@@ -1,5 +1,4 @@
 <?php
-
 // =======================================================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
@@ -565,7 +564,7 @@ if (file_exists(CONFIGFILEJSON)) {
       justify-items: center;
       align-items: center;
     }
-
+    
     #contenuto {
       max-width: 90%;
       max-height: 90%;
@@ -580,7 +579,7 @@ if (file_exists(CONFIGFILEJSON)) {
       display: flex;
       flex-direction: column;
     }
-
+      
     .miniatura {
       width: 160px;
       margin: 10px;
@@ -632,6 +631,7 @@ if (file_exists(CONFIGFILEJSON)) {
     <div id="bersagli">
     </div>
     <button onclick="phpApplicaModifiche()">Applica modifiche</button>
+
   </div>
 </body>
 
