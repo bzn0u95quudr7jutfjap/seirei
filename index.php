@@ -23,6 +23,13 @@ function ls()
   );
 }
 
+function all_true($array)
+{
+  return array_reduce($array, function ($a, $b) {
+    return $a && $b;
+  }, true);
+}
+
 // =======================================================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
@@ -106,14 +113,7 @@ function save()
 
 function apply()
 {
-  function all_true($array)
-  {
-    return array_reduce($array, function ($a, $b) {
-      return $a && $b;
-    }, true);
-  }
   $content = json_decode(file_get_contents(CONFIGFILEJSON));
-  var_dump($content);
   $etichette = filter(
     function ($dir) {
       $e = file_exists($dir);
