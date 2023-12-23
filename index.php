@@ -171,7 +171,6 @@ if (count($_POST) != 0) {
 
 $files = ls();
 
-
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{FILENAME}}'>
     <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
@@ -195,14 +194,14 @@ const htmletichetta = "
   </div>
 ";
 
-$etichette = "[]";
-$associazioni = "[]";
-
-if (file_exists(CONFIGFILEJSON)) {
+try {
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
   $etichette = $conf->etichette;
   $associazioni = $conf->associazioni;
-}
+} catch (Exception) {
+  $etichette = "[]";
+  $associazioni = "[]";
+};
 
 ?>
 
