@@ -1,5 +1,40 @@
 <?php
 // =======================================================================================================================================================
+// QOL
+// =======================================================================================================================================================
+
+function map($function, $collection)
+{
+  return array_map($function, $collection);
+}
+
+function filter($function, $collection)
+{
+  return array_filter($collection, $function);
+}
+
+function ls()
+{
+  return filter(
+    function ($f) {
+      return !is_dir($f) && $f != "index.php";
+    },
+    glob('*')
+  );
+}
+
+function all_true($array)
+{
+  return array_reduce(
+    $array,
+    function ($a, $b) {
+      return $a && $b;
+    },
+    true
+  );
+}
+
+// =======================================================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
 
@@ -68,60 +103,6 @@ if (count($_GET) != 0) {
 // COMANDI POST
 // =======================================================================================================================================================
 
-// $CONFIG_FILE_JSON = ".immagio.json";
-// 
-// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "save") == 0) {
-//   if (file_put_contents($CONFIG_FILE_JSON, $_POST['data'])) {
-//     echo "Salvato con successo\n";
-//   } else {
-//     echo "Errore\n";
-//   }
-// }
-// 
-// if (array_key_exists("command", $_POST) && strcmp($_POST["command"], "apply") == 0) {
-//   $data = json_decode($_POST['data']);
-// 
-//   $bad_dirs = [];
-//   foreach ($data->etichette as $dir) {
-//     $e = file_exists($dir);
-//     if (($e && is_dir($dir)) || (!$e && mkdir($dir))) {
-//       echo "Creazione di '$dir' : SUCCESSO\n";
-//     } else {
-//       echo "Creazione di '$dir' : ERRORE\n";
-//       $bad_dirs[] = $dir;
-//     }
-//   }
-//   echo "\n";
-// 
-//   $bad_files = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-//     return in_array($i->label, $bad_dirs);
-//   });
-//   $associazioni = array_filter($data->associazioni, function ($i) use ($bad_dirs) {
-//     return !in_array($i->label, $bad_dirs);
-//   });
-// 
-//   foreach ($associazioni as $o) {
-//     $from = $o->path;
-//     $to = $o->label . '/' . $o->path;
-//     $e = file_exists($to);
-//     if (!$e && rename($from, $to)) {
-//       echo "Spostamento di '$from' in '$to' : SUCCESSO\n";
-//     } else {
-//       $bad_files[] = $o;
-//       $bad_dirs[] = $o->label;
-//       echo "Spostamento di '$from' in '$to' : " . ($e ? "FILE GIÀ ESISTENTE" : "ERRORE") . "\n";
-//     }
-//   }
-// 
-//   $associazioni = (object)["etichette" => array_unique($bad_dirs), "associazioni" => $bad_files];
-// 
-//   if (file_put_contents($CONFIG_FILE_JSON, json_encode($associazioni))) {
-//     echo "Salvato con successo\n";
-//   } else {
-//     echo "Errore\n";
-//   }
-// }
-
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
@@ -136,14 +117,7 @@ function save()
 
 function apply()
 {
-  function all_true($array)
-  {
-    return array_reduce($array, function ($a, $b) {
-      return $a && $b;
-    }, true);
-  }
   $content = json_decode(file_get_contents(CONFIGFILEJSON));
-  var_dump($content);
   $etichette = filter(
     function ($dir) {
       $e = file_exists($dir);
@@ -152,42 +126,33 @@ function apply()
     json_decode($content->etichette)
   );
 
-  $files = filter(
-    function ($f) {
-      return !is_dir($f) && $f != "index.php";
-    },
-    glob('*')
-  );
+  $files = ls();
 
-  $associazioni = filter(
-    function ($associazione) use ($etichette, $files) {
-      return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
-    },
-    json_decode($content->associazioni)
-  );
-
-  $results = map(
-    function ($associazione) {
-      $bersaglio = "./" . $associazione->etichetta . "/" . $associazione->filename;
-      return [$associazione->filename, $bersaglio, rename($associazione->filename, $bersaglio)];
-    },
-    $associazioni
-  );
-
-  echo implode(
+  $res = implode(
     "\n",
     map(
       function ($coll) {
         [$f, $b, $bool] = $coll;
-        return json_encode($bool) . " : $f -> $b";
+        return "<p>" . json_encode($bool) . " : $f -> $b" . "</p>";
       },
-      $results
+      map(
+        function ($associazione) {
+          $etichetta = "./" . $associazione->etichetta . "/" . $associazione->filename;
+          return [$associazione->filename, $etichetta, rename($associazione->filename, $etichetta)];
+        },
+        filter(
+          function ($associazione) use ($etichette, $files) {
+            return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
+          },
+          json_decode($content->associazioni)
+        )
+      )
     )
   );
+  echo "<html><body>$res</body></html>";
 }
 
 if (array_key_exists('command', $_POST)) {
-  var_dump($_POST);
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
@@ -203,23 +168,7 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // =======================================================================================================================================================
 
-
-function map($function, $collection)
-{
-  return array_map($function, $collection);
-}
-function filter($function, $collection)
-{
-  return array_filter($collection, $function);
-}
-
-$files = filter(
-  function ($f) {
-    return !is_dir($f) && $f != "index.php";
-  },
-  glob('*')
-);
-
+$files = ls();
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{FILENAME}}'>
@@ -238,20 +187,20 @@ $miniature = implode(
 );
 
 const htmletichetta = "
-  <div class='bersaglio' >
+  <div class='etichetta' >
     <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
     <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
   </div>
 ";
 
-$etichette = "[]";
-$associazioni = "[]";
-
-if (file_exists(CONFIGFILEJSON)) {
+try {
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
   $etichette = $conf->etichette;
   $associazioni = $conf->associazioni;
-}
+} catch (Exception) {
+  $etichette = "[]";
+  $associazioni = "[]";
+};
 
 ?>
 
@@ -276,8 +225,8 @@ if (file_exists(CONFIGFILEJSON)) {
       const miniature = document.getElementsByClassName("miniatura");
       miniature[0].click();
 
-      const inputbox = document.getElementById("nuovo-bersaglio");
-      const bottone = document.getElementById("aggiungi-bersaglio");
+      const inputbox = document.getElementById("nuovo-etichetta");
+      const bottone = document.getElementById("aggiungi-etichetta");
       Object.values(etichette).forEach(
         function(etichetta) {
           inputbox.value = etichetta;
@@ -289,20 +238,20 @@ if (file_exists(CONFIGFILEJSON)) {
         function(radio) {
           return [radio, document.getElementById(radio.value)];
         }).forEach(
-        function(coll) {
+        function([radio, text]) {
           associazioniLocali.filter(
             function(associazione) {
-              return associazione.etichetta == coll[1].value;
+              return associazione.etichetta == text.value;
             }
           ).forEach(
             function(associazione) {
-              associazioni[associazione.filename] = coll[0];
+              associazioni[associazione.filename] = radio;
             });
         });
 
       Object.values(miniature).forEach(
         function(elem) {
-          classname = "evidenziatura";
+          const classname = "evidenziatura";
           if (associazioni.hasOwnProperty(elem.alt)) {
             elem.classList.add(classname);
           } else {
@@ -311,9 +260,7 @@ if (file_exists(CONFIGFILEJSON)) {
         }
       );
       const daEtichettare = Object.values(miniature).filter(
-        function(elem) {
-          return !elem.classList.contains("evidenziatura");
-        }
+        (elem) => !elem.classList.contains("evidenziatura")
       );
       if (daEtichettare.length > 0) {
         daEtichettare[0].click();
@@ -370,14 +317,14 @@ if (file_exists(CONFIGFILEJSON)) {
     }
 
     function aggiungiEtichetta() {
-      const nuovaetichetta = document.getElementById("nuovo-bersaglio");
+      const nuovaetichetta = document.getElementById("nuovo-etichetta");
       if (nuovaetichetta.value == "") {
         return;
       }
-      const etichette = document.getElementById("bersagli");
+      const etichette = document.getElementById("etichette");
       const id = etichette.children.length;
       etichette.innerHTML += `
-        <div class='bersaglio'>
+        <div class='etichetta'>
           <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
           <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
         </div>`;
@@ -406,12 +353,10 @@ if (file_exists(CONFIGFILEJSON)) {
         zip(
           Object.keys(associazioni),
           Object.values(associazioni)).map(
-          function(coll) {
-            return {
-              filename: coll[0],
-              etichetta: etichetteRadioTesto.get(coll[1])
-            };
-          }
+          ([filename, radio]) => ({
+            filename: filename,
+            etichetta: etichetteRadioTesto.get(radio)
+          })
         ));
       let data = new FormData();
       data.append("command", "save");
@@ -433,120 +378,8 @@ if (file_exists(CONFIGFILEJSON)) {
         function() {
           console.log(this.responseText);
           window.location.reload(false);
+          window.open('', '_blank').document.write(this.responseText);
         });
-    }
-
-    // ===========================================================================================================================
-    // ===========================================================================================================================
-    // ===========================================================================================================================
-
-    var currentindex = 0;
-    var current_image;
-    var newdir;
-    var dirs;
-    var etichette;
-
-    function select_image(image, border, check) {
-      image.style.border = border;
-      if (etichette.hasOwnProperty(image.alt)) {
-        etichette[image.alt].radio.checked = check;
-      }
-    }
-
-    function setCurrentImage(i) {
-      if (this.images == undefined) {
-        this.images = document.getElementById("images");
-      }
-      images.children[i].click();
-    }
-
-    function make_etichetta(label_name) {
-      var radio = document.createElement("input");
-      radio.classList.add("radio");
-      radio.type = "radio";
-      radio.name = "label_radio";
-      var text = document.createElement("input");
-      text.classList.add("text");
-      text.type = "text";
-      text.name = "label_text";
-      text.value = label_name;
-      var row = document.createElement("div");
-      row.append(radio);
-      row.append(text);
-      radio.onclick = function() {
-        var b = !etichette.hasOwnProperty(current_image.alt);
-        etichette[current_image.alt] = {
-          radio: radio,
-          text: text
-        };
-
-        if (b) {
-          set_current_image((currentindex + 1) % images.children.length);
-        }
-      };
-      return ({
-        row: row,
-        radio: radio,
-        text: text
-      });
-    }
-
-    function add_target_directory() {
-      const label = newdir.value;
-      const duplicates = Object.values(dirs.children)
-        .map(i => i.children[0])
-        .filter(i => i.value == label)
-        .length;
-      if (label != "" && duplicates == 0) {
-        dirs.append(make_etichetta(label).row);
-        newdir.value = "";
-      }
-    }
-
-    function get_labels_text() {
-      return Object.values(document.getElementsByName("label_text")).map(i => i.value);
-    }
-
-    function get_pair_image_label() {
-      return Object.values(images.children)
-        .map(i => i.alt)
-        .filter(i => etichette.hasOwnProperty(i))
-        .map(i => ({
-          path: i,
-          label: etichette[i].text.value
-        }));
-    }
-
-    function call_php(data, func) {
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = func;
-      xmlhttp.send(data);
-    }
-
-    function save() {
-      var data = new FormData();
-      data.append("command", "save");
-      // data.append("data", JSON.stringify({
-      //   etichette: get_labels_text(),
-      //   associazioni: get_pair_image_label()
-      // }));
-      call_php(data, function() {
-        alert(this.responseText);
-      });
-    }
-
-    function apply() {
-      var data = new FormData();
-      data.append("command", "apply");
-      // data.append("data", JSON.stringify({
-      //   etichette: get_labels_text(),
-      //   associazioni: get_pair_image_label()
-      // }));
-      call_php(data, function() {
-        alert(this.responseText);
-        window.location.reload(false);
-      });
     }
   </script>
 
@@ -564,7 +397,7 @@ if (file_exists(CONFIGFILEJSON)) {
       justify-items: center;
       align-items: center;
     }
-    
+
     #contenuto {
       max-width: 90%;
       max-height: 90%;
@@ -579,7 +412,7 @@ if (file_exists(CONFIGFILEJSON)) {
       display: flex;
       flex-direction: column;
     }
-      
+
     .miniatura {
       width: 160px;
       margin: 10px;
@@ -599,19 +432,19 @@ if (file_exists(CONFIGFILEJSON)) {
       grid-gap: 10px;
     }
 
-    #bersagli {
+    #etichette {
       overflow: scroll;
       height: 100%;
       display: flex;
       flex-direction: column;
     }
 
-    .bersaglio .text {
+    .etichetta .text {
       display: inline-block;
       width: 70%;
     }
 
-    .bersaglio .radio {
+    .etichetta .radio {
       display: inline-block;
       height: 20px;
       width: 20px;
@@ -626,9 +459,9 @@ if (file_exists(CONFIGFILEJSON)) {
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <button onclick="phpSalvaAssociazioni()">Salva</button>
-    <button onclick="aggiungiEtichetta()" id="aggiungi-bersaglio">Nuova directory</button>
-    <input id="nuovo-bersaglio" type="text">
-    <div id="bersagli">
+    <button onclick="aggiungiEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
+    <input id="nuovo-etichetta" type="text">
+    <div id="etichette">
     </div>
     <button onclick="phpApplicaModifiche()">Applica modifiche</button>
 
