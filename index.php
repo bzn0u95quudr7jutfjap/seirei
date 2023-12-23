@@ -353,12 +353,10 @@ if (file_exists(CONFIGFILEJSON)) {
         zip(
           Object.keys(associazioni),
           Object.values(associazioni)).map(
-          function(coll) {
-            return {
-              filename: coll[0],
-              etichetta: etichetteRadioTesto.get(coll[1])
-            };
-          }
+          ([filename, radio]) => ({
+            filename: filename,
+            etichetta: etichetteRadioTesto.get(radio)
+          })
         ));
       let data = new FormData();
       data.append("command", "save");
@@ -380,7 +378,7 @@ if (file_exists(CONFIGFILEJSON)) {
         function() {
           console.log(this.responseText);
           window.location.reload(false);
-          window.open('','_blank').document.write(this.responseText);
+          window.open('', '_blank').document.write(this.responseText);
         });
     }
   </script>
