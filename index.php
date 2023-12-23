@@ -124,21 +124,6 @@ function apply()
 
   $files = ls();
 
-  $associazioni = filter(
-    function ($associazione) use ($etichette, $files) {
-      return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
-    },
-    json_decode($content->associazioni)
-  );
-
-  $results = map(
-    function ($associazione) {
-      $bersaglio = "./" . $associazione->etichetta . "/" . $associazione->filename;
-      return [$associazione->filename, $bersaglio, rename($associazione->filename, $bersaglio)];
-    },
-    $associazioni
-  );
-
   echo implode(
     "\n",
     map(
@@ -146,7 +131,18 @@ function apply()
         [$f, $b, $bool] = $coll;
         return json_encode($bool) . " : $f -> $b";
       },
-      $results
+      map(
+        function ($associazione) {
+          $bersaglio = "./" . $associazione->etichetta . "/" . $associazione->filename;
+          return [$associazione->filename, $bersaglio, rename($associazione->filename, $bersaglio)];
+        },
+        filter(
+          function ($associazione) use ($etichette, $files) {
+            return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
+          },
+          json_decode($content->associazioni)
+        )
+      )
     )
   );
 }
