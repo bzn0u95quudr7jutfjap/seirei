@@ -153,7 +153,6 @@ function apply()
 }
 
 if (array_key_exists('command', $_POST)) {
-  var_dump($_POST);
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
