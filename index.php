@@ -25,9 +25,13 @@ function ls()
 
 function all_true($array)
 {
-  return array_reduce($array, function ($a, $b) {
-    return $a && $b;
-  }, true);
+  return array_reduce(
+    $array,
+    function ($a, $b) {
+      return $a && $b;
+    },
+    true
+  );
 }
 
 // =======================================================================================================================================================
