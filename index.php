@@ -137,8 +137,8 @@ function apply()
       },
       map(
         function ($associazione) {
-          $bersaglio = "./" . $associazione->etichetta . "/" . $associazione->filename;
-          return [$associazione->filename, $bersaglio, rename($associazione->filename, $bersaglio)];
+          $etichetta = "./" . $associazione->etichetta . "/" . $associazione->filename;
+          return [$associazione->filename, $etichetta, rename($associazione->filename, $etichetta)];
         },
         filter(
           function ($associazione) use ($etichette, $files) {
@@ -187,7 +187,7 @@ $miniature = implode(
 );
 
 const htmletichetta = "
-  <div class='bersaglio' >
+  <div class='etichetta' >
     <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
     <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
   </div>
@@ -225,8 +225,8 @@ try {
       const miniature = document.getElementsByClassName("miniatura");
       miniature[0].click();
 
-      const inputbox = document.getElementById("nuovo-bersaglio");
-      const bottone = document.getElementById("aggiungi-bersaglio");
+      const inputbox = document.getElementById("nuovo-etichetta");
+      const bottone = document.getElementById("aggiungi-etichetta");
       Object.values(etichette).forEach(
         function(etichetta) {
           inputbox.value = etichetta;
@@ -319,14 +319,14 @@ try {
     }
 
     function aggiungiEtichetta() {
-      const nuovaetichetta = document.getElementById("nuovo-bersaglio");
+      const nuovaetichetta = document.getElementById("nuovo-etichetta");
       if (nuovaetichetta.value == "") {
         return;
       }
-      const etichette = document.getElementById("bersagli");
+      const etichette = document.getElementById("etichette");
       const id = etichette.children.length;
       etichette.innerHTML += `
-        <div class='bersaglio'>
+        <div class='etichetta'>
           <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
           <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
         </div>`;
@@ -434,19 +434,19 @@ try {
       grid-gap: 10px;
     }
 
-    #bersagli {
+    #etichette {
       overflow: scroll;
       height: 100%;
       display: flex;
       flex-direction: column;
     }
 
-    .bersaglio .text {
+    .etichetta .text {
       display: inline-block;
       width: 70%;
     }
 
-    .bersaglio .radio {
+    .etichetta .radio {
       display: inline-block;
       height: 20px;
       width: 20px;
@@ -461,9 +461,9 @@ try {
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <button onclick="phpSalvaAssociazioni()">Salva</button>
-    <button onclick="aggiungiEtichetta()" id="aggiungi-bersaglio">Nuova directory</button>
-    <input id="nuovo-bersaglio" type="text">
-    <div id="bersagli">
+    <button onclick="aggiungiEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
+    <input id="nuovo-etichetta" type="text">
+    <div id="etichette">
     </div>
     <button onclick="phpApplicaModifiche()">Applica modifiche</button>
 
