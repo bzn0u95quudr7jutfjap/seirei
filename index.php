@@ -238,20 +238,20 @@ try {
         function(radio) {
           return [radio, document.getElementById(radio.value)];
         }).forEach(
-        function(coll) {
+        function([radio, text]) {
           associazioniLocali.filter(
             function(associazione) {
-              return associazione.etichetta == coll[1].value;
+              return associazione.etichetta == text.value;
             }
           ).forEach(
             function(associazione) {
-              associazioni[associazione.filename] = coll[0];
+              associazioni[associazione.filename] = radio;
             });
         });
 
       Object.values(miniature).forEach(
         function(elem) {
-          classname = "evidenziatura";
+          const classname = "evidenziatura";
           if (associazioni.hasOwnProperty(elem.alt)) {
             elem.classList.add(classname);
           } else {
@@ -260,9 +260,7 @@ try {
         }
       );
       const daEtichettare = Object.values(miniature).filter(
-        function(elem) {
-          return !elem.classList.contains("evidenziatura");
-        }
+        (elem) => !elem.classList.contains("evidenziatura")
       );
       if (daEtichettare.length > 0) {
         daEtichettare[0].click();
