@@ -124,12 +124,12 @@ function apply()
 
   $files = ls();
 
-  echo implode(
+  $res = implode(
     "\n",
     map(
       function ($coll) {
         [$f, $b, $bool] = $coll;
-        return json_encode($bool) . " : $f -> $b";
+        return "<p>" . json_encode($bool) . " : $f -> $b" . "</p>";
       },
       map(
         function ($associazione) {
@@ -145,6 +145,7 @@ function apply()
       )
     )
   );
+  echo "<html><body>$res</body></html>";
 }
 
 if (array_key_exists('command', $_POST)) {
@@ -379,6 +380,7 @@ if (file_exists(CONFIGFILEJSON)) {
         function() {
           console.log(this.responseText);
           window.location.reload(false);
+          window.open('','_blank').document.write(this.responseText);
         });
     }
   </script>
