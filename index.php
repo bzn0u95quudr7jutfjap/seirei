@@ -122,12 +122,7 @@ function apply()
     json_decode($content->etichette)
   );
 
-  $files = filter(
-    function ($f) {
-      return !is_dir($f) && $f != "index.php";
-    },
-    glob('*')
-  );
+  $files = ls();
 
   $associazioni = filter(
     function ($associazione) use ($etichette, $files) {
@@ -173,12 +168,7 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // =======================================================================================================================================================
 
-$files = filter(
-  function ($f) {
-    return !is_dir($f) && $f != "index.php";
-  },
-  glob('*')
-);
+$files = ls();
 
 
 const htmlminiatura = "
