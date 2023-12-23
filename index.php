@@ -8,6 +8,16 @@ function map($function, $collection)
   return array_map($function, $collection);
 }
 
+function zip($a0, $a1)
+{
+  $a = [];
+  $len = [count($a0), count($a1)];
+  for ($i = 0; $i < $len[0] || $i < $len[1]; $i += 1) {
+    $a[] = [$a0[$i], $a1[$i]];
+  }
+  return $a;
+}
+
 function filter($function, $collection)
 {
   return array_filter($collection, $function);
@@ -188,15 +198,44 @@ $miniature = implode(
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' onclick='etichettaFile(this)'>
-    <input class='text'  type='text'  name='label_text'  value='{{ETICHETTA}}'>
+    <input class='radio' type='radio' name='label_radio' value='label{{ID}}' onclick='etichettaFile(this)'>
+    <input class='text'  type='text'  name='label_text'     id='label{{ID}}' value='{{ETICHETTA}}'>
   </div>
 ";
 
 try {
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
-  $etichette = $conf->etichette;
-  $associazioni = $conf->associazioni;
+  $etichette = json_decode($conf->etichette);
+  $etichette = implode(
+    "\n",
+    array_map(
+      function ($coll) {
+        [$etichetta, $id] = $coll;
+        return str_replace(
+          '{{ID}}',
+          $id,
+          str_replace(
+            '{{ETICHETTA}}',
+            $etichetta,
+            htmletichetta
+          )
+        );
+      },
+      zip(
+        $etichette,
+        array_keys($etichette)
+      )
+    )
+  );
+  $associazioni = json_encode(
+    filter(
+      function ($coll) use ($files) {
+        [$filename,] = $coll;
+        return in_array($files, $filename);
+      },
+      json_decode($conf->associazioni)
+    )
+  );
 } catch (Exception) {
   $etichette = "[]";
   $associazioni = "[]";
@@ -210,14 +249,15 @@ try {
 <head>
   <script>
     function init() {
-      return [<?php echo $etichette; ?>, <?php echo $associazioni; ?>];
+      return <?php echo $associazioni; ?>;
     }
   </script>
   <script>
-    var associazioni = {};
+    var associazioni = JSON.parse(init());
     var filenameAttuale = "";
 
     function main() {
+      return;
       const iniziali = init();
       const etichette = iniziali[0];
       const associazioniLocali = iniziali[1];
@@ -462,6 +502,7 @@ try {
     <button onclick="aggiungiEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
     <input id="nuovo-etichetta" type="text">
     <div id="etichette">
+      <?php echo $etichette; ?>
     </div>
     <button onclick="phpApplicaModifiche()">Applica modifiche</button>
 
