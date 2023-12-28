@@ -381,6 +381,12 @@ try {
       xmlhttp.send(data);
     }
 
+    function phpGetAssociazione(){
+    }
+
+    function phpSetAssociazione(){
+    }
+
     function phpSalva() {
       let data = new FormData();
       data.append("command", "save");
