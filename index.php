@@ -376,36 +376,14 @@ try {
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
+      xmlhttp.open("POST", "index.php", false);
       xmlhttp.onload = func;
       xmlhttp.send(data);
     }
 
-    function phpSalvaAssociazioni() {
-      const zip = (a, b) => a.map((v, k) => [v, b[k]]);
-      const etichetteRadio = document.getElementsByClassName("radio");
-      const etichetteTesto = Object.values(etichetteRadio).map(
-        function(etichetta) {
-          return document.getElementById(etichetta.value).value;
-        }
-      );
-      const etichetteRadioTesto = new Map(zip(Object.values(etichetteRadio), Object.values(etichetteTesto)));
-      const etichetteDaSalvare = JSON.stringify(etichetteTesto);
-      const associazioniDaSalvare = JSON.stringify(
-        zip(
-          Object.keys(associazioni),
-          Object.values(associazioni)).map(
-          ([filename, radio]) => ({
-            filename: filename,
-            etichetta: etichetteRadioTesto.get(radio)
-          })
-        ));
+    function phpSalva() {
       let data = new FormData();
       data.append("command", "save");
-      data.append("data", JSON.stringify({
-        etichette: etichetteDaSalvare,
-        associazioni: associazioniDaSalvare
-      }));
       callPhp(data,
         function() {
           console.log(this.responseText);
@@ -413,7 +391,7 @@ try {
       );
     }
 
-    function phpApplicaModifiche() {
+    function phpApplica() {
       let data = new FormData();
       data.append("command", "apply");
       callPhp(data,
