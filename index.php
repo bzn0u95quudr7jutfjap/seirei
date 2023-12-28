@@ -48,6 +48,8 @@ function all_true($array)
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
 
+session_start();
+
 function dispaly_text($file)
 {
   header("Content-Type: text/plain; charset=utf-8");
