@@ -25,11 +25,13 @@ function filter($function, $collection)
 
 function ls()
 {
-  return filter(
-    function ($f) {
-      return !is_dir($f) && $f != "index.php";
-    },
-    glob('*')
+  return array_values(
+    filter(
+      function ($f) {
+        return !is_dir($f) && $f != "index.php";
+      },
+      glob('*')
+    )
   );
 }
 
@@ -47,6 +49,8 @@ function all_true($array)
 // =======================================================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // =======================================================================================================================================================
+
+session_start();
 
 function dispaly_text($file)
 {
@@ -96,7 +100,7 @@ function display_default($file)
 }
 
 if (array_key_exists("file", $_GET)) {
-  $filename = $_GET["file"];
+  $filename = $_SESSION['files'][$_GET["file"]];
   $mime = mime_content_type($filename);
   match (true) {
     strpos($mime, "text") !== false => dispaly_text($filename),
@@ -112,8 +116,6 @@ if (count($_GET) != 0) {
 // =======================================================================================================================================================
 // COMANDI POST
 // =======================================================================================================================================================
-
-session_start();
 
 const CONFIGFILEJSON = ".seireidire.json";
 
@@ -181,11 +183,11 @@ if (count($_POST) != 0) {
 // =======================================================================================================================================================
 
 $files = ls();
-$_SESSION['files'] = zip(array_keys($files), $files);
+$_SESSION['files'] = $files;
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura' id='file{{ID}}' src='./?source={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
+    <img class='miniatura' id='file{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
 
@@ -198,7 +200,7 @@ $miniature = implode(
       $res = str_replace("{{ID}}", $id, $res);
       return $res;
     },
-    $_SESSION['files']
+    zip(array_keys($files), $files)
   )
 );
 
@@ -381,11 +383,9 @@ try {
       xmlhttp.send(data);
     }
 
-    function phpGetAssociazione(){
-    }
+    function phpGetAssociazione() {}
 
-    function phpSetAssociazione(){
-    }
+    function phpSetAssociazione() {}
 
     function phpSalva() {
       let data = new FormData();
