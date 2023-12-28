@@ -166,10 +166,22 @@ function apply()
   echo "<html><body>$res</body></html>";
 }
 
+function new_etichetta()
+{
+  $etichetta = $_POST['etichetta'];
+  if (!in_array($etichetta, $_SESSION['etichette'])) {
+    echo json_encode([count($_SESSION['etichette']), true]);
+    $_SESSION['etichette'][] = $etichetta;
+  } else {
+    echo json_encode([-1, false]);
+  }
+}
+
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
+    "newEtichetta" => new_etichetta(),
     default => null,
   };
 }
@@ -378,9 +390,36 @@ try {
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", false);
+      xmlhttp.open("POST", "index.php", true);
       xmlhttp.onload = func;
       xmlhttp.send(data);
+    }
+
+    function phpNewEtichetta() {
+      const nuovaetichetta = document.getElementById("nuovo-etichetta");
+      if (nuovaetichetta.value == "") {
+        return;
+      }
+      let data = new FormData();
+      data.append("command", "newEtichetta");
+      data.append("etichetta", nuovaetichetta.value);
+      callPhp(data,
+        function() {
+          console.log(this.responseText);
+          const [id, hasVal] = JSON.parse(this.responseText);
+          if (!hasVal) {
+            return;
+          }
+          const etichette = document.getElementById("etichette");
+          etichette.innerHTML += `
+        <div class='etichetta'>
+          <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
+          <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
+        </div>`;
+          //TODO SORTING DELLE ETICHETTE
+          nuovaetichetta.value = "";
+        }
+      );
     }
 
     function phpGetAssociazione() {}
