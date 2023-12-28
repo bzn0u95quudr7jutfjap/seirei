@@ -244,8 +244,8 @@ try {
     )
   );
 } catch (Exception) {
-  $etichette = "";
-  $associazioni = json_encode("[]");
+  $_SESSION['etichette']    = [];
+  $_SESSION['associazioni'] = [];
 };
 
 ?>
@@ -255,12 +255,7 @@ try {
 
 <head>
   <script>
-    function init() {
-      return <?php echo $associazioni; ?>;
-    }
-  </script>
-  <script>
-    var associazioni = JSON.parse(init());
+    var associazioni = "";
     var filenameAttuale = "";
 
     function main() {
