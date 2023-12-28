@@ -210,6 +210,7 @@ const htmletichetta = "
 ";
 
 try {
+  throw new Exception();
   $conf = json_decode(file_get_contents(CONFIGFILEJSON));
   $etichette = json_decode($conf->etichette);
   $etichette = implode(
@@ -243,8 +244,8 @@ try {
     )
   );
 } catch (Exception) {
-  $etichette = "[]";
-  $associazioni = "[]";
+  $etichette = "";
+  $associazioni = json_encode("[]");
 };
 
 ?>
