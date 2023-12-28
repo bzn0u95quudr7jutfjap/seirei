@@ -181,20 +181,24 @@ if (count($_POST) != 0) {
 // =======================================================================================================================================================
 
 $files = ls();
+$_SESSION['files'] = zip(array_keys($files), $files);
 
 const htmlminiatura = "
-  <a target='contenuto' href='./?file={{FILENAME}}'>
-    <img class='miniatura' src='{{FILENAME}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
+  <a target='contenuto' href='./?file={{ID}}'>
+    <img class='miniatura' id='file{{ID}}' src='./?source={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
 
 $miniature = implode(
   "\n",
   map(
-    function ($filename) {
-      return str_replace("{{FILENAME}}", $filename, htmlminiatura);
+    function ($coll) {
+      [$id, $filename] = $coll;
+      $res = str_replace("{{FILENAME}}", filter_var($filename, FILTER_SANITIZE_FULL_SPECIAL_CHARS), htmlminiatura);
+      $res = str_replace("{{ID}}", $id, $res);
+      return $res;
     },
-    $files
+    $_SESSION['files']
   )
 );
 
