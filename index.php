@@ -507,13 +507,13 @@ try {
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
-    <button onclick="phpSalvaAssociazioni()">Salva</button>
-    <button onclick="aggiungiEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
+    <button onclick="phpSalva()">Salva</button>
+    <button onclick="phpNewEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
     <input id="nuovo-etichetta" type="text">
     <div id="etichette">
       <?php echo $etichette; ?>
     </div>
-    <button onclick="phpApplicaModifiche()">Applica modifiche</button>
+    <button onclick="phpApplica()">Applica modifiche</button>
 
   </div>
 </body>
