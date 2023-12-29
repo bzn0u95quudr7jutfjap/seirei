@@ -372,22 +372,6 @@ try {
       }
     }
 
-    function aggiungiEtichetta() {
-      const nuovaetichetta = document.getElementById("nuovo-etichetta");
-      if (nuovaetichetta.value == "") {
-        return;
-      }
-      const etichette = document.getElementById("etichette");
-      const id = etichette.children.length;
-      etichette.innerHTML += `
-        <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
-          <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
-        </div>`;
-      //TODO SORTING DELLE ETICHETTE
-      nuovaetichetta.value = "";
-    }
-
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
