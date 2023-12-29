@@ -258,9 +258,28 @@ try {
     )
   );
 } catch (Exception) {
+  $_SESSION = [];
   $_SESSION['etichette']    = [];
   $_SESSION['associazioni'] = [];
+  $etichette = "";
+  $associazioni = "";
 };
+$_SESSION['files'] = $files;
+
+// TODO
+// forse un'idea migliore di inizializzazione
+// leggiamo, se errore inizializzazione, finalmente stringhifichiamo una seconda volta
+try {
+  $conf = file_get_contents(CONFIGFILEJSON);
+} catch (Exception) {
+  $conf = json_encode((object)[
+    'files' => $files,
+    'etichette' => [],
+    'associazioni' => []
+  ]);
+} finally {
+  $conf = json_encode($conf);
+}
 
 ?>
 
@@ -268,6 +287,8 @@ try {
 <html>
 
 <head>
+  <script>
+  </script>
   <script>
     var associazioni = "";
     var filenameAttuale = "";
