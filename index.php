@@ -20,12 +20,12 @@ function map($function, $collection)
 
 function zip($a0, $a1)
 {
-  $k0 = array_keys($a0);
-  $k1 = array_keys($a1);
+  $a0 = array_values($a0);
+  $a1 = array_values($a1);
   $a = [];
   $len = [count($a0), count($a1)];
   for ($i = 0; $i < $len[0] || $i < $len[1]; $i += 1) {
-    $a[] = [$a0[$k0[$i]], $a1[$k1[$i]]];
+    $a[] = [$a0[$i], $a1[$i]];
   }
   return $a;
 }
