@@ -3,6 +3,16 @@
 // QOL
 // =======================================================================================================================================================
 
+function exception_error_handler($errno, $errstr, $errfile, $errline)
+{
+  throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+}
+set_error_handler("exception_error_handler");
+
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 function map($function, $collection)
 {
   return array_map($function, $collection);
