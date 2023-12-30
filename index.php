@@ -10,10 +10,12 @@ function map($function, $collection)
 
 function zip($a0, $a1)
 {
+  $k0 = array_keys($a0);
+  $k1 = array_keys($a1);
   $a = [];
   $len = [count($a0), count($a1)];
   for ($i = 0; $i < $len[0] || $i < $len[1]; $i += 1) {
-    $a[] = [$a0[$i], $a1[$i]];
+    $a[] = [$a0[$k0[$i]], $a1[$k1[$i]]];
   }
   return $a;
 }
@@ -31,6 +33,28 @@ function ls()
         return !is_dir($f) && $f != "index.php";
       },
       glob('*')
+    )
+  );
+}
+
+function indicizzafiles($i, $a)
+{
+  $k = array_keys($a);
+  $b = [];
+  for ($j = 0; $j < count($a); $j += 1, $i += 1) {
+    $b["file_$i"] = $a[$k[$i]];
+  }
+  return $b;
+}
+
+function maxindice($a)
+{
+  return count($a) == 0 ? 0 : max(
+    map(
+      function ($k) {
+        return (int)(explode("_", $k)[1]);
+      },
+      array_keys($a)
     )
   );
 }
@@ -126,6 +150,7 @@ function save()
   } else {
     echo "Errore";
   }
+  var_dump($_SESSION);
 }
 
 function apply()
@@ -170,11 +195,11 @@ function new_etichetta()
   try {
     $etichetta = $_POST['etichetta'];
     $key = "etichetta_" . count($_SESSION['etichette']);
-    echo json_encode([
-      ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette'])),
-      $key,
-    ]);
-    $_SESSION['etichette'][$key] = $etichetta;
+    $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
+    if ($success) {
+      $_SESSION['etichette'][$key] = $etichetta;
+    }
+    echo json_encode([$success, $key]);
   } catch (Exception) {
     echo json_encode([false, null]);
   }
@@ -227,20 +252,35 @@ $files = ls();
 
 try {
   $_SESSION = (array) json_decode(file_get_contents(CONFIGFILEJSON));
-  $_SESSION['associazioni'] = $_SESSION['associazioni'] == null ? [] : filter(
-    function ($coll) use ($files) {
-      [$filename, $etichetta] = $coll;
-      return in_array($filename, $files);
-    },
-    $_SESSION['associazioni']
+  $_SESSION['etichette'] = !isset($_SESSION['etichette']) ? [] : (array) $_SESSION['etichette'];
+  $_SESSION['associazioni'] = !isset($_SESSION['associazioni']) ? [] : (array) $_SESSION['associazioni'];
+  $_SESSION['files'] = !isset($_SESSION['files']) ? [] : (array) $_SESSION['files'];
+
+  $diff = indicizzafiles(
+    maxindice($_SESSION['files']),
+    array_values(array_diff(
+      $files,
+      $_SESSION['files']
+    ))
   );
-  $_SESSION['etichette'] = $_SESSION['etichette'] == null ? [] : $_SESSION['etichette'];
+
+  if (count($diff) > 0) {
+    $common = array_intersect($_SESSION['files'], $files);
+    $_SESSION['associazioni'] = filter(
+      function ($coll) use ($common) {
+        [$filename,] = $coll;
+        return in_array($filename, $common);
+      },
+      $_SESSION['associazioni']
+    );
+    $_SESSION['files'] = array_merge($common, $diff);
+  }
 } catch (Exception) {
   $_SESSION = [];
   $_SESSION['etichette']    = [];
   $_SESSION['associazioni'] = [];
+  $_SESSION['files'] = indicizzafiles(0, $files);
 };
-$_SESSION['files'] = $files;
 
 $miniature = implode(
   "\n",
@@ -251,7 +291,7 @@ $miniature = implode(
       $res = str_replace("{{ID}}", $id, $res);
       return $res;
     },
-    zip(array_keys($files), $files)
+    zip(array_keys($_SESSION['files']), $_SESSION['files'])
   )
 );
 
