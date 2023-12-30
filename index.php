@@ -121,8 +121,7 @@ const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
 {
-  ["data" => $data] = $_POST;
-  if (file_put_contents(CONFIGFILEJSON, $data)) {
+  if (file_put_contents(CONFIGFILEJSON, json_encode($_SESSION))) {
     echo "Salvato con successo\n";
   } else {
     echo "Errore";
@@ -194,14 +193,37 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // =======================================================================================================================================================
 
-$files = ls();
-$_SESSION['files'] = $files;
-
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
     <img class='miniatura' id='file{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
+
+const htmletichetta = "
+  <div class='etichetta' >
+    <input class='radio' type='radio' name='label_radio' value='etichetta_{{ID}}' onclick='etichettaFile(this)'>
+    <input class='text'  type='text'  name='label_text'     id='etichetta_{{ID}}' value='{{ETICHETTA}}'>
+  </div>
+";
+
+$files = ls();
+
+try {
+  $_SESSION = (array) json_decode(file_get_contents(CONFIGFILEJSON));
+  $_SESSION['associazioni'] = $_SESSION['associazioni'] == null ? [] : filter(
+    function ($coll) use ($files) {
+      [$filename, $etichetta] = $coll;
+      return in_array($filename, $files);
+    },
+    $_SESSION['associazioni']
+  );
+  $_SESSION['etichette'] = $_SESSION['etichette'] == null ? [] : $_SESSION['etichette'];
+} catch (Exception) {
+  $_SESSION = [];
+  $_SESSION['etichette']    = [];
+  $_SESSION['associazioni'] = [];
+};
+$_SESSION['files'] = $files;
 
 $miniature = implode(
   "\n",
@@ -216,70 +238,24 @@ $miniature = implode(
   )
 );
 
-const htmletichetta = "
-  <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='label{{ID}}' onclick='etichettaFile(this)'>
-    <input class='text'  type='text'  name='label_text'     id='label{{ID}}' value='{{ETICHETTA}}'>
-  </div>
-";
-
-try {
-  throw new Exception();
-  $conf = json_decode(file_get_contents(CONFIGFILEJSON));
-  $etichette = json_decode($conf->etichette);
-  $etichette = implode(
-    "\n",
-    array_map(
-      function ($coll) {
-        [$etichetta, $id] = $coll;
-        return str_replace(
-          '{{ID}}',
-          $id,
-          str_replace(
-            '{{ETICHETTA}}',
-            $etichetta,
-            htmletichetta
-          )
-        );
-      },
-      zip(
-        $etichette,
-        array_keys($etichette)
-      )
-    )
-  );
-  $associazioni = json_encode(
-    filter(
-      function ($coll) use ($files) {
-        [$filename,] = $coll;
-        return in_array($files, $filename);
-      },
-      json_decode($conf->associazioni)
-    )
-  );
-} catch (Exception) {
-  $_SESSION = [];
-  $_SESSION['etichette']    = [];
-  $_SESSION['associazioni'] = [];
-  $etichette = "";
-  $associazioni = "";
-};
-$_SESSION['files'] = $files;
-
-// TODO
-// forse un'idea migliore di inizializzazione
-// leggiamo, se errore inizializzazione, finalmente stringhifichiamo una seconda volta
-try {
-  $conf = file_get_contents(CONFIGFILEJSON);
-} catch (Exception) {
-  $conf = json_encode((object)[
-    'files' => $files,
-    'etichette' => [],
-    'associazioni' => []
-  ]);
-} finally {
-  $conf = json_encode($conf);
-}
+$etichette = implode(
+  "\n",
+  array_map(
+    function ($coll) {
+      [$id, $etichetta] = $coll;
+      return str_replace(
+        '{{ID}}',
+        $id,
+        str_replace(
+          '{{ETICHETTA}}',
+          $etichetta,
+          htmletichetta
+        )
+      );
+    },
+    zip(array_keys($_SESSION['etichette']), $_SESSION['etichette'])
+  )
+);
 
 ?>
 
@@ -287,8 +263,6 @@ try {
 <html>
 
 <head>
-  <script>
-  </script>
   <script>
     var associazioni = "";
     var filenameAttuale = "";
