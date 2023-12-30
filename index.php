@@ -227,12 +227,22 @@ function new_associazione()
   }
 }
 
+function get_associazione()
+{
+  try {
+    echo json_encode([true, $_SESSION['associazioni'][$_POST['file']]]);
+  } catch (Exception) {
+    echo json_encode([false, ""]);
+  }
+}
+
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
     "newAssociazione" => new_associazione(),
+    "getAssociazione" => get_associazione(),
     default => null,
   };
 }
@@ -247,7 +257,7 @@ if (count($_POST) != 0) {
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
+    <img class='miniatura' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
   </a>
 ";
 
@@ -505,7 +515,29 @@ $etichette = implode(
       )
     }
 
-    function phpGetAssociazione() {}
+    // TODO
+    // testing
+    function phpGetAssociazione(elem) {
+      fileAttuale = elem.id;
+      const radioboxes = document.getElementsByClassName('radio');
+      let data = new FormData();
+      data.append("command", "getAssociazione");
+      data.append("file", elem.id);
+      callPhp(data,
+        function() {
+          const [success, radiovalue] = JSON.parse(this.responseText);
+          if (success) {
+            Object.values(radioboxes).find(
+              (radio) => radio.value == radiovalue
+            ).checked = true;
+          } else {
+            Object.values(radioboxes).forEach(
+              (radio) => radio.checked = false
+            );
+          }
+        }
+      );
+    }
 
     function phpSalva() {
       let data = new FormData();
