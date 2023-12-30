@@ -342,6 +342,18 @@ $etichette = implode(
 
 <head>
   <script>
+    function main() {
+      const miniature = document.getElementsByClassName('miniatura');
+      const primo = Object.values(miniature).find(
+        (elem) => !elem.classList.contains('evidenziatura')
+      );
+      if (primo) {
+        primo.click();
+      } else {
+        miniature[0].click();
+      }
+    }
+
     var fileAttuale = "";
 
     function callPhp(data, func) {
