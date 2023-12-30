@@ -163,7 +163,6 @@ function save()
   } else {
     echo "Errore";
   }
-  var_dump($_SESSION);
 }
 
 function apply()
@@ -388,7 +387,6 @@ $etichette = implode(
       data.append("nome", elem.value);
       callPhp(data,
         function() {
-          console.log("label update");
           const [success, oldname] = JSON.parse(this.responseText);
           if (success) {
             return;
@@ -408,7 +406,6 @@ $etichette = implode(
       data.append("etichetta", nuovaetichetta.value);
       callPhp(data,
         function() {
-          console.log(this.responseText);
           const [success, id] = JSON.parse(this.responseText);
           if (!success) {
             return;
@@ -483,7 +480,6 @@ $etichette = implode(
       data.append("command", "save");
       callPhp(data,
         function() {
-          console.log(this.responseText);
         }
       );
     }
@@ -493,7 +489,6 @@ $etichette = implode(
       data.append("command", "apply");
       callPhp(data,
         function() {
-          console.log(this.responseText);
           window.location.reload(false);
           window.open('', '_blank').document.write(this.responseText);
         });
