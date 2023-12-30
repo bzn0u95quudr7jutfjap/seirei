@@ -219,9 +219,9 @@ function new_associazione()
 {
   try {
     ["file" => $file, "etichetta" => $etichetta] = $_POST;
-    $reset = array_key_exists($file, $_SESSION['associazioni']);
+    $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
     $_SESSION['associazioni'][$file] = $etichetta;
-    echo json_encode([true, $reset]);
+    echo json_encode([true, $primo_check]);
   } catch (Exception) {
     echo json_encode([false, false]);
   }
@@ -253,7 +253,7 @@ const htmlminiatura = "
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='etichettaFile(this)'>
+    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this,fileAttuale)'>
     <input class='text'  type='text'  name='label_text'     id='{{ID}}' value='{{ETICHETTA}}'>
   </div>
 ";
@@ -388,6 +388,7 @@ $etichette = implode(
 
     function displayFile(elem) {
       filenameAttuale = elem.alt;
+      fileAttuale = elem.id;
       elem.scrollIntoView({
         behavior: 'auto',
         block: 'center',
@@ -423,6 +424,7 @@ $etichette = implode(
       );
 
       if (primoCheck) {
+        const miniature = document.getElementsByClassName("miniatura");
         const daEtichettare = Object.values(miniature).filter(
           function(elem) {
             return !elem.classList.contains("evidenziatura");
@@ -433,6 +435,12 @@ $etichette = implode(
         }
       }
     }
+
+    // ===========================================================================================================================
+    //  NUOVO JS
+    // ===========================================================================================================================
+
+    var fileAttuale = "";
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
@@ -459,7 +467,7 @@ $etichette = implode(
           const etichette = document.getElementById("etichette");
           etichette.innerHTML += `
         <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='etichettaFile(this)'>
+          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='phpNewAssociazione(this,fileAttuale)'>
           <input class='text'  type='text'  name='label_text'     id='${id}' value='${nuovaetichetta.value}'>
         </div>`;
           //TODO SORTING DELLE ETICHETTE
@@ -468,22 +476,30 @@ $etichette = implode(
       );
     }
 
-    function phpNewAssociazione(elem) {
+    function phpNewAssociazione(elem, file) {
       let data = new FormData();
       data.append("command", "newAssociazione");
       data.append("etichetta", elem.value);
-      data.append("file", fileAttuale);
+      data.append("file", file);
       callPhp(data,
         function() {
-          const [success, reset] = JSON.parse(this.responseText);
+          const [success, primocheck] = JSON.parse(this.responseText);
           if (!success) {
             alert("ERRORE ASSOCIAZIONE");
             console.log("ERRORE ASSOCIAZIONE");
             return;
           }
-          // TODO MARCARE IL FILE COME EVIDENZIATO
-          if (reset) {
-            //TODO CLICCARE IL PRIMO NON EVIDENZIATO
+          document.getElementById(file).classList.add('evidenziatura');
+          if (primocheck) {
+            const miniature = document.getElementsByClassName('miniatura');
+            const daEtichettare = Object.values(miniature).filter(
+              function(elem) {
+                return !elem.classList.contains('evidenziatura');
+              }
+            );
+            if (daEtichettare.length > 0) {
+              daEtichettare[0].click();
+            }
           }
         }
       )
