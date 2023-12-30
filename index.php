@@ -86,6 +86,9 @@ function all_true($array)
 
 session_start();
 
+// TODO
+// fare un display delle miniature
+
 function dispaly_text($file)
 {
   header("Content-Type: text/plain; charset=utf-8");
