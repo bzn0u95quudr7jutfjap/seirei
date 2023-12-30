@@ -238,11 +238,22 @@ function get_associazione()
   }
 }
 
+function set_etichetta()
+{
+  try {
+    $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
+    echo json_encode([true, ""]);
+  } catch (Exception) {
+    echo json_encode([false, $_SESSION['etichette'][$_POST['etichetta']]]);
+  }
+}
+
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
+    "setEtichetta" => set_etichetta(),
     "newAssociazione" => new_associazione(),
     "getAssociazione" => get_associazione(),
     default => null,
@@ -266,7 +277,7 @@ const htmlminiatura = "
 const htmletichetta = "
   <div class='etichetta' >
     <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this,fileAttuale)'>
-    <input class='text'  type='text'  name='label_text'     id='{{ID}}' value='{{ETICHETTA}}'>
+    <input class='text'  type='text'  name='label_text'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
   </div>
 ";
 
@@ -365,6 +376,23 @@ $etichette = implode(
       xmlhttp.open("POST", "index.php", true);
       xmlhttp.onload = func;
       xmlhttp.send(data);
+    }
+
+    function phpAggiornaNomeEtichetta(id, elem) {
+      let data = new FormData();
+      data.append("command", "setEtichetta");
+      data.append("etichetta", id);
+      data.append("nome", elem.value);
+      callPhp(data,
+        function() {
+          console.log("label update");
+          const [success, oldname] = JSON.parse(this.responseText);
+          if (success) {
+            return;
+          }
+          elem.value = oldname;
+        }
+      );
     }
 
     function phpNewEtichetta() {
