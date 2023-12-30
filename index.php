@@ -165,6 +165,8 @@ function save()
 
 function apply()
 {
+  // TODO
+  // correzione di apply
   $content = json_decode(file_get_contents(CONFIGFILEJSON));
   $etichette = filter(
     function ($dir) {
@@ -342,6 +344,8 @@ $etichette = implode(
 
 <head>
   <script>
+    // TODO
+    // funzione di aggiornamento dei nomi delle categorie
     function main() {
       const miniature = document.getElementsByClassName('miniatura');
       const primo = Object.values(miniature).find(
