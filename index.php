@@ -176,11 +176,24 @@ function new_etichetta()
   }
 }
 
+function new_associazione()
+{
+  try {
+    ["file" => $file, "etichetta" => $etichetta] = $_POST;
+    $reset = array_key_exists($file, $_SESSION['associazioni']);
+    $_SESSION['associazioni'][$file] = $etichetta;
+    echo json_encode([true, $reset]);
+  } catch (Exception) {
+    echo json_encode([false, false]);
+  }
+}
+
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
+    "newAssociazione" => new_associazione(),
     default => null,
   };
 }
@@ -399,6 +412,27 @@ $etichette = implode(
           nuovaetichetta.value = "";
         }
       );
+    }
+
+    function phpNewAssociazione(elem) {
+      let data = new FormData();
+      data.append("command", "newAssociazione");
+      data.append("etichetta", elem.value);
+      data.append("file", fileAttuale);
+      callPhp(data,
+        function() {
+          const [success, reset] = JSON.parse(this.responseText);
+          if (!success) {
+            alert("ERRORE ASSOCIAZIONE");
+            console.log("ERRORE ASSOCIAZIONE");
+            return;
+          }
+          // TODO MARCARE IL FILE COME EVIDENZIATO
+          if (reset) {
+            //TODO CLICCARE IL PRIMO NON EVIDENZIATO
+          }
+        }
+      )
     }
 
     function phpGetAssociazione() {}
