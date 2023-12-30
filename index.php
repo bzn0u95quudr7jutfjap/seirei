@@ -167,12 +167,16 @@ function apply()
 
 function new_etichetta()
 {
-  $etichetta = $_POST['etichetta'];
-  if (!in_array($etichetta, $_SESSION['etichette'])) {
-    echo json_encode([count($_SESSION['etichette']), true]);
-    $_SESSION['etichette'][] = $etichetta;
-  } else {
-    echo json_encode([-1, false]);
+  try {
+    $etichetta = $_POST['etichetta'];
+    $key = "etichetta_" . count($_SESSION['etichette']);
+    echo json_encode([
+      ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette'])),
+      $key,
+    ]);
+    $_SESSION['etichette'][$key] = $etichetta;
+  } catch (Exception) {
+    echo json_encode([false, null]);
   }
 }
 
@@ -398,15 +402,15 @@ $etichette = implode(
       callPhp(data,
         function() {
           console.log(this.responseText);
-          const [id, hasVal] = JSON.parse(this.responseText);
-          if (!hasVal) {
+          const [success, id] = JSON.parse(this.responseText);
+          if (!success) {
             return;
           }
           const etichette = document.getElementById("etichette");
           etichette.innerHTML += `
         <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='label${id}' onclick='etichettaFile(this)'>
-          <input class='text'  type='text'  name='label_text'  id='label${id}' value='${nuovaetichetta.value}'>
+          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='etichettaFile(this)'>
+          <input class='text'  type='text'  name='label_text'     id='${id}' value='${nuovaetichetta.value}'>
         </div>`;
           //TODO SORTING DELLE ETICHETTE
           nuovaetichetta.value = "";
