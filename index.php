@@ -257,7 +257,7 @@ if (count($_POST) != 0) {
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
+    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
   </a>
 ";
 
@@ -309,6 +309,7 @@ $miniature = implode(
       [$id, $filename] = $coll;
       $res = str_replace("{{FILENAME}}", filter_var($filename, FILTER_SANITIZE_FULL_SPECIAL_CHARS), htmlminiatura);
       $res = str_replace("{{ID}}", $id, $res);
+      $res = str_replace("{{EVIDENZIATURA}}", in_array($id, array_keys($_SESSION['associazioni'])) ? "evidenziatura" : "", $res);
       return $res;
     },
     zip(array_keys($_SESSION['files']), $_SESSION['files'])
