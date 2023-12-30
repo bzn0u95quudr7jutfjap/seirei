@@ -86,9 +86,6 @@ function all_true($array)
 
 session_start();
 
-// TODO
-// fare un display delle miniature
-
 function dispaly_text($file)
 {
   header("Content-Type: text/plain; charset=utf-8");
@@ -165,43 +162,10 @@ function save()
   }
 }
 
+// TODO
+// correzione di apply
 function apply()
 {
-  // TODO
-  // correzione di apply
-  $content = json_decode(file_get_contents(CONFIGFILEJSON));
-  $etichette = filter(
-    function ($dir) {
-      $e = file_exists($dir);
-      return ($e && is_dir($e)) || (!$e && mkdir($dir));
-    },
-    json_decode($content->etichette)
-  );
-
-  $files = ls();
-
-  $res = implode(
-    "\n",
-    map(
-      function ($coll) {
-        [$f, $b, $bool] = $coll;
-        return "<p>" . json_encode($bool) . " : $f -> $b" . "</p>";
-      },
-      map(
-        function ($associazione) {
-          $etichetta = "./" . $associazione->etichetta . "/" . $associazione->filename;
-          return [$associazione->filename, $etichetta, rename($associazione->filename, $etichetta)];
-        },
-        filter(
-          function ($associazione) use ($etichette, $files) {
-            return in_array($associazione->etichetta, $etichette) && in_array($associazione->filename, $files);
-          },
-          json_decode($content->associazioni)
-        )
-      )
-    )
-  );
-  echo "<html><body>$res</body></html>";
 }
 
 function new_etichetta()
@@ -272,7 +236,7 @@ if (count($_POST) != 0) {
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
+    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
   </a>
 ";
 
@@ -357,8 +321,6 @@ $etichette = implode(
 
 <head>
   <script>
-    // TODO
-    // funzione di aggiornamento dei nomi delle categorie
     function main() {
       const miniature = document.getElementsByClassName('miniatura');
       const primo = Object.values(miniature).find(
@@ -451,8 +413,6 @@ $etichette = implode(
       )
     }
 
-    // TODO
-    // testing
     function phpGetAssociazione(elem) {
       fileAttuale = elem.id;
       const radioboxes = document.getElementsByClassName('radio');
@@ -479,8 +439,7 @@ $etichette = implode(
       let data = new FormData();
       data.append("command", "save");
       callPhp(data,
-        function() {
-        }
+        function() {}
       );
     }
 
