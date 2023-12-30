@@ -253,8 +253,8 @@ const htmlminiatura = "
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='etichetta_{{ID}}' onclick='etichettaFile(this)'>
-    <input class='text'  type='text'  name='label_text'     id='etichetta_{{ID}}' value='{{ETICHETTA}}'>
+    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='etichettaFile(this)'>
+    <input class='text'  type='text'  name='label_text'     id='{{ID}}' value='{{ETICHETTA}}'>
   </div>
 ";
 
