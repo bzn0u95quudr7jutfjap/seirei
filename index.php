@@ -247,7 +247,7 @@ if (count($_POST) != 0) {
 
 const htmlminiatura = "
   <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura' id='file{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
+    <img class='miniatura' id='{{ID}}' src='./?file={{ID}}' alt='{{FILENAME}}' onclick='displayFile(this);'>
   </a>
 ";
 
