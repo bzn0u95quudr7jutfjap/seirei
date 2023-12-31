@@ -190,6 +190,8 @@ function apply()
     $associazioni
   ));
 
+  //TODO
+  //trycatch in caso di eccezzione
   $res = implode(
     "\n",
     map(
@@ -210,6 +212,8 @@ function apply()
     )
   );
 
+  //TODO
+  //rimuovere solo i file e le associazioni che hanno avuto successo
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
