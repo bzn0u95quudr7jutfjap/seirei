@@ -162,10 +162,65 @@ function save()
   }
 }
 
-// TODO
-// correzione di apply
 function apply()
 {
+  $etichette = filter(
+    function ($e) {
+      $b = file_exists($e);
+      return ($b && is_dir($e)) || (!$b && mkdir($e));
+    },
+    $_SESSION['etichette']
+  );
+  $etichette_keys = array_keys($etichette);
+  $associazioni = filter(
+    function ($e) use ($etichette_keys) {
+      return in_array($e, $etichette_keys);
+    },
+    $_SESSION['associazioni']
+  );
+  $associazioni = zip(map(
+    function ($f) {
+      return $_SESSION['files'][$f];
+    },
+    array_keys($associazioni)
+  ), map(
+    function ($e) {
+      return $_SESSION['etichette'][$e];
+    },
+    $associazioni
+  ));
+
+  $res = implode(
+    "\n",
+    map(
+      function ($coll) {
+        [$file, $dir] = $coll;
+        $from = "./$file";
+        $to = "./$dir/$file";
+        $res = json_encode(rename($from, $to));
+        return "
+          <tr>
+            <td>$res</td>
+            <td>$from</td>
+            <td>$to</td>
+          </tr>
+          ";
+      },
+      $associazioni
+    )
+  );
+
+  $_SESSION['files'] = [];
+  $_SESSION['associazioni'] = [];
+
+  echo "<!DOCTYPE html><html><body>";
+  echo "<table><tr> <th>Risultato</th> <th>Sorgente</th> <th>Destinazione</th> </tr>";
+  echo $res;
+  echo "</table>";
+  echo "<p>";
+  save();
+  echo "</p>";
+  echo "</body></html>";
 }
 
 function new_etichetta()
@@ -448,8 +503,7 @@ $etichette = implode(
       data.append("command", "apply");
       callPhp(data,
         function() {
-          window.location.reload(false);
-          window.open('', '_blank').document.write(this.responseText);
+          document.write(this.responseText);
         });
     }
   </script>
