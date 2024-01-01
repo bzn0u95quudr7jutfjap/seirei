@@ -381,15 +381,13 @@ $etichette = implode(
 <head>
   <script>
     function main() {
-      const miniature = document.getElementsByClassName('miniatura');
-      const primo = Object.values(miniature).find(
+      Object.values(
+        document.getElementsByClassName('miniatura')
+      ).filter(
         (elem) => !elem.classList.contains('evidenziatura')
+      ).slice(0, 1).forEach(
+        (elem) => elem.click()
       );
-      if (primo) {
-        primo.click();
-      } else {
-        miniature[0].click();
-      }
     }
 
     var fileAttuale = "";
