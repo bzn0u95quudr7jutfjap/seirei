@@ -473,7 +473,15 @@ $etichette = implode(
     }
 
     function phpGetAssociazione(elem) {
+      const selezione = 'selezione';
+      Object.values(
+        document.getElementsByClassName(selezione)
+      ).forEach(
+        (elem) => elem.classList.remove(selezione)
+      );
+      elem.classList.add(selezione);
       fileAttuale = elem.id;
+      console.log(fileAttuale);
       const radioboxes = document.getElementsByClassName('radio');
       let data = new FormData();
       data.append("command", "getAssociazione");
@@ -551,6 +559,10 @@ $etichette = implode(
 
     .evidenziatura {
       border: solid blue 2px;
+    }
+
+    .selezione {
+      border: solid lime 2px;
     }
 
     #controlli {
