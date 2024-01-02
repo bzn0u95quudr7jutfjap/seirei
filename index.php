@@ -118,6 +118,7 @@ const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
 {
+  header("Location: /");
   return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
@@ -236,8 +237,8 @@ function get_associazione()
 function set_etichetta()
 {
   try {
-    $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
-    echo json_encode([true, ""]);
+    $ret = $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
+    echo json_encode([true, $ret]);
   } catch (Exception) {
     echo json_encode([false, $_SESSION['etichette'][$_POST['etichetta']]]);
   }
@@ -375,6 +376,7 @@ $etichette = implode(
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
       xmlhttp.onload = function() {
+        console.log(this.responseText);
         func(JSON.parse(this.responseText));
       };
       xmlhttp.send(data);
@@ -529,7 +531,7 @@ $etichette = implode(
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
     <form action="./" method="post">
-      <button type="submit" name="command" value="salva">Salva</button>
+      <button type="submit" name="command" value="save">Salva</button>
       <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
       <input name="etichetta" type="text">
     </form>
