@@ -564,4 +564,7 @@ $etichette = implode(
 // ROUTER PER LA STAMPA DELLE IMMAGINI
 // =======================================================================================================================================================
 
-return false;
+$req = $_SERVER['REQUEST_URI'];
+if (strpos($req, '?') !== false) {
+  return false;
+}
