@@ -392,24 +392,6 @@ $etichette = implode(
       );
     }
 
-    function phpNewEtichetta() {
-      const nuovaetichetta = document.getElementById("nuovo-etichetta");
-      if (nuovaetichetta.value == "") {
-        return;
-      }
-      let data = new FormData();
-      data.append("command", "newEtichetta");
-      data.append("etichetta", nuovaetichetta.value);
-      callPhp(data,
-        function() {
-          const [success, id] = JSON.parse(this.responseText);
-          if (success) {
-            window.location.reload();
-          }
-        }
-      );
-    }
-
     function phpNewAssociazione(elem, file) {
       let data = new FormData();
       data.append("command", "newAssociazione");
