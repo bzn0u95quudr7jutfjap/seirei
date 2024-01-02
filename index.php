@@ -343,17 +343,26 @@ $etichette = implode(
 
 <head>
   <script>
-    function main() {
-      Object.values(
-        document.getElementsByClassName('miniatura')
-      ).filter(
+
+    // ===========================================================================================================================
+    // GLOBAL VARS
+    // ===========================================================================================================================
+    let MINIATURE = null;
+    let FILE = null;
+
+    function clickPrimoNonEvidenziato() {
+      MINIATURE.filter(
         (elem) => !elem.classList.contains('evidenziatura')
       ).slice(0, 1).forEach(
         (elem) => elem.click()
       );
     }
 
-    var fileAttuale = "";
+    function main() {
+      MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
+      clickPrimoNonEvidenziato();
+    }
+
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
@@ -395,7 +404,7 @@ $etichette = implode(
           const etichette = document.getElementById("etichette");
           etichette.innerHTML += `
         <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='phpNewAssociazione(this,fileAttuale)'>
+          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='phpNewAssociazione(this,FILE)'>
           <input class='text'  type='text'  name='label_text'     id='${id}' value='${nuovaetichetta.value}'>
         </div>`;
           //TODO SORTING DELLE ETICHETTE
@@ -419,13 +428,7 @@ $etichette = implode(
           }
           document.getElementById(file).classList.add('evidenziatura');
           if (primocheck) {
-            Object.values(
-              document.getElementsByClassName('miniatura')
-            ).filter(
-              (elem) => !elem.classList.contains('evidenziatura')
-            ).slice(0, 1).forEach(
-              (elem) => elem.click()
-            );
+            clickPrimoNonEvidenziato();
           }
         }
       )
