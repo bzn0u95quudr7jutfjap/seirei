@@ -438,14 +438,6 @@ $etichette = implode(
       );
     }
 
-    function phpSalva() {
-      let data = new FormData();
-      data.append("command", "save");
-      callPhp(data,
-        function() {}
-      );
-    }
-
     function phpApplica() {
       let data = new FormData();
       data.append("command", "apply");
