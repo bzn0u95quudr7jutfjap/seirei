@@ -176,14 +176,24 @@ function apply()
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
-  echo "<!DOCTYPE html><html><body>";
-  echo "<table><tr> <th>Risultato</th> <th>Sorgente</th> <th>Destinazione</th> </tr>";
-  echo $res;
-  echo "</table>";
-  echo "<p>";
   save();
-  echo "</p>";
-  echo "</body></html>";
+?>
+  <!DOCTYPE html>
+  <html>
+
+  <body>
+    <table>
+      <tr>
+        <th>Risultato</th>
+        <th>Sorgente</th>
+        <th>Destinazione</th>
+        <?php echo $res; ?>
+      </tr>
+    </table>
+  </body>
+
+  </html>
+<?php
 }
 
 function new_etichetta()
