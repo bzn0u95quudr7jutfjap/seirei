@@ -374,7 +374,9 @@ $etichette = implode(
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = func;
+      xmlhttp.onload = function() {
+        func(JSON.parse(this.responseText));
+      };
       xmlhttp.send(data);
     }
 
@@ -384,12 +386,10 @@ $etichette = implode(
       data.append("etichetta", id);
       data.append("nome", elem.value);
       callPhp(data,
-        function() {
-          const [success, oldname] = JSON.parse(this.responseText);
-          if (success) {
-            return;
+        function([success, oldname]) {
+          if (!success) {
+            elem.value = oldname;
           }
-          elem.value = oldname;
         }
       );
     }
@@ -400,16 +400,15 @@ $etichette = implode(
       data.append("etichetta", elem.value);
       data.append("file", FILE.id);
       callPhp(data,
-        function() {
-          const [success, primocheck] = JSON.parse(this.responseText);
-          if (!success) {
+        function([success, primocheck]) {
+          if (success) {
+            FILE.classList.add('evidenziatura');
+            if (primocheck) {
+              clickPrimoNonEvidenziato();
+            }
+          } else {
             alert("ERRORE ASSOCIAZIONE");
             console.log("ERRORE ASSOCIAZIONE");
-            return;
-          }
-          FILE.classList.add('evidenziatura');
-          if (primocheck) {
-            clickPrimoNonEvidenziato();
           }
         }
       )
@@ -428,8 +427,7 @@ $etichette = implode(
       data.append("command", "getAssociazione");
       data.append("file", elem.id);
       callPhp(data,
-        function() {
-          const [success, radiovalue] = JSON.parse(this.responseText);
+        function([success, radiovalue]) {
           if (success) {
             ETICHETTERADIO.filter(
               (radio) => radio.value == radiovalue
