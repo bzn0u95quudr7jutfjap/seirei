@@ -413,15 +413,13 @@ $etichette = implode(
           }
           document.getElementById(file).classList.add('evidenziatura');
           if (primocheck) {
-            const miniature = document.getElementsByClassName('miniatura');
-            const daEtichettare = Object.values(miniature).filter(
-              function(elem) {
-                return !elem.classList.contains('evidenziatura');
-              }
+            Object.values(
+              document.getElementsByClassName('miniatura')
+            ).filter(
+              (elem) => !elem.classList.contains('evidenziatura')
+            ).slice(0, 1).forEach(
+              (elem) => elem.click()
             );
-            if (daEtichettare.length > 0) {
-              daEtichettare[0].click();
-            }
           }
         }
       )
