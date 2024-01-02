@@ -86,10 +86,24 @@ function all_true($array)
 
 session_start();
 
+function display_text($file)
+{
+  header("Content-Type: text/plain; charset=utf-8");
+  readfile($file);
+}
+function display_other($mime, $file)
+{
+  header("Content-Type: " . $mime);
+  readfile($file);
+}
+
 if (array_key_exists("file", $_GET)) {
   $file = $_SESSION['files'][$_GET["file"]];
-  header("Content-Type: " . mime_content_type($file));
-  readfile($file);
+  $mime = mime_content_type($file);
+  match (true) {
+    strpos($mime, 'text') !== false => display_text($file),
+    default => display_other($mime, $file),
+  };
 }
 
 if (count($_GET) != 0) {
