@@ -94,61 +94,10 @@ function all_true($array)
 
 session_start();
 
-function dispaly_text($file)
-{
-  header("Content-Type: text/plain; charset=utf-8");
-  readfile($file);
-}
-
-function display_image($file)
-{
-?>
-  <!DOCTYPE html>
-  <html>
-  <style>
-    html,
-    body {
-      margin: 0px;
-      padding: 0px;
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      display: grid;
-      grid-template-columns: auto;
-      grid-template-rows: auto;
-      justify-items: center;
-      align-content: center;
-    }
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-  </style>
-
-  <body>
-    <img src="<?php echo $file; ?>">
-  </body>
-
-  </html>
-<?php
-}
-
-function display_default($file)
-{
-  header("Location: http://localhost:8888/$file");
-}
-
 if (array_key_exists("file", $_GET)) {
-  $filename = $_SESSION['files'][$_GET["file"]];
-  $mime = mime_content_type($filename);
-  match (true) {
-    strpos($mime, "text") !== false => dispaly_text($filename),
-    strpos($mime, "image") !== false => display_image($filename),
-    default => display_default($filename),
-  };
+  $file = $_SESSION['files'][$_GET["file"]];
+  header("Content-Type: " . mime_content_type($file));
+  readfile($file);
 }
 
 if (count($_GET) != 0) {
