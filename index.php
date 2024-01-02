@@ -343,7 +343,6 @@ $etichette = implode(
 
 <head>
   <script>
-
     // ===========================================================================================================================
     // GLOBAL VARS
     // ===========================================================================================================================
@@ -362,7 +361,6 @@ $etichette = implode(
       MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
       clickPrimoNonEvidenziato();
     }
-
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
@@ -436,14 +434,9 @@ $etichette = implode(
 
     function phpGetAssociazione(elem) {
       const selezione = 'selezione';
-      Object.values(
-        document.getElementsByClassName(selezione)
-      ).forEach(
-        (elem) => elem.classList.remove(selezione)
-      );
+      FILE.classList.remove(selezione);
+      FILE = elem;
       elem.classList.add(selezione);
-      fileAttuale = elem.id;
-      console.log(fileAttuale);
       const radioboxes = document.getElementsByClassName('radio');
       let data = new FormData();
       data.append("command", "getAssociazione");
