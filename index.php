@@ -118,11 +118,7 @@ const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
 {
-  if (file_put_contents(CONFIGFILEJSON, json_encode($_SESSION))) {
-    echo "Salvato con successo\n";
-  } else {
-    echo "Errore";
-  }
+  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
 function apply()
@@ -198,6 +194,7 @@ function new_etichetta()
     $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
     if ($success) {
       $_SESSION['etichette'][$key] = $etichetta;
+      save();
     }
     echo json_encode([$success, $key]);
   } catch (Exception) {
@@ -396,17 +393,9 @@ $etichette = implode(
       callPhp(data,
         function() {
           const [success, id] = JSON.parse(this.responseText);
-          if (!success) {
-            return;
+          if (success) {
+            window.location.reload();
           }
-          const etichette = document.getElementById("etichette");
-          etichette.innerHTML += `
-        <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='phpNewAssociazione(this,FILE)'>
-          <input class='text'  type='text'  name='label_text'     id='${id}' value='${nuovaetichetta.value}'>
-        </div>`;
-          //TODO SORTING DELLE ETICHETTE
-          nuovaetichetta.value = "";
         }
       );
     }
@@ -491,8 +480,6 @@ $etichette = implode(
     }
 
     #contenuto {
-      max-width: 90%;
-      max-height: 90%;
       height: 90%;
       width: 90%;
     }
@@ -546,6 +533,12 @@ $etichette = implode(
       height: 20px;
       width: 20px;
     }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
   </style>
 </head>
 
@@ -555,13 +548,17 @@ $etichette = implode(
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
-    <button onclick="phpSalva()">Salva</button>
-    <button onclick="phpNewEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
-    <input id="nuovo-etichetta" type="text">
+    <form action="./" method="post">
+      <button type="submit" name="command" value="salva">Salva</button>
+      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+      <input name="etichetta" id="nuovo-etichetta" type="text">
+    </form>
     <div id="etichette">
       <?php echo $etichette; ?>
     </div>
-    <button onclick="phpApplica()">Applica modifiche</button>
+    <form action="./" method="post">
+      <button type="submit" name="contenuto" value="apply">Applica modifiche</button>
+    </form>
 
   </div>
 </body>
