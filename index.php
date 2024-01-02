@@ -355,6 +355,7 @@ $etichette = implode(
     // ===========================================================================================================================
     let MINIATURE = null;
     let FILE = null;
+    let ETICHETTERADIO = null;
 
     function clickPrimoNonEvidenziato() {
       MINIATURE.filter(
@@ -365,6 +366,7 @@ $etichette = implode(
     }
 
     function main() {
+      ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
       MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
       clickPrimoNonEvidenziato();
     }
@@ -405,7 +407,7 @@ $etichette = implode(
             console.log("ERRORE ASSOCIAZIONE");
             return;
           }
-          document.getElementById(file).classList.add('evidenziatura');
+          FILE.classList.add('evidenziatura');
           if (primocheck) {
             clickPrimoNonEvidenziato();
           }
@@ -415,10 +417,13 @@ $etichette = implode(
 
     function phpGetAssociazione(elem) {
       const selezione = 'selezione';
-      FILE.classList.remove(selezione);
+      MINIATURE.filter(
+        (elem) => elem.classList.contains(selezione)
+      ).forEach(
+        (elem) => elem.classList.remove(selezione)
+      );
       FILE = elem;
       elem.classList.add(selezione);
-      const radioboxes = document.getElementsByClassName('radio');
       let data = new FormData();
       data.append("command", "getAssociazione");
       data.append("file", elem.id);
@@ -426,11 +431,13 @@ $etichette = implode(
         function() {
           const [success, radiovalue] = JSON.parse(this.responseText);
           if (success) {
-            Object.values(radioboxes).find(
+            ETICHETTERADIO.filter(
               (radio) => radio.value == radiovalue
-            ).checked = true;
+            ).forEach(
+              (radio) => radio.checked = true
+            );
           } else {
-            Object.values(radioboxes).forEach(
+            ETICHETTERADIO.forEach(
               (radio) => radio.checked = false
             );
           }
