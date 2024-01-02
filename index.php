@@ -561,13 +561,13 @@ $etichette = implode(
     <form action="./" method="post">
       <button type="submit" name="command" value="salva">Salva</button>
       <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-      <input name="etichetta" id="nuovo-etichetta" type="text">
+      <input name="etichetta" type="text">
     </form>
     <div id="etichette">
       <?php echo $etichette; ?>
     </div>
     <form action="./" method="post">
-      <button type="submit" name="contenuto" value="apply">Applica modifiche</button>
+      <button type="submit" name="command" value="apply">Applica modifiche</button>
     </form>
 
   </div>
