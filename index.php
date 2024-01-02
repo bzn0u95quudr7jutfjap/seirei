@@ -271,7 +271,7 @@ const htmlminiatura = "
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this,fileAttuale)'>
+    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this)'>
     <input class='text'  type='text'  name='label_text'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
   </div>
 ";
@@ -392,11 +392,11 @@ $etichette = implode(
       );
     }
 
-    function phpNewAssociazione(elem, file) {
+    function phpNewAssociazione(elem) {
       let data = new FormData();
       data.append("command", "newAssociazione");
       data.append("etichetta", elem.value);
-      data.append("file", file);
+      data.append("file", FILE.id);
       callPhp(data,
         function() {
           const [success, primocheck] = JSON.parse(this.responseText);
