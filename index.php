@@ -40,7 +40,7 @@ function ls()
   return array_values(
     filter(
       function ($f) {
-        return !is_dir($f) && $f != "index.php";
+        return !is_dir($f);
       },
       glob('*')
     )
@@ -86,60 +86,23 @@ function all_true($array)
 
 session_start();
 
-function dispaly_text($file)
+function display_text($file)
 {
   header("Content-Type: text/plain; charset=utf-8");
   readfile($file);
 }
-
-function display_image($file)
+function display_other($mime, $file)
 {
-?>
-  <!DOCTYPE html>
-  <html>
-  <style>
-    html,
-    body {
-      margin: 0px;
-      padding: 0px;
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      display: grid;
-      grid-template-columns: auto;
-      grid-template-rows: auto;
-      justify-items: center;
-      align-content: center;
-    }
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-  </style>
-
-  <body>
-    <img src="<?php echo $file; ?>">
-  </body>
-
-  </html>
-<?php
-}
-
-function display_default($file)
-{
-  header("Location: http://localhost:8888/$file");
+  header("Content-Type: " . $mime);
+  readfile($file);
 }
 
 if (array_key_exists("file", $_GET)) {
-  $filename = $_SESSION['files'][$_GET["file"]];
-  $mime = mime_content_type($filename);
+  $file = $_SESSION['files'][$_GET["file"]];
+  $mime = mime_content_type($file);
   match (true) {
-    strpos($mime, "text") !== false => dispaly_text($filename),
-    strpos($mime, "image") !== false => display_image($filename),
-    default => display_default($filename),
+    strpos($mime, 'text') !== false => display_text($file),
+    default => display_other($mime, $file),
   };
 }
 
@@ -155,11 +118,7 @@ const CONFIGFILEJSON = ".seireidire.json";
 
 function save()
 {
-  if (file_put_contents(CONFIGFILEJSON, json_encode($_SESSION))) {
-    echo "Salvato con successo\n";
-  } else {
-    echo "Errore";
-  }
+  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
 function apply()
@@ -217,14 +176,24 @@ function apply()
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
-  echo "<!DOCTYPE html><html><body>";
-  echo "<table><tr> <th>Risultato</th> <th>Sorgente</th> <th>Destinazione</th> </tr>";
-  echo $res;
-  echo "</table>";
-  echo "<p>";
   save();
-  echo "</p>";
-  echo "</body></html>";
+?>
+  <!DOCTYPE html>
+  <html>
+
+  <body>
+    <table>
+      <tr>
+        <th>Risultato</th>
+        <th>Sorgente</th>
+        <th>Destinazione</th>
+        <?php echo $res; ?>
+      </tr>
+    </table>
+  </body>
+
+  </html>
+<?php
 }
 
 function new_etichetta()
@@ -235,6 +204,7 @@ function new_etichetta()
     $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
     if ($success) {
       $_SESSION['etichette'][$key] = $etichetta;
+      save();
     }
     echo json_encode([$success, $key]);
   } catch (Exception) {
@@ -301,7 +271,7 @@ const htmlminiatura = "
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this,fileAttuale)'>
+    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this)'>
     <input class='text'  type='text'  name='label_text'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
   </div>
 ";
@@ -380,24 +350,33 @@ $etichette = implode(
 
 <head>
   <script>
-    function main() {
-      const miniature = document.getElementsByClassName('miniatura');
-      const primo = Object.values(miniature).find(
+    // ===========================================================================================================================
+    // GLOBAL VARS
+    // ===========================================================================================================================
+    let MINIATURE = null;
+    let FILE = null;
+    let ETICHETTERADIO = null;
+
+    function clickPrimoNonEvidenziato() {
+      MINIATURE.filter(
         (elem) => !elem.classList.contains('evidenziatura')
+      ).slice(0, 1).forEach(
+        (elem) => elem.click()
       );
-      if (primo) {
-        primo.click();
-      } else {
-        miniature[0].click();
-      }
     }
 
-    var fileAttuale = "";
+    function main() {
+      ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
+      MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
+      clickPrimoNonEvidenziato();
+    }
 
     function callPhp(data, func) {
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = func;
+      xmlhttp.onload = function() {
+        func(JSON.parse(this.responseText));
+      };
       xmlhttp.send(data);
     }
 
@@ -407,108 +386,61 @@ $etichette = implode(
       data.append("etichetta", id);
       data.append("nome", elem.value);
       callPhp(data,
-        function() {
-          const [success, oldname] = JSON.parse(this.responseText);
-          if (success) {
-            return;
-          }
-          elem.value = oldname;
-        }
-      );
-    }
-
-    function phpNewEtichetta() {
-      const nuovaetichetta = document.getElementById("nuovo-etichetta");
-      if (nuovaetichetta.value == "") {
-        return;
-      }
-      let data = new FormData();
-      data.append("command", "newEtichetta");
-      data.append("etichetta", nuovaetichetta.value);
-      callPhp(data,
-        function() {
-          const [success, id] = JSON.parse(this.responseText);
+        function([success, oldname]) {
           if (!success) {
-            return;
+            elem.value = oldname;
           }
-          const etichette = document.getElementById("etichette");
-          etichette.innerHTML += `
-        <div class='etichetta'>
-          <input class='radio' type='radio' name='label_radio' value='${id}' onclick='phpNewAssociazione(this,fileAttuale)'>
-          <input class='text'  type='text'  name='label_text'     id='${id}' value='${nuovaetichetta.value}'>
-        </div>`;
-          //TODO SORTING DELLE ETICHETTE
-          nuovaetichetta.value = "";
         }
       );
     }
 
-    function phpNewAssociazione(elem, file) {
+    function phpNewAssociazione(elem) {
       let data = new FormData();
       data.append("command", "newAssociazione");
       data.append("etichetta", elem.value);
-      data.append("file", file);
+      data.append("file", FILE.id);
       callPhp(data,
-        function() {
-          const [success, primocheck] = JSON.parse(this.responseText);
-          if (!success) {
+        function([success, primocheck]) {
+          if (success) {
+            FILE.classList.add('evidenziatura');
+            if (primocheck) {
+              clickPrimoNonEvidenziato();
+            }
+          } else {
             alert("ERRORE ASSOCIAZIONE");
             console.log("ERRORE ASSOCIAZIONE");
-            return;
-          }
-          document.getElementById(file).classList.add('evidenziatura');
-          if (primocheck) {
-            const miniature = document.getElementsByClassName('miniatura');
-            const daEtichettare = Object.values(miniature).filter(
-              function(elem) {
-                return !elem.classList.contains('evidenziatura');
-              }
-            );
-            if (daEtichettare.length > 0) {
-              daEtichettare[0].click();
-            }
           }
         }
       )
     }
 
     function phpGetAssociazione(elem) {
-      fileAttuale = elem.id;
-      const radioboxes = document.getElementsByClassName('radio');
+      const selezione = 'selezione';
+      MINIATURE.filter(
+        (elem) => elem.classList.contains(selezione)
+      ).forEach(
+        (elem) => elem.classList.remove(selezione)
+      );
+      FILE = elem;
+      elem.classList.add(selezione);
       let data = new FormData();
       data.append("command", "getAssociazione");
       data.append("file", elem.id);
       callPhp(data,
-        function() {
-          const [success, radiovalue] = JSON.parse(this.responseText);
+        function([success, radiovalue]) {
           if (success) {
-            Object.values(radioboxes).find(
+            ETICHETTERADIO.filter(
               (radio) => radio.value == radiovalue
-            ).checked = true;
+            ).forEach(
+              (radio) => radio.checked = true
+            );
           } else {
-            Object.values(radioboxes).forEach(
+            ETICHETTERADIO.forEach(
               (radio) => radio.checked = false
             );
           }
         }
       );
-    }
-
-    function phpSalva() {
-      let data = new FormData();
-      data.append("command", "save");
-      callPhp(data,
-        function() {}
-      );
-    }
-
-    function phpApplica() {
-      let data = new FormData();
-      data.append("command", "apply");
-      callPhp(data,
-        function() {
-          document.write(this.responseText);
-        });
     }
   </script>
 
@@ -528,8 +460,6 @@ $etichette = implode(
     }
 
     #contenuto {
-      max-width: 90%;
-      max-height: 90%;
       height: 90%;
       width: 90%;
     }
@@ -538,6 +468,7 @@ $etichette = implode(
       margin: 20px;
       overflow: scroll;
       height: 90%;
+      width: 200px;
       display: flex;
       flex-direction: column;
     }
@@ -551,6 +482,10 @@ $etichette = implode(
 
     .evidenziatura {
       border: solid blue 2px;
+    }
+
+    .selezione {
+      border: solid lime 2px;
     }
 
     #controlli {
@@ -578,6 +513,12 @@ $etichette = implode(
       height: 20px;
       width: 20px;
     }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
   </style>
 </head>
 
@@ -587,15 +528,29 @@ $etichette = implode(
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <div id="controlli">
-    <button onclick="phpSalva()">Salva</button>
-    <button onclick="phpNewEtichetta()" id="aggiungi-etichetta">Nuova directory</button>
-    <input id="nuovo-etichetta" type="text">
+    <form action="./" method="post">
+      <button type="submit" name="command" value="salva">Salva</button>
+      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+      <input name="etichetta" type="text">
+    </form>
     <div id="etichette">
       <?php echo $etichette; ?>
     </div>
-    <button onclick="phpApplica()">Applica modifiche</button>
+    <form action="./" method="post">
+      <button type="submit" name="command" value="apply">Applica modifiche</button>
+    </form>
 
   </div>
 </body>
 
 </html>
+
+<?php
+// =======================================================================================================================================================
+// ROUTER PER LA STAMPA DELLE IMMAGINI
+// =======================================================================================================================================================
+
+$req = $_SERVER['REQUEST_URI'];
+if (strpos($req, '?') !== false) {
+  return false;
+}
