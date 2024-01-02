@@ -219,9 +219,11 @@ function new_associazione()
     ["file" => $file, "etichetta" => $etichetta] = $_POST;
     $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
     $_SESSION['associazioni'][$file] = $etichetta;
-    echo json_encode([true, $primo_check]);
+    $res = [true, $primo_check];
   } catch (Exception) {
-    echo json_encode([false, false]);
+    $res = [false, false];
+  } finally {
+    echo json_encode($res);
   }
 }
 
@@ -272,8 +274,8 @@ const htmlminiatura = "
 
 const htmletichetta = "
   <div class='etichetta' >
-    <input class='radio' type='radio' name='label_radio' value='{{ID}}' onclick='phpNewAssociazione(this)'>
-    <input class='text'  type='text'  name='label_text'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
+    <input class='radio' type='radio' name='etichetta' value='{{ID}}' onclick='phpNewAssociazione(this)'>
+    <input class='text'  type='text'  name='{{ID}}'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
   </div>
 ";
 
@@ -357,6 +359,8 @@ $etichette = implode(
     let MINIATURE = null;
     let FILE = null;
     let ETICHETTERADIO = null;
+    let NEWASSOCIAZIONE = null;
+    let BTN_NEW_ASSOCIAZIONE = null;
 
     function clickPrimoNonEvidenziato() {
       MINIATURE.filter(
@@ -366,7 +370,24 @@ $etichette = implode(
       );
     }
 
+    function selezionaFile(elem) {
+      const selezione = 'selezione';
+      MINIATURE.filter(
+        (elem) => elem.classList.contains(selezione)
+      ).forEach(
+        (elem) => elem.classList.remove(selezione)
+      );
+      NEWASSOCIAZIONE.file.value = elem.id;
+      FILE = elem;
+      elem.classList.add(selezione);
+    }
+
     function main() {
+      NEWASSOCIAZIONE = {
+        form: document.getElementById('newAssociazioneForm'),
+        btn: document.getElementById('newAssociazioneBtn'),
+        file: document.getElementById('newAssociazioneFile'),
+      };
       ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
       MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
       clickPrimoNonEvidenziato();
@@ -376,7 +397,6 @@ $etichette = implode(
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", "index.php", true);
       xmlhttp.onload = function() {
-        console.log(this.responseText);
         func(JSON.parse(this.responseText));
       };
       xmlhttp.send(data);
@@ -397,11 +417,10 @@ $etichette = implode(
     }
 
     function phpNewAssociazione(elem) {
-      let data = new FormData();
-      data.append("command", "newAssociazione");
-      data.append("etichetta", elem.value);
-      data.append("file", FILE.id);
-      callPhp(data,
+      callPhp(new FormData(
+          NEWASSOCIAZIONE.form,
+          NEWASSOCIAZIONE.btn
+        ),
         function([success, primocheck]) {
           if (success) {
             FILE.classList.add('evidenziatura');
@@ -417,14 +436,7 @@ $etichette = implode(
     }
 
     function phpGetAssociazione(elem) {
-      const selezione = 'selezione';
-      MINIATURE.filter(
-        (elem) => elem.classList.contains(selezione)
-      ).forEach(
-        (elem) => elem.classList.remove(selezione)
-      );
-      FILE = elem;
-      elem.classList.add(selezione);
+      selezionaFile(elem);
       let data = new FormData();
       data.append("command", "getAssociazione");
       data.append("file", elem.id);
@@ -535,9 +547,11 @@ $etichette = implode(
       <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
       <input name="etichetta" type="text">
     </form>
-    <div id="etichette">
+    <form action="./" method="post" target="devnull" id="newAssociazioneForm">
       <?php echo $etichette; ?>
-    </div>
+      <input hidden id='newAssociazioneFile' type="text" name="file">
+      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'>
+    </form>
     <form action="./" method="post">
       <button type="submit" name="command" value="apply">Applica modifiche</button>
     </form>
