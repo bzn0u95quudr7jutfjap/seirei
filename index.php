@@ -468,7 +468,7 @@ $etichette = implode(
       margin: 20px;
       overflow: scroll;
       height: 90%;
-      width: 300px;
+      width: 200px;
       display: flex;
       flex-direction: column;
     }
