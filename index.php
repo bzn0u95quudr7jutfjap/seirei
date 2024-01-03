@@ -177,7 +177,7 @@ function apply()
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
-  save();
+  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 ?>
   <!DOCTYPE html>
   <html>
