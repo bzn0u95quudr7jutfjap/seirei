@@ -12,13 +12,13 @@ Gli standard di separazione dei file non sono applicabili a questo progetto.
 ## Comando 「命令」
 
 ```shell
-    php --server $IP:$PORTA $INDEXPHP --docroot .
+php --server $IP:$PORTA $INDEXPHP --docroot .
 ```
 
-$IP e $PORTA scelti arbitrari.  
-$INDEXPHP è il path di index.php
+$IP e $PORTA scelti arbitrari.
+$INDEXPHP è il path di index.php  
 Esempio:
 
 ```shell
-    php --server localhost:8888 ~/.local/bin/index.php --docroot .
+php --server localhost:8888 ~/.local/bin/index.php --docroot .
 ```
