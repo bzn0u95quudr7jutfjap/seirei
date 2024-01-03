@@ -538,7 +538,7 @@ $etichette = implode(
     <div id="etichette">
       <?php echo $etichette; ?>
     </div>
-    <form action="./" method="post">
+    <form action="./" target="_self" method="post">
       <button type="submit" name="command" value="apply">Applica modifiche</button>
     </form>
 
