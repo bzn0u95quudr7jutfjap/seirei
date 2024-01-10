@@ -3,8 +3,7 @@
 // QOL
 // =======================================================================================================================================================
 
-function exception_error_handler($errno, $errstr, $errfile, $errline)
-{
+function exception_error_handler($errno, $errstr, $errfile, $errline) {
   throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
 }
 set_error_handler("exception_error_handler");
@@ -13,13 +12,11 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-function map($function, $collection)
-{
+function map($function, $collection) {
   return array_map($function, $collection);
 }
 
-function zip($a0, $a1)
-{
+function zip($a0, $a1) {
   $a0 = array_values($a0);
   $a1 = array_values($a1);
   $a = [];
@@ -30,13 +27,11 @@ function zip($a0, $a1)
   return $a;
 }
 
-function filter($function, $collection)
-{
+function filter($function, $collection) {
   return array_filter($collection, $function);
 }
 
-function ls()
-{
+function ls() {
   return array_values(
     filter(
       function ($f) {
@@ -47,8 +42,7 @@ function ls()
   );
 }
 
-function indicizzafiles($i, $a)
-{
+function indicizzafiles($i, $a) {
   $k = array_keys($a);
   $b = [];
   for ($j = 0; $j < count($a); $j += 1, $i += 1) {
@@ -57,8 +51,7 @@ function indicizzafiles($i, $a)
   return $b;
 }
 
-function maxindice($a)
-{
+function maxindice($a) {
   return count($a) == 0 ? 0 : max(
     map(
       function ($k) {
@@ -69,8 +62,7 @@ function maxindice($a)
   );
 }
 
-function all_true($array)
-{
+function all_true($array) {
   return array_reduce(
     $array,
     function ($a, $b) {
@@ -86,13 +78,11 @@ function all_true($array)
 
 session_start();
 
-function display_text($file)
-{
+function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
   readfile($file);
 }
-function display_other($mime, $file)
-{
+function display_other($mime, $file) {
   header("Content-Type: " . $mime);
   readfile($file);
 }
@@ -116,14 +106,12 @@ if (count($_GET) != 0) {
 
 const CONFIGFILEJSON = ".seireidire.json";
 
-function save()
-{
+function save() {
   header("Location: /");
   return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
-function apply()
-{
+function apply() {
   $etichette = filter(
     function ($e) {
       $b = file_exists($e);
@@ -197,8 +185,7 @@ function apply()
 <?php
 }
 
-function new_etichetta()
-{
+function new_etichetta() {
   try {
     $etichetta = $_POST['etichetta'];
     $key = "etichetta_" . count($_SESSION['etichette']);
@@ -213,8 +200,7 @@ function new_etichetta()
   }
 }
 
-function new_associazione()
-{
+function new_associazione() {
   try {
     ["file" => $file, "etichetta" => $etichetta] = $_POST;
     $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
@@ -227,8 +213,7 @@ function new_associazione()
   }
 }
 
-function get_associazione()
-{
+function get_associazione() {
   try {
     echo json_encode([true, $_SESSION['associazioni'][$_POST['file']]]);
   } catch (Exception) {
@@ -236,8 +221,7 @@ function get_associazione()
   }
 }
 
-function set_etichetta()
-{
+function set_etichetta() {
   try {
     $ret = $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
     echo json_encode([true, $ret]);
