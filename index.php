@@ -340,23 +340,12 @@ $miniature = implode(
     ->get()
 );
 
+const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
 $etichette = implode(
   "\n",
-  array_map(
-    function ($coll) {
-      [$id, $etichetta] = $coll;
-      return str_replace(
-        '{{ID}}',
-        $id,
-        str_replace(
-          '{{ETICHETTA}}',
-          $etichetta,
-          htmletichetta
-        )
-      );
-    },
-    zip(array_keys($_SESSION['etichette']), $_SESSION['etichette'])
-  )
+  stream($_SESSION['etichette'])
+    ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
+    ->get()
 );
 
 ?>
