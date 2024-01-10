@@ -39,6 +39,10 @@ class Stream {
   public function getValues(): array {
     return array_values($this->collection);
   }
+
+  public function join($delimiter): string {
+    return implode($delimiter, $this->collection);
+  }
 }
 
 function stream($collection) {
@@ -331,22 +335,16 @@ try {
 };
 
 const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
-$miniature = implode(
-  "\n",
-  stream($_SESSION['files'])
-    ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
-    ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
-    ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
-    ->get()
-);
+$miniature = stream($_SESSION['files'])
+  ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
+  ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
+  ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
+  ->join("\n");
 
 const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
-$etichette = implode(
-  "\n",
-  stream($_SESSION['etichette'])
-    ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
-    ->get()
-);
+$etichette = stream($_SESSION['etichette'])
+  ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
+  ->join("\n");
 
 ?>
 
