@@ -148,7 +148,6 @@ function save() {
   return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
-
 const htmlTableRow = '
       <tr>
         <td>{{RIS}}</td>
