@@ -315,10 +315,11 @@ try {
     $_SESSION['files'] = array_merge($common, $diff);
   }
 } catch (Exception) {
-  $_SESSION = [];
-  $_SESSION['etichette']    = [];
-  $_SESSION['associazioni'] = [];
-  $_SESSION['files'] = indicizzafiles(0, $files);
+  $_SESSION = [
+    'etichette' => [],
+    'associazioni' => [],
+    'files' => indicizzafiles(0, $files)
+  ];
 };
 
 const htmlminiatura = '
