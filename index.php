@@ -11,6 +11,40 @@ set_error_handler(
 // QOL
 // ========================================================================================================================
 
+class Stream {
+  public function __construct(private $collection = []) {
+  }
+
+  private function set($collection): Stream {
+    $this->collection = $collection;
+    return $this;
+  }
+
+  public function map($function): Stream {
+    return $this->set(array_map($function, $this->collection));
+  }
+
+  public function mapKeyValues($function): Stream {
+    return $this->set(array_map($function, array_keys($this->collection), $this->collection));
+  }
+
+  public function filter($function): Stream {
+    return $this->set(array_filter($this->collection, $function));
+  }
+
+  public function get() {
+    return $this->collection;
+  }
+
+  public function getValues() {
+    return array_values($this->collection);
+  }
+}
+
+function stream($collection) {
+  return new Stream($collection);
+}
+
 function map($function, $collection) {
   return array_map($function, $collection);
 }
