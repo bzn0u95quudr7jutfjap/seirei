@@ -148,54 +148,32 @@ function save() {
   return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
 }
 
-function apply() {
-  $etichette = filter(
-    function ($e) {
-      $b = file_exists($e);
-      return ($b && is_dir($e)) || (!$b && mkdir($e));
-    },
-    $_SESSION['etichette']
-  );
-  $etichette_keys = array_keys($etichette);
-  $associazioni = filter(
-    function ($e) use ($etichette_keys) {
-      return in_array($e, $etichette_keys);
-    },
-    $_SESSION['associazioni']
-  );
-  $associazioni = zip(map(
-    function ($f) {
-      return $_SESSION['files'][$f];
-    },
-    array_keys($associazioni)
-  ), map(
-    function ($e) {
-      return $_SESSION['etichette'][$e];
-    },
-    $associazioni
-  ));
 
-  //TODO
-  //trycatch in caso di eccezzione
-  $res = implode(
-    "\n",
-    map(
-      function ($coll) {
-        [$file, $dir] = $coll;
-        $from = "./$file";
-        $to = "./$dir/$file";
-        $res = json_encode(rename($from, $to));
-        return "
-          <tr>
-            <td>$res</td>
-            <td>$from</td>
-            <td>$to</td>
-          </tr>
-          ";
-      },
-      $associazioni
-    )
-  );
+const htmlTableRow = '
+      <tr>
+        <td>{{RIS}}</td>
+        <td>{{SRC}}</td>
+        <td>{{DST}}</td>
+      </tr>
+  ';
+const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
+
+function apply() {
+  $etichette = stream($_SESSION['etichette'])
+    ->filter(fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))
+    ->get();
+
+  $ris = stream($_SESSION['associazioni'])
+    ->filter(fn ($e) => array_key_exists($e, $etichette))
+    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
+    ->map(function ($coll) {
+      //TODO - trycatch in caso di eccezzione
+      [$file, $dir] = $coll;
+      [$src, $dst] = ["./$file", "./$dir/$file"];
+      return [json_encode(rename($src, $dst)), $src, $dst];
+    })
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->join("\n");
 
   //TODO
   //rimuovere solo i file e le associazioni che hanno avuto successo
@@ -213,7 +191,7 @@ function apply() {
         <th>Risultato</th>
         <th>Sorgente</th>
         <th>Destinazione</th>
-        <?php echo $res; ?>
+        <?php echo $ris; ?>
       </tr>
     </table>
   </body>
