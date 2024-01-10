@@ -287,19 +287,6 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // ========================================================================================================================
 
-const htmlminiatura = "
-  <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
-  </a>
-";
-
-const htmletichetta = "
-  <div class='etichetta' >
-    <input class='radio' type='radio' name='etichetta' value='{{ID}}' onclick='phpNewAssociazione(this)'>
-    <input class='text'  type='text'  name='{{ID}}'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
-  </div>
-";
-
 $files = ls();
 
 try {
@@ -334,6 +321,11 @@ try {
   $_SESSION['files'] = indicizzafiles(0, $files);
 };
 
+const htmlminiatura = "
+  <a target='contenuto' href='./?file={{ID}}'>
+    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
+  </a>
+";
 const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
 $miniature = stream($_SESSION['files'])
   ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
@@ -341,6 +333,12 @@ $miniature = stream($_SESSION['files'])
   ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
   ->join("\n");
 
+const htmletichetta = "
+  <div class='etichetta' >
+    <input class='radio' type='radio' name='etichetta' value='{{ID}}' onclick='phpNewAssociazione(this)'>
+    <input class='text'  type='text'  name='{{ID}}'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
+  </div>
+";
 const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
 $etichette = stream($_SESSION['etichette'])
   ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
