@@ -32,11 +32,11 @@ class Stream {
     return $this->set(array_filter($this->collection, $function));
   }
 
-  public function get() {
+  public function get(): array {
     return $this->collection;
   }
 
-  public function getValues() {
+  public function getValues(): array {
     return array_values($this->collection);
   }
 }
