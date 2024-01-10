@@ -330,18 +330,14 @@ try {
   $_SESSION['files'] = indicizzafiles(0, $files);
 };
 
+const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
 $miniature = implode(
   "\n",
-  map(
-    function ($coll) {
-      [$id, $filename] = $coll;
-      $res = str_replace("{{FILENAME}}", filter_var($filename, FILTER_SANITIZE_FULL_SPECIAL_CHARS), htmlminiatura);
-      $res = str_replace("{{ID}}", $id, $res);
-      $res = str_replace("{{EVIDENZIATURA}}", in_array($id, array_keys($_SESSION['associazioni'])) ? "evidenziatura" : "", $res);
-      return $res;
-    },
-    zip(array_keys($_SESSION['files']), $_SESSION['files'])
-  )
+  stream($_SESSION['files'])
+    ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
+    ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
+    ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
+    ->get()
 );
 
 $etichette = implode(
