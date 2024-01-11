@@ -132,9 +132,11 @@ if (count($_GET) != 0) {
 
 const CONFIGFILEJSON = ".seireidire.json";
 
-function save() {
-  header("Location: /");
-  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+function save($refresh = false) {
+  if ($refresh) {
+    header("Location: /");
+  }
+  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
 }
 
 const htmlTableRow = '
@@ -168,7 +170,7 @@ function apply() {
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
-  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+  save();
 ?>
   <!DOCTYPE html>
   <html>
@@ -235,7 +237,7 @@ function set_etichetta() {
 
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
-    "save" => save(),
+    "save" => save(true),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
     "setEtichetta" => set_etichetta(),
@@ -257,33 +259,24 @@ $files = ls();
 
 try {
   $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
-  ->map(fn($a) => (array) $a)
-  ->get();
+    ->map(fn ($a) => (array) $a)
+    ->get();
 
-  $diff = indicizzafiles(
-    maxindice($_SESSION['files']),
-    array_values(array_diff(
-      $files,
-      $_SESSION['files']
-    ))
-  );
-
+  $diff = array_diff($files, $_SESSION['files']);
   if (count($diff) > 0) {
-    $common = array_intersect($_SESSION['files'], $files);
-    $_SESSION['associazioni'] = filter(
-      function ($coll) use ($common) {
-        [$filename,] = $coll;
-        return in_array($filename, $common);
-      },
-      $_SESSION['associazioni']
-    );
-    $_SESSION['files'] = array_merge($common, $diff);
+    $max = max(array_keys($_SESSION['files']));
+    $diff = array_combine(range($max, $max + count($diff) - 1), $diff);
+    $_SESSION['files'] = $diff + array_intersect($_SESSION['files'], $files);
+
+    $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
+      ->filter(fn ($file) => in_array($file, $_SESSION['files']))
+      ->get();
   }
-} catch (Exception) {
+} catch (Exception | ValueError) {
   $_SESSION = [
     'etichette' => [],
     'associazioni' => [],
-    'files' => indicizzafiles(0, $files)
+    'files' => $files
   ];
 };
 
@@ -302,7 +295,7 @@ $miniature = stream($_SESSION['files'])
 const htmletichetta = '
   <div class="etichetta" >
     <input class="radio" type="radio" name="etichetta" value="{{ID}}" onclick="phpNewAssociazione(this)">
-    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\"{{ID}}\",this)" value="{{ETICHETTA}}">
+    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\'{{ID}}\',this)" value="{{ETICHETTA}}">
   </div>
 ';
 const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
@@ -514,7 +507,7 @@ $etichette = stream($_SESSION['etichette'])
     <form action="./" method="post" target="devnull" id="newAssociazioneForm">
       <?php echo $etichette; ?>
       <input hidden id='newAssociazioneFile' type="text" name="file">
-      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'>
+      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
     </form>
     <form action="./" method="post">
       <button type="submit" name="command" value="apply">Applica modifiche</button>
