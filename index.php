@@ -260,30 +260,21 @@ try {
   ->map(fn($a) => (array) $a)
   ->get();
 
-  $diff = indicizzafiles(
-    maxindice($_SESSION['files']),
-    array_values(array_diff(
-      $files,
-      $_SESSION['files']
-    ))
-  );
-
+  $diff = array_diff($files, $_SESSION['files']);
   if (count($diff) > 0) {
-    $common = array_intersect($_SESSION['files'], $files);
-    $_SESSION['associazioni'] = filter(
-      function ($coll) use ($common) {
-        [$filename,] = $coll;
-        return in_array($filename, $common);
-      },
-      $_SESSION['associazioni']
-    );
-    $_SESSION['files'] = array_merge($common, $diff);
+    $max = max(array_keys($_SESSION['files']));
+    $diff = array_combine(range($max, $max + count($diff) - 1), $diff);
+    $_SESSION['files'] = $diff + array_intersect($_SESSION['files'], $files);
+
+    $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
+      ->filter(fn ($file) => in_array($file, $_SESSION['files']))
+      ->get();
   }
 } catch (Exception) {
   $_SESSION = [
     'etichette' => [],
     'associazioni' => [],
-    'files' => indicizzafiles(0, $files)
+    'files' => $files
   ];
 };
 
