@@ -108,7 +108,7 @@ session_start();
 
 function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
-  readfile($file);
+  echo filter_var(file_get_contents($file), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 }
 function display_other($mime, $file) {
   header("Content-Type: " . $mime);
@@ -120,6 +120,7 @@ if (array_key_exists("file", $_GET)) {
   $mime = mime_content_type($file);
   match (true) {
     strpos($mime, 'text') !== false => display_text($file),
+    strpos($mime, 'application') !== false => display_text($file),
     default => display_other($mime, $file),
   };
 }
