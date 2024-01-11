@@ -53,17 +53,6 @@ function map($function, $collection) {
   return array_map($function, $collection);
 }
 
-function zip($a0, $a1) {
-  $a0 = array_values($a0);
-  $a1 = array_values($a1);
-  $a = [];
-  $len = [count($a0), count($a1)];
-  for ($i = 0; $i < $len[0] || $i < $len[1]; $i += 1) {
-    $a[] = [$a0[$i], $a1[$i]];
-  }
-  return $a;
-}
-
 function filter($function, $collection) {
   return array_filter($collection, $function);
 }
