@@ -132,9 +132,11 @@ if (count($_GET) != 0) {
 
 const CONFIGFILEJSON = ".seireidire.json";
 
-function save() {
-  header("Location: /");
-  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+function save($refresh = false) {
+  if ($refresh) {
+    header("Location: /");
+  }
+  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
 }
 
 const htmlTableRow = '
@@ -168,7 +170,7 @@ function apply() {
   $_SESSION['files'] = [];
   $_SESSION['associazioni'] = [];
 
-  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+  save();
 ?>
   <!DOCTYPE html>
   <html>
@@ -235,7 +237,7 @@ function set_etichetta() {
 
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
-    "save" => save(),
+    "save" => save(true),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
     "setEtichetta" => set_etichetta(),
@@ -257,8 +259,8 @@ $files = ls();
 
 try {
   $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
-  ->map(fn($a) => (array) $a)
-  ->get();
+    ->map(fn ($a) => (array) $a)
+    ->get();
 
   $diff = array_diff($files, $_SESSION['files']);
   if (count($diff) > 0) {
@@ -270,7 +272,7 @@ try {
       ->filter(fn ($file) => in_array($file, $_SESSION['files']))
       ->get();
   }
-} catch (Exception) {
+} catch (Exception | ValueError) {
   $_SESSION = [
     'etichette' => [],
     'associazioni' => [],
