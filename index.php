@@ -135,10 +135,11 @@ if (count($_GET) != 0) {
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save($refresh = false) {
+  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
   if ($refresh) {
     header("Location: /");
+    die();
   }
-  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
 }
 
 const htmlTableRow = '
@@ -199,11 +200,10 @@ function new_etichetta() {
     $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
     if ($success) {
       $_SESSION['etichette'][$key] = $etichetta;
-      save();
+      save(true);
     }
-    echo json_encode([$success, $key]);
   } catch (Exception) {
-    echo json_encode([false, null]);
+    echo "<p>Errore di un nuova etichetta</p>";
   }
 }
 
