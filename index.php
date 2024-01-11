@@ -265,11 +265,14 @@ try {
     ->map(fn ($a) => (array) $a)
     ->get();
 
-  $diff = array_diff($files, $_SESSION['files']);
-  if (count($diff) > 0) {
+  // TODO fix code
+  $common = array_intersect($_SESSION['files'], $files);
+  if (count($common) < count($_SESSION['files'])) {
     $max = max(array_keys($_SESSION['files'])) + 1;
-    $diff = array_combine(range($max, $max + count($diff) - 1), $diff);
-    $_SESSION['files'] = $diff + array_intersect($_SESSION['files'], $files);
+    $diff = array_diff($files, $_SESSION['files']);
+    $diff = count($diff) == 0 ? [] : array_combine(range($max, $max + count($diff) - 1), $diff);
+    $_SESSION['files'] = $diff + $common;
+
 
     $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
       ->filter(fn ($file) => array_key_exists($file, $_SESSION['files']), ARRAY_FILTER_USE_KEY)
