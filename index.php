@@ -256,10 +256,9 @@ if (count($_POST) != 0) {
 $files = ls();
 
 try {
-  $_SESSION = (array) json_decode(file_get_contents(CONFIGFILEJSON));
-  $_SESSION['etichette'] = !isset($_SESSION['etichette']) ? [] : (array) $_SESSION['etichette'];
-  $_SESSION['associazioni'] = !isset($_SESSION['associazioni']) ? [] : (array) $_SESSION['associazioni'];
-  $_SESSION['files'] = !isset($_SESSION['files']) ? [] : (array) $_SESSION['files'];
+  $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
+  ->map(fn($a) => (array) $a)
+  ->get();
 
   $diff = indicizzafiles(
     maxindice($_SESSION['files']),
