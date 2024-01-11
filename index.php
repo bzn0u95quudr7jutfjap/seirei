@@ -295,7 +295,7 @@ $miniature = stream($_SESSION['files'])
 const htmletichetta = '
   <div class="etichetta" >
     <input class="radio" type="radio" name="etichetta" value="{{ID}}" onclick="phpNewAssociazione(this)">
-    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\"{{ID}}\",this)" value="{{ETICHETTA}}">
+    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\'{{ID}}\',this)" value="{{ETICHETTA}}">
   </div>
 ';
 const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
@@ -507,7 +507,7 @@ $etichette = stream($_SESSION['etichette'])
     <form action="./" method="post" target="devnull" id="newAssociazioneForm">
       <?php echo $etichette; ?>
       <input hidden id='newAssociazioneFile' type="text" name="file">
-      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'>
+      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
     </form>
     <form action="./" method="post">
       <button type="submit" name="command" value="apply">Applica modifiche</button>
