@@ -125,7 +125,7 @@ function apply() {
 
   $successo = stream($_SESSION['associazioni'])
     ->filter(fn ($e) => array_key_exists($e, $etichette))
-    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
+    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $v])
     ->filter(function ($coll) {
       try {
         [$file, $dir] = $coll;
@@ -137,16 +137,29 @@ function apply() {
     })
     ->get();
 
-  // TODO controllare la stampa di questi
-  $ris = stream($successo)->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+  $ris = stream($successo)
+    ->map(fn ($coll) => ["true", './'.($coll[0]), './'.($coll[1]).'/'.($coll[0])])
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
     ->join("\n");
 
-  // TODO verificare il todo sotto
-  // TODO rimuovere solo i file e le associazioni che hanno avuto successo
+  // TODO correggere
   $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
-  $_SESSION['associazioni'] = array_diff($_SESSION['associazioni'], stream($successo)->map(fn ($c) => $c[1])->get());
+  $assoc_pre = $_SESSION['associazioni'];
+  $_SESSION['associazioni'] = array_diff($_SESSION['associazioni'], stream($successo)->map(fn ($c) => $c[2])->get());
 
-  save();
+  header(TEXT_MODE);
+  echo "SUCCESSO\n";
+  var_dump($successo);
+  echo "\n\n";
+  echo "files\n";
+  var_dump($_SESSION['files']);
+  echo "\n\n";
+  echo "associazioni\n";
+  var_dump($assoc_pre);
+  var_dump($_SESSION['associazioni']);
+  die();
+
+  //save();
 ?>
   <!DOCTYPE html>
   <html>
