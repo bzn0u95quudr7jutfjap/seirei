@@ -1,42 +1,61 @@
 <?php
-// =======================================================================================================================================================
-// QOL
-// =======================================================================================================================================================
-
-function exception_error_handler($errno, $errstr, $errfile, $errline)
-{
-  throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-}
-set_error_handler("exception_error_handler");
-
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-function map($function, $collection)
-{
-  return array_map($function, $collection);
-}
+set_error_handler(
+  fn ($errno, $errstr, $errfile, $errline) => throw new ErrorException($errstr, $errno, 0, $errfile, $errline)
+);
 
-function zip($a0, $a1)
-{
-  $a0 = array_values($a0);
-  $a1 = array_values($a1);
-  $a = [];
-  $len = [count($a0), count($a1)];
-  for ($i = 0; $i < $len[0] || $i < $len[1]; $i += 1) {
-    $a[] = [$a0[$i], $a1[$i]];
+const TEXT_MODE = 'Content-Type: text/plain; charset=utf-8';
+
+// ========================================================================================================================
+// QOL
+// ========================================================================================================================
+
+class Stream {
+  public function __construct(private $collection = []) {
   }
-  return $a;
+
+  private function set($collection): Stream {
+    $this->collection = $collection;
+    return $this;
+  }
+
+  public function map($function): Stream {
+    return $this->set(array_map($function, $this->collection));
+  }
+
+  public function mapKeyValues($function): Stream {
+    return $this->set(array_map($function, array_keys($this->collection), $this->collection));
+  }
+
+  public function filter($function, $mode = 0): Stream {
+    return $this->set(array_filter($this->collection, $function, $mode));
+  }
+
+  public function get(): array {
+    return $this->collection;
+  }
+
+  public function getValues(): array {
+    return array_values($this->collection);
+  }
+
+  public function join($delimiter): string {
+    return implode($delimiter, $this->collection);
+  }
 }
 
-function filter($function, $collection)
-{
+function stream($collection) {
+  return new Stream($collection);
+}
+
+function filter($function, $collection) {
   return array_filter($collection, $function);
 }
 
-function ls()
-{
+function ls() {
   return array_values(
     filter(
       function ($f) {
@@ -47,52 +66,17 @@ function ls()
   );
 }
 
-function indicizzafiles($i, $a)
-{
-  $k = array_keys($a);
-  $b = [];
-  for ($j = 0; $j < count($a); $j += 1, $i += 1) {
-    $b["file_$i"] = $a[$k[$i]];
-  }
-  return $b;
-}
-
-function maxindice($a)
-{
-  return count($a) == 0 ? 0 : max(
-    map(
-      function ($k) {
-        return (int)(explode("_", $k)[1]);
-      },
-      array_keys($a)
-    )
-  );
-}
-
-function all_true($array)
-{
-  return array_reduce(
-    $array,
-    function ($a, $b) {
-      return $a && $b;
-    },
-    true
-  );
-}
-
-// =======================================================================================================================================================
+// ========================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
-// =======================================================================================================================================================
+// ========================================================================================================================
 
 session_start();
 
-function display_text($file)
-{
+function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
-  readfile($file);
+  echo filter_var(file_get_contents($file), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 }
-function display_other($mime, $file)
-{
+function display_other($mime, $file) {
   header("Content-Type: " . $mime);
   readfile($file);
 }
@@ -102,6 +86,7 @@ if (array_key_exists("file", $_GET)) {
   $mime = mime_content_type($file);
   match (true) {
     strpos($mime, 'text') !== false => display_text($file),
+    strpos($mime, 'application') !== false => display_text($file),
     default => display_other($mime, $file),
   };
 }
@@ -110,74 +95,65 @@ if (count($_GET) != 0) {
   die();
 }
 
-// =======================================================================================================================================================
+// ========================================================================================================================
 // COMANDI POST
-// =======================================================================================================================================================
+// ========================================================================================================================
 
 const CONFIGFILEJSON = ".seireidire.json";
 
-function save()
-{
-  header("Location: /");
-  return file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+function save($refresh = false) {
+  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
+  if ($refresh) {
+    header("Location: /");
+    die();
+  }
 }
 
-function apply()
-{
-  $etichette = filter(
-    function ($e) {
-      $b = file_exists($e);
-      return ($b && is_dir($e)) || (!$b && mkdir($e));
-    },
-    $_SESSION['etichette']
-  );
-  $etichette_keys = array_keys($etichette);
-  $associazioni = filter(
-    function ($e) use ($etichette_keys) {
-      return in_array($e, $etichette_keys);
-    },
-    $_SESSION['associazioni']
-  );
-  $associazioni = zip(map(
-    function ($f) {
-      return $_SESSION['files'][$f];
-    },
-    array_keys($associazioni)
-  ), map(
-    function ($e) {
-      return $_SESSION['etichette'][$e];
-    },
-    $associazioni
-  ));
+const htmlTableRow = '
+      <tr>
+        <td>{{RIS}}</td>
+        <td>{{SRC}}</td>
+        <td>{{DST}}</td>
+      </tr>
+  ';
+const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
 
-  //TODO
-  //trycatch in caso di eccezzione
-  $res = implode(
-    "\n",
-    map(
-      function ($coll) {
+function apply() {
+  $etichette = stream($_SESSION['etichette'])
+    ->filter(fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))
+    ->get();
+
+  $successo = stream($_SESSION['associazioni'])
+    ->filter(fn ($e) => array_key_exists($e, $etichette))
+    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $k])
+    ->filter(function ($coll) {
+      try {
         [$file, $dir] = $coll;
-        $from = "./$file";
-        $to = "./$dir/$file";
-        $res = json_encode(rename($from, $to));
-        return "
-          <tr>
-            <td>$res</td>
-            <td>$from</td>
-            <td>$to</td>
-          </tr>
-          ";
-      },
-      $associazioni
-    )
-  );
+        [$src, $dst] = ["./$file", "./$dir/$file"];
+        return json_encode(rename($src, $dst));
+      } catch (Exception) {
+        return false;
+      }
+    })
+    ->get();
 
-  //TODO
-  //rimuovere solo i file e le associazioni che hanno avuto successo
-  $_SESSION['files'] = [];
-  $_SESSION['associazioni'] = [];
+  $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
+  foreach (stream($successo)->map(fn ($c) => $c[2])->get() as $k) {
+    unset($_SESSION['associazioni'][$k]);
+  }
 
-  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION));
+  $ris = stream($successo)
+    ->map(fn ($coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->join("\n")
+    . "\n"
+    . stream($_SESSION['associazioni'])
+    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
+    ->map(fn ($coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->join("\n");
+
+  save();
 ?>
   <!DOCTYPE html>
   <html>
@@ -188,7 +164,7 @@ function apply()
         <th>Risultato</th>
         <th>Sorgente</th>
         <th>Destinazione</th>
-        <?php echo $res; ?>
+        <?php echo $ris; ?>
       </tr>
     </table>
   </body>
@@ -197,24 +173,21 @@ function apply()
 <?php
 }
 
-function new_etichetta()
-{
+function new_etichetta() {
   try {
     $etichetta = $_POST['etichetta'];
     $key = "etichetta_" . count($_SESSION['etichette']);
     $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
     if ($success) {
       $_SESSION['etichette'][$key] = $etichetta;
-      save();
+      save(true);
     }
-    echo json_encode([$success, $key]);
   } catch (Exception) {
-    echo json_encode([false, null]);
+    echo "<p>Errore di un nuova etichetta</p>";
   }
 }
 
-function new_associazione()
-{
+function new_associazione() {
   try {
     ["file" => $file, "etichetta" => $etichetta] = $_POST;
     $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
@@ -227,8 +200,7 @@ function new_associazione()
   }
 }
 
-function get_associazione()
-{
+function get_associazione() {
   try {
     echo json_encode([true, $_SESSION['associazioni'][$_POST['file']]]);
   } catch (Exception) {
@@ -236,8 +208,7 @@ function get_associazione()
   }
 }
 
-function set_etichetta()
-{
+function set_etichetta() {
   try {
     $ret = $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
     echo json_encode([true, $ret]);
@@ -248,7 +219,7 @@ function set_etichetta()
 
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
-    "save" => save(),
+    "save" => save(true),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
     "setEtichetta" => set_etichetta(),
@@ -262,89 +233,56 @@ if (count($_POST) != 0) {
   die();
 }
 
-// =======================================================================================================================================================
+// ========================================================================================================================
 // PAGINA PRINCIPALE
-// =======================================================================================================================================================
-
-const htmlminiatura = "
-  <a target='contenuto' href='./?file={{ID}}'>
-    <img class='miniatura {{EVIDENZIATURA}}' id='{{ID}}' alt='{{FILENAME}}' onclick='phpGetAssociazione(this);'>
-  </a>
-";
-
-const htmletichetta = "
-  <div class='etichetta' >
-    <input class='radio' type='radio' name='etichetta' value='{{ID}}' onclick='phpNewAssociazione(this)'>
-    <input class='text'  type='text'  name='{{ID}}'     id='{{ID}}' onchange='phpAggiornaNomeEtichetta(\"{{ID}}\",this)' value='{{ETICHETTA}}'>
-  </div>
-";
+// ========================================================================================================================
 
 $files = ls();
 
 try {
-  $_SESSION = (array) json_decode(file_get_contents(CONFIGFILEJSON));
-  $_SESSION['etichette'] = !isset($_SESSION['etichette']) ? [] : (array) $_SESSION['etichette'];
-  $_SESSION['associazioni'] = !isset($_SESSION['associazioni']) ? [] : (array) $_SESSION['associazioni'];
-  $_SESSION['files'] = !isset($_SESSION['files']) ? [] : (array) $_SESSION['files'];
+  $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
+    ->map(fn ($a) => (array) $a)
+    ->get();
 
-  $diff = indicizzafiles(
-    maxindice($_SESSION['files']),
-    array_values(array_diff(
-      $files,
-      $_SESSION['files']
-    ))
-  );
+  $common = array_intersect($_SESSION['files'], $files);
+  $max = max(array_keys($_SESSION['files'])) + 1;
+  $diff = array_diff($files, $_SESSION['files']);
+  $diff = count($diff) == 0 ? [] : array_combine(range($max, $max + count($diff) - 1), $diff);
+  $_SESSION['files'] = $diff + $common;
 
-  if (count($diff) > 0) {
-    $common = array_intersect($_SESSION['files'], $files);
-    $_SESSION['associazioni'] = filter(
-      function ($coll) use ($common) {
-        [$filename,] = $coll;
-        return in_array($filename, $common);
-      },
-      $_SESSION['associazioni']
-    );
-    $_SESSION['files'] = array_merge($common, $diff);
-  }
-} catch (Exception) {
-  $_SESSION = [];
-  $_SESSION['etichette']    = [];
-  $_SESSION['associazioni'] = [];
-  $_SESSION['files'] = indicizzafiles(0, $files);
+  $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
+    ->filter(fn ($file) => array_key_exists($file, $_SESSION['files']), ARRAY_FILTER_USE_KEY)
+    ->get();
+} catch (Exception | ValueError) {
+  $_SESSION = [
+    'etichette' => [],
+    'associazioni' => [],
+    'files' => $files
+  ];
 };
 
-$miniature = implode(
-  "\n",
-  map(
-    function ($coll) {
-      [$id, $filename] = $coll;
-      $res = str_replace("{{FILENAME}}", filter_var($filename, FILTER_SANITIZE_FULL_SPECIAL_CHARS), htmlminiatura);
-      $res = str_replace("{{ID}}", $id, $res);
-      $res = str_replace("{{EVIDENZIATURA}}", in_array($id, array_keys($_SESSION['associazioni'])) ? "evidenziatura" : "", $res);
-      return $res;
-    },
-    zip(array_keys($_SESSION['files']), $_SESSION['files'])
-  )
-);
+const htmlminiatura = '
+  <a target="contenuto" href="./?file={{ID}}">
+    <img class="miniatura {{EVIDENZIATURA}}" id="{{ID}}" alt="{{FILENAME}}" onclick="phpGetAssociazione(this);">
+  </a>
+';
+const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
+$miniature = stream($_SESSION['files'])
+  ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
+  ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
+  ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
+  ->join("\n");
 
-$etichette = implode(
-  "\n",
-  array_map(
-    function ($coll) {
-      [$id, $etichetta] = $coll;
-      return str_replace(
-        '{{ID}}',
-        $id,
-        str_replace(
-          '{{ETICHETTA}}',
-          $etichetta,
-          htmletichetta
-        )
-      );
-    },
-    zip(array_keys($_SESSION['etichette']), $_SESSION['etichette'])
-  )
-);
+const htmletichetta = '
+  <div class="etichetta" >
+    <input class="radio" type="radio" name="etichetta" value="{{ID}}" onclick="phpNewAssociazione(this)">
+    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\'{{ID}}\',this)" value="{{ETICHETTA}}">
+  </div>
+';
+const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
+$etichette = stream($_SESSION['etichette'])
+  ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
+  ->join("\n");
 
 ?>
 
@@ -550,7 +488,7 @@ $etichette = implode(
     <form action="./" method="post" target="devnull" id="newAssociazioneForm">
       <?php echo $etichette; ?>
       <input hidden id='newAssociazioneFile' type="text" name="file">
-      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'>
+      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
     </form>
     <form action="./" method="post">
       <button type="submit" name="command" value="apply">Applica modifiche</button>
@@ -562,9 +500,9 @@ $etichette = implode(
 </html>
 
 <?php
-// =======================================================================================================================================================
+// ========================================================================================================================
 // ROUTER PER LA STAMPA DELLE IMMAGINI
-// =======================================================================================================================================================
+// ========================================================================================================================
 
 $req = $_SERVER['REQUEST_URI'];
 if (strpos($req, '?') !== false) {
