@@ -51,19 +51,10 @@ function stream($collection) {
   return new Stream($collection);
 }
 
-function filter($function, $collection) {
-  return array_filter($collection, $function);
-}
-
 function ls() {
-  return array_values(
-    filter(
-      function ($f) {
-        return !is_dir($f);
-      },
-      glob('*')
-    )
-  );
+  return stream(glob('*'))
+    ->filter(fn ($f) => !is_dir($f))
+    ->getValues();
 }
 
 // ========================================================================================================================
