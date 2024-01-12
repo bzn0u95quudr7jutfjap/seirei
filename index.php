@@ -282,111 +282,6 @@ $etichette = stream($_SESSION['etichette'])
 <html>
 
 <head>
-  <script>
-    // ===========================================================================================================================
-    // GLOBAL VARS
-    // ===========================================================================================================================
-    let MINIATURE = null;
-    let FILE = null;
-    let ETICHETTERADIO = null;
-    let NEWASSOCIAZIONE = null;
-    let BTN_NEW_ASSOCIAZIONE = null;
-
-    function clickPrimoNonEvidenziato() {
-      MINIATURE.filter(
-        (elem) => !elem.classList.contains('evidenziatura')
-      ).slice(0, 1).forEach(
-        (elem) => elem.click()
-      );
-    }
-
-    function selezionaFile(elem) {
-      const selezione = 'selezione';
-      MINIATURE.filter(
-        (elem) => elem.classList.contains(selezione)
-      ).forEach(
-        (elem) => elem.classList.remove(selezione)
-      );
-      NEWASSOCIAZIONE.file.value = elem.id;
-      FILE = elem;
-      elem.classList.add(selezione);
-    }
-
-    function main() {
-      NEWASSOCIAZIONE = {
-        form: document.getElementById('newAssociazioneForm'),
-        btn: document.getElementById('newAssociazioneBtn'),
-        file: document.getElementById('newAssociazioneFile'),
-      };
-      ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
-      MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
-      clickPrimoNonEvidenziato();
-    }
-
-    function callPhp(data, func) {
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = function() {
-        func(JSON.parse(this.responseText));
-      };
-      xmlhttp.send(data);
-    }
-
-    function phpAggiornaNomeEtichetta(id, elem) {
-      let data = new FormData();
-      data.append("command", "setEtichetta");
-      data.append("etichetta", id);
-      data.append("nome", elem.value);
-      callPhp(data,
-        function([success, oldname]) {
-          if (!success) {
-            elem.value = oldname;
-          }
-        }
-      );
-    }
-
-    function phpNewAssociazione(elem) {
-      callPhp(new FormData(
-          NEWASSOCIAZIONE.form,
-          NEWASSOCIAZIONE.btn
-        ),
-        function([success, primocheck]) {
-          if (success) {
-            FILE.classList.add('evidenziatura');
-            if (primocheck) {
-              clickPrimoNonEvidenziato();
-            }
-          } else {
-            alert("ERRORE ASSOCIAZIONE");
-            console.log("ERRORE ASSOCIAZIONE");
-          }
-        }
-      )
-    }
-
-    function phpGetAssociazione(elem) {
-      selezionaFile(elem);
-      let data = new FormData();
-      data.append("command", "getAssociazione");
-      data.append("file", elem.id);
-      callPhp(data,
-        function([success, radiovalue]) {
-          if (success) {
-            ETICHETTERADIO.filter(
-              (radio) => radio.value == radiovalue
-            ).forEach(
-              (radio) => radio.checked = true
-            );
-          } else {
-            ETICHETTERADIO.forEach(
-              (radio) => radio.checked = false
-            );
-          }
-        }
-      );
-    }
-  </script>
 
   <style>
     html {
@@ -488,6 +383,112 @@ $etichette = stream($_SESSION['etichette'])
 
   </div>
 </body>
+
+<script>
+  // ===========================================================================================================================
+  // GLOBAL VARS
+  // ===========================================================================================================================
+  let MINIATURE = null;
+  let FILE = null;
+  let ETICHETTERADIO = null;
+  let NEWASSOCIAZIONE = null;
+  let BTN_NEW_ASSOCIAZIONE = null;
+
+  function clickPrimoNonEvidenziato() {
+    MINIATURE.filter(
+      (elem) => !elem.classList.contains('evidenziatura')
+    ).slice(0, 1).forEach(
+      (elem) => elem.click()
+    );
+  }
+
+  function selezionaFile(elem) {
+    const selezione = 'selezione';
+    MINIATURE.filter(
+      (elem) => elem.classList.contains(selezione)
+    ).forEach(
+      (elem) => elem.classList.remove(selezione)
+    );
+    NEWASSOCIAZIONE.file.value = elem.id;
+    FILE = elem;
+    elem.classList.add(selezione);
+  }
+
+  function main() {
+    NEWASSOCIAZIONE = {
+      form: document.getElementById('newAssociazioneForm'),
+      btn: document.getElementById('newAssociazioneBtn'),
+      file: document.getElementById('newAssociazioneFile'),
+    };
+    ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
+    MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
+    clickPrimoNonEvidenziato();
+  }
+
+  function callPhp(data, func) {
+    const xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", "index.php", true);
+    xmlhttp.onload = function() {
+      func(JSON.parse(this.responseText));
+    };
+    xmlhttp.send(data);
+  }
+
+  function phpAggiornaNomeEtichetta(id, elem) {
+    let data = new FormData();
+    data.append("command", "setEtichetta");
+    data.append("etichetta", id);
+    data.append("nome", elem.value);
+    callPhp(data,
+      function([success, oldname]) {
+        if (!success) {
+          elem.value = oldname;
+        }
+      }
+    );
+  }
+
+  function phpNewAssociazione(elem) {
+    callPhp(new FormData(
+        NEWASSOCIAZIONE.form,
+        NEWASSOCIAZIONE.btn
+      ),
+      function([success, primocheck]) {
+        if (success) {
+          FILE.classList.add('evidenziatura');
+          if (primocheck) {
+            clickPrimoNonEvidenziato();
+          }
+        } else {
+          alert("ERRORE ASSOCIAZIONE");
+          console.log("ERRORE ASSOCIAZIONE");
+        }
+      }
+    )
+  }
+
+  function phpGetAssociazione(elem) {
+    selezionaFile(elem);
+    let data = new FormData();
+    data.append("command", "getAssociazione");
+    data.append("file", elem.id);
+    callPhp(data,
+      function([success, radiovalue]) {
+        if (success) {
+          ETICHETTERADIO.filter(
+            (radio) => radio.value == radiovalue
+          ).forEach(
+            (radio) => radio.checked = true
+          );
+        } else {
+          ETICHETTERADIO.forEach(
+            (radio) => radio.checked = false
+          );
+        }
+      }
+    );
+  }
+</script>
 
 </html>
 
