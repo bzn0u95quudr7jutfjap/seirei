@@ -387,11 +387,14 @@ $etichette = stream($_SESSION['etichette'])
   // ===========================================================================================================================
   // GLOBAL VARS
   // ===========================================================================================================================
-  let MINIATURE = null;
   let FILE = null;
-  let ETICHETTERADIO = null;
-  let NEWASSOCIAZIONE = null;
-  let BTN_NEW_ASSOCIAZIONE = null;
+  const MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
+  const ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
+  const NEWASSOCIAZIONE = {
+    form: document.getElementById('newAssociazioneForm'),
+    btn: document.getElementById('newAssociazioneBtn'),
+    file: document.getElementById('newAssociazioneFile'),
+  };
 
   function clickPrimoNonEvidenziato() {
     MINIATURE.filter(
@@ -414,13 +417,6 @@ $etichette = stream($_SESSION['etichette'])
   }
 
   function main() {
-    NEWASSOCIAZIONE = {
-      form: document.getElementById('newAssociazioneForm'),
-      btn: document.getElementById('newAssociazioneBtn'),
-      file: document.getElementById('newAssociazioneFile'),
-    };
-    ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
-    MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
     clickPrimoNonEvidenziato();
   }
 
