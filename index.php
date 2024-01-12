@@ -416,6 +416,10 @@ $etichette = stream($_SESSION['etichette'])
     elem.classList.add(selezione);
   }
 
+  function print_e() {
+    document.write(e.map((a) => '<p>' + a + '</p>').join('\n'));
+  }
+
   function main() {
     clickPrimoNonEvidenziato();
   }
@@ -424,12 +428,13 @@ $etichette = stream($_SESSION['etichette'])
     const xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", "index.php", true);
     xmlhttp.onload = function() {
+      let data;
       try {
-        const data = JSON.parse(this.responseText);
+        data = JSON.parse(this.responseText);
         const success = data.shift();
         (success ? successFunc : failFunc)(data);
       } catch (e) {
-        document.write(e);
+        print_e([e, data, successFunc, failFunc]);
       }
     };
     xmlhttp.send(data);
@@ -440,32 +445,19 @@ $etichette = stream($_SESSION['etichette'])
     data.append("command", "setEtichetta");
     data.append("etichetta", id);
     data.append("nome", elem.value);
-    callPhp(data,
-      function([success, oldname]) {
-        if (!success) {
-          elem.value = oldname;
-        }
-      }
-    );
+    callPhp(data, console.log, ([prev]) => elem.value = prev);
   }
 
   function phpNewAssociazione(elem) {
-    callPhp(new FormData(
-        NEWASSOCIAZIONE.form,
-        NEWASSOCIAZIONE.btn
-      ),
-      function([success, primocheck]) {
-        if (success) {
-          FILE.classList.add('evidenziatura');
-          if (primocheck) {
-            clickPrimoNonEvidenziato();
-          }
-        } else {
-          alert("ERRORE ASSOCIAZIONE");
-          console.log("ERRORE ASSOCIAZIONE");
+    callPhp(new FormData(NEWASSOCIAZIONE.form, NEWASSOCIAZIONE.btn),
+      function([primocheck]) {
+        FILE.classList.add('evidenziatura');
+        if (primocheck) {
+          clickPrimoNonEvidenziato();
         }
-      }
-    )
+      },
+      print_e
+    );
   }
 
   function phpGetAssociazione(elem) {
@@ -474,18 +466,17 @@ $etichette = stream($_SESSION['etichette'])
     data.append("command", "getAssociazione");
     data.append("file", elem.id);
     callPhp(data,
-      function([success, radiovalue]) {
-        if (success) {
-          ETICHETTERADIO.filter(
-            (radio) => radio.value == radiovalue
-          ).forEach(
-            (radio) => radio.checked = true
-          );
-        } else {
-          ETICHETTERADIO.forEach(
-            (radio) => radio.checked = false
-          );
-        }
+      function([radiovalue]) {
+        ETICHETTERADIO.filter(
+          (radio) => radio.value == radiovalue
+        ).forEach(
+          (radio) => radio.checked = true
+        );
+      },
+      function(_) {
+        ETICHETTERADIO.forEach(
+          (radio) => radio.checked = false
+        );
       }
     );
   }
