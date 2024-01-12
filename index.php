@@ -282,7 +282,6 @@ $etichette = stream($_SESSION['etichette'])
 <html>
 
 <head>
-
   <style>
     html {
       height: 100%;
