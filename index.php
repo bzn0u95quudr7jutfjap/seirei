@@ -51,10 +51,6 @@ function stream($collection) {
   return new Stream($collection);
 }
 
-function map($function, $collection) {
-  return array_map($function, $collection);
-}
-
 function filter($function, $collection) {
   return array_filter($collection, $function);
 }
@@ -67,36 +63,6 @@ function ls() {
       },
       glob('*')
     )
-  );
-}
-
-function indicizzafiles($i, $a) {
-  $k = array_keys($a);
-  $b = [];
-  for ($j = 0; $j < count($a); $j += 1, $i += 1) {
-    $b["file_$i"] = $a[$k[$i]];
-  }
-  return $b;
-}
-
-function maxindice($a) {
-  return count($a) == 0 ? 0 : max(
-    map(
-      function ($k) {
-        return (int)(explode("_", $k)[1]);
-      },
-      array_keys($a)
-    )
-  );
-}
-
-function all_true($array) {
-  return array_reduce(
-    $array,
-    function ($a, $b) {
-      return $a && $b;
-    },
-    true
   );
 }
 
