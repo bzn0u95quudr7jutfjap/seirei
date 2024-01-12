@@ -445,7 +445,7 @@ $etichette = stream($_SESSION['etichette'])
     data.append("command", "setEtichetta");
     data.append("etichetta", id);
     data.append("nome", elem.value);
-    callPhp(data, console.log, ([prev]) => elem.value = prev);
+    callPhp(data, () => null, ([prev]) => elem.value = prev);
   }
 
   function phpNewAssociazione(elem) {
