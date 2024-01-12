@@ -424,7 +424,11 @@ $etichette = stream($_SESSION['etichette'])
     const xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", "index.php", true);
     xmlhttp.onload = function() {
-      func(JSON.parse(this.responseText));
+      try {
+        func(JSON.parse(this.responseText));
+      } catch (e) {
+        document.write(e);
+      }
     };
     xmlhttp.send(data);
   }
