@@ -420,18 +420,14 @@ $etichette = stream($_SESSION['etichette'])
     clickPrimoNonEvidenziato();
   }
 
-  function callPhp(data, successFunc, faiilFunc) {
+  function callPhp(data, successFunc, failFunc) {
     const xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", "index.php", true);
     xmlhttp.onload = function() {
       try {
         const data = JSON.parse(this.responseText);
         const success = data.shift();
-        if (success) {
-          successFunc(data);
-        } else {
-          failFunc(data);
-        }
+        (success ? successFunc : failFunc)(data);
       } catch (e) {
         document.write(e);
       }
