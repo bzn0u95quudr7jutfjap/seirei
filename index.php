@@ -137,15 +137,21 @@ function apply() {
     })
     ->get();
 
-  $ris = stream($successo)
-    ->map(fn ($coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
-    ->join("\n");
-
   $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
   foreach (stream($successo)->map(fn ($c) => $c[2])->get() as $k) {
     unset($_SESSION['associazioni'][$k]);
   }
+
+  $ris = stream($successo)
+    ->map(fn ($coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->join("\n")
+    . "\n"
+    . stream($_SESSION['associazioni'])
+    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
+    ->map(fn ($coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
+    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->join("\n");
 
   save();
 ?>
