@@ -67,6 +67,7 @@ function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
   echo filter_var(file_get_contents($file), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 }
+
 function display_other($mime, $file) {
   header("Content-Type: " . $mime);
   readfile($file);
