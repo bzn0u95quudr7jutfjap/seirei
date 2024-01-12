@@ -123,22 +123,28 @@ function apply() {
     ->filter(fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))
     ->get();
 
-  $ris = stream($_SESSION['associazioni'])
+  $successo = stream($_SESSION['associazioni'])
     ->filter(fn ($e) => array_key_exists($e, $etichette))
     ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
-    ->map(function ($coll) {
-      //TODO - trycatch in caso di eccezzione
-      [$file, $dir] = $coll;
-      [$src, $dst] = ["./$file", "./$dir/$file"];
-      return [json_encode(rename($src, $dst)), $src, $dst];
+    ->filter(function ($coll) {
+      try {
+        [$file, $dir] = $coll;
+        [$src, $dst] = ["./$file", "./$dir/$file"];
+        return json_encode(rename($src, $dst));
+      } catch (Exception) {
+        return false;
+      }
     })
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
+    ->get();
+
+  // TODO controllare la stampa di questi
+  $ris = stream($successo)->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
     ->join("\n");
 
-  //TODO
-  //rimuovere solo i file e le associazioni che hanno avuto successo
-  $_SESSION['files'] = [];
-  $_SESSION['associazioni'] = [];
+  // TODO verificare il todo sotto
+  // TODO rimuovere solo i file e le associazioni che hanno avuto successo
+  $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
+  $_SESSION['associazioni'] = array_diff($_SESSION['associazioni'], stream($successo)->map(fn ($c) => $c[1])->get());
 
   save();
 ?>
