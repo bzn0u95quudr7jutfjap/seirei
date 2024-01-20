@@ -261,15 +261,13 @@ $miniature = stream($_SESSION['files'])
   ))
   ->join("\n");
 
-const htmletichetta = '
-  <div class="etichetta" >
-    <input class="radio" type="radio" name="etichetta" value="{{ID}}" onclick="phpNewAssociazione(this)">
-    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\'{{ID}}\',this)" value="{{ETICHETTA}}">
-  </div>
-';
-const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
 $etichette = stream($_SESSION['etichette'])
-  ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
+  ->mapKeyValues(fn ($k, $v) => sprintf('
+  <span class="etichetta">
+    <input type="radio" name="etichetta" value="%d" onclick="phpNewAssociazione(this)">
+    <input type="text" value="%s" onchange="phpAggiornaNomeEtichetta(this,%d)" >
+  </span>
+', $k, $v, $k))
   ->join("\n");
 
 ?>
@@ -279,39 +277,54 @@ $etichette = stream($_SESSION['etichette'])
 
 <head>
   <style>
-    html {
+    html,
+    body,
+    input {
+      width: 100%;
       height: 100%;
+      margin: 0px;
     }
 
     body {
-      height: 100%;
-      margin: 0px;
       display: grid;
-      grid-template-columns: min-content auto min-content;
-      grid-template-rows: 100%;
-      justify-items: center;
-      align-items: center;
-    }
-
-    #contenuto {
-      height: 90%;
-      width: 90%;
+      grid-template:
+        'miniature contenuto controlli' min-content
+        'miniature contenuto etichette' 1fr
+        / 200px 1fr 200px;
+      gap: 20px;
+      justify-content: space-around;
+      align-content: space-around;
     }
 
     #miniature {
-      margin: 20px;
-      overflow: scroll;
-      height: 90%;
-      width: 200px;
-      display: flex;
-      flex-direction: column;
+      grid-area: miniature;
+      padding: 10px;
     }
 
-    .miniatura {
-      width: 160px;
-      margin: 10px;
-      margin-right: 20px;
-      border: none;
+    #contenuto {
+      grid-area: contenuto;
+      width: 100%;
+      height: 96%;
+    }
+
+    #controlli {
+      grid-area: controlli;
+      padding: 10px;
+    }
+
+    #etichette {
+      grid-area: etichette;
+      padding: 10px;
+    }
+
+    #miniature,
+    #etichette,
+    #controlli {
+      overflow-y: scroll;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .evidenziatura {
@@ -322,61 +335,31 @@ $etichette = stream($_SESSION['etichette'])
       border: solid lime 2px;
     }
 
-    #controlli {
-      margin: 20px;
-      height: 90%;
+    .etichetta {
       display: grid;
-      grid-template-rows: min-content min-content min-content auto min-content;
-      grid-gap: 10px;
-    }
-
-    #etichette {
-      overflow: scroll;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .etichetta .text {
-      display: inline-block;
-      width: 70%;
-    }
-
-    .etichetta .radio {
-      display: inline-block;
-      height: 20px;
-      width: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
+      grid-template-columns: 30px 1fr;
+      grid-template-rows: 30px;
       gap: 6px;
     }
   </style>
 </head>
 
 <body onload='main()'>
-  <div id="miniature">
+  <div id="miniature" class="list">
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
-  <div id="controlli">
-    <form action="./" method="post">
-      <button type="submit" name="command" value="save">Salva</button>
-      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-      <input name="etichetta" type="text">
-    </form>
-    <form action="./" method="post" target="devnull" id="newAssociazioneForm">
-      <?php echo $etichette; ?>
-      <input hidden id='newAssociazioneFile' type="text" name="file">
-      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
-    </form>
-    <form action="./" method="post">
-      <button type="submit" name="command" value="apply">Applica modifiche</button>
-    </form>
-
-  </div>
+  <form id="etichette" action="./" method="post" target="devnull" id="newAssociazioneForm">
+    <?php echo $etichette; ?>
+    <input hidden id='newAssociazioneFile' type="text" name="file">
+    <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
+  </form>
+  <form id="controlli" action="./" method="post">
+    <button type="submit" name="command" value="apply">Applica modifiche</button>
+    <button type="submit" name="command" value="save">Salva</button>
+    <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+    <input name="etichetta" type="text">
+  </form>
 </body>
 
 <script>
