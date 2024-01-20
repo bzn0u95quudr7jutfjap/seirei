@@ -65,6 +65,11 @@ session_start();
 
 function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
+  readfile($file);
+}
+
+function display_app($file) {
+  header("Content-Type: text/plain; charset=utf-8");
   echo htmlspecialchars(file_get_contents($file));
 }
 
@@ -74,11 +79,11 @@ function display_other($mime, $file) {
 }
 
 if (array_key_exists("file", $_GET)) {
-  $file = $_SESSION['files'][$_GET["file"]];
+  $file = htmlspecialchars_decode($_GET["file"]);
   $mime = mime_content_type($file);
   match (true) {
     strpos($mime, 'text') !== false => display_text($file),
-    strpos($mime, 'application') !== false => display_text($file),
+    strpos($mime, 'application') !== false => display_app($file),
     default => display_other($mime, $file),
   };
 }
