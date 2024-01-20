@@ -57,32 +57,25 @@ function stream($collection) {
 
 session_start();
 
-function display_text($file) {
-  header("Content-Type: text/plain; charset=utf-8");
-  readfile($file);
-}
-
-function display_app($file) {
-  header("Content-Type: text/plain; charset=utf-8");
-  echo htmlspecialchars(file_get_contents($file));
-}
-
-function display_other($mime, $file) {
-  header("Content-Type: " . $mime);
-  readfile($file);
+function id($a) {
+  return $a;
 }
 
 if (array_key_exists("file", $_GET)) {
   $file = htmlspecialchars_decode($_GET["file"]);
   $mime = mime_content_type($file);
-  match (true) {
-    strpos($mime, 'text') !== false => display_text($file),
-    strpos($mime, 'application') !== false => display_app($file),
-    default => display_other($mime, $file),
+
+  [$mime, $parse] = match (true) {
+    strpos($mime, 'text') !== false => ['text/plain; charset=utf-8', 'id'],
+    strpos($mime, 'application') !== false => ['text/plain; charset=utf-8', 'htmlspecialchars'],
+    default => [$mime, 'id']
   };
+
+  header('Content-Type: ' . $mime);
+  echo $parse(file_get_contents($file));
 }
 
-if (count($_GET) != 0) {
+if (count($_GET) > 0) {
   die();
 }
 
