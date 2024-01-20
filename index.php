@@ -51,12 +51,6 @@ function stream($collection) {
   return new Stream($collection);
 }
 
-function ls() {
-  return stream(glob('*'))
-    ->filter(fn ($f) => !is_dir($f))
-    ->getValues();
-}
-
 // ========================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // ========================================================================================================================
@@ -234,22 +228,17 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // ========================================================================================================================
 
-$files = ls();
+$files = stream(glob('*'))
+  ->filter(fn ($f) => !is_dir($f))
+  ->map('htmlspecialchars')
+  ->getValues();
 
 try {
-  $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
-    ->map(fn ($a) => (array) $a)
-    ->get();
-
-  $common = array_intersect($_SESSION['files'], $files);
-  $max = max(array_keys($_SESSION['files'])) + 1;
-  $diff = array_diff($files, $_SESSION['files']);
-  $diff = count($diff) == 0 ? [] : array_combine(range($max, $max + count($diff) - 1), $diff);
-  $_SESSION['files'] = $diff + $common;
-
-  $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
-    ->filter(fn ($file) => array_key_exists($file, $_SESSION['files']), ARRAY_FILTER_USE_KEY)
-    ->get();
+  $_SESSION = json_decode(file_get_contents(CONFIGFILEJSON), true);
+  foreach (array_diff($_SESSION['files'], $files) as $file) {
+    unset($_SESSION['associazioni'][$file]);
+  }
+  $_SESSION['files'] = $files;
 } catch (Exception | ValueError) {
   $_SESSION = [
     'etichette' => [],
