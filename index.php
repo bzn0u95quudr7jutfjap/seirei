@@ -65,7 +65,7 @@ session_start();
 
 function display_text($file) {
   header("Content-Type: text/plain; charset=utf-8");
-  echo filter_var(file_get_contents($file), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+  echo htmlspecialchars(file_get_contents($file));
 }
 
 function display_other($mime, $file) {
@@ -260,7 +260,7 @@ const htmlminiatura = '
 ';
 const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
 $miniature = stream($_SESSION['files'])
-  ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
+  ->map('htmlspecialchars')
   ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
   ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
   ->join("\n");
