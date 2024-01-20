@@ -253,16 +253,12 @@ try {
   ];
 };
 
-const htmlminiatura = '
-  <a target="contenuto" href="./?file={{ID}}">
-    <img class="miniatura {{EVIDENZIATURA}}" id="{{ID}}" alt="{{FILENAME}}" onclick="phpGetAssociazione(this);">
-  </a>
-';
-const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
 $miniature = stream($_SESSION['files'])
   ->map('htmlspecialchars')
-  ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
-  ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
+  ->map(fn ($v) => vsprintf(
+    '<a target="contenuto" class="miniatura %s" href="./?file=%s">%s</a>',
+    [array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v]
+  ))
   ->join("\n");
 
 const htmletichetta = '
