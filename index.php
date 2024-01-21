@@ -242,10 +242,9 @@ try {
 
 $miniature = stream($_SESSION['files'])
   ->map('htmlspecialchars')
-  ->map(fn ($v) => vsprintf(
-    '<a target="contenuto" class="miniatura %s" href="./?file=%s">%s</a>',
-    [array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v]
-  ))
+  ->map(fn ($v) => sprintf('
+  <a target="contenuto" class="miniatura %s" href="./?file=%s">%s</a>
+  ', array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v))
   ->join("\n");
 
 $etichette = stream($_SESSION['etichette'])
