@@ -364,35 +364,12 @@ $etichette = stream($_SESSION['etichette'], [
 </body>
 
 <script>
-  // ===========================================================================================================================
-  // GLOBAL VARS
-  // ===========================================================================================================================
-  let FILE = null;
-  const MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
-  const ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
-  const NEWASSOCIAZIONE = {
-    form: document.getElementById('newAssociazioneForm'),
-    btn: document.getElementById('newAssociazioneBtn'),
-    file: document.getElementById('newAssociazioneFile'),
-  };
-
   function clickPrimoNonEvidenziato() {
-    MINIATURE.filter(
+    Object.values(miniature).filter(
       (elem) => !elem.classList.contains('evidenziatura')
     ).slice(0, 1).forEach(
       (elem) => elem.click()
     );
-  }
-
-  function selezionaFile(elem) {
-    const selezione = 'selezione';
-    MINIATURE.filter(
-      (elem) => elem.classList.contains(selezione)
-    ).forEach(
-      (elem) => elem.classList.remove(selezione)
-    );
-    fileattuale.value = elem.id;
-    elem.classList.add(selezione);
   }
 
   function main() {
@@ -428,6 +405,17 @@ $etichette = stream($_SESSION['etichette'], [
         .filter((e) => e.value == a.value)
         .forEach((e) => e.checked = true)
       );
+  }
+
+  function selezionaFile(elem) {
+    const selezione = 'selezione';
+    MINIATURE.filter(
+      (elem) => elem.classList.contains(selezione)
+    ).forEach(
+      (elem) => elem.classList.remove(selezione)
+    );
+    fileattuale.value = elem.id;
+    elem.classList.add(selezione);
   }
 </script>
 
