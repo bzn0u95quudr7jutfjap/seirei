@@ -365,7 +365,7 @@ $etichette = stream($_SESSION['etichette'], [
 
 <script>
   function clickPrimoNonEvidenziato() {
-    Object.values(miniature).filter(
+    Object.values(miniature.children).filter(
       (elem) => !elem.classList.contains('evidenziatura')
     ).slice(0, 1).forEach(
       (elem) => elem.click()
@@ -409,7 +409,7 @@ $etichette = stream($_SESSION['etichette'], [
 
   function selezionaFile(elem) {
     const selezione = 'selezione';
-    MINIATURE.filter(
+    Object.values(miniature.children).filter(
       (elem) => elem.classList.contains(selezione)
     ).forEach(
       (elem) => elem.classList.remove(selezione)
