@@ -241,8 +241,8 @@ try {
 $miniature = stream($_SESSION['files'], [
   [map,  fn ($k, $v) => htmlspecialchars($v)],
   [map, fn ($k, $v) => sprintf('
-  <a id="%s" target="contenuto" class="miniatura %s" onclick="selezionaFile(this)" href="./?file=%s">%s</a>
-  ', $v, array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v)],
+  <a id="%s" target="contenuto" class="miniatura %s" onclick="selezionaFile(this);phpGetAssociazione(\'%s\')" href="./?file=%s">%s</a>
+  ', $v, array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v, $v)],
   [join, "\n"]
 ]);
 
@@ -335,8 +335,10 @@ $etichette = stream($_SESSION['etichette'], [
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
-  <form id="etichette" action="./" method="post" target="devnull" id="newAssociazioneForm">
-    <?php echo $etichette; ?>
+  <form action="./" method="post" target="devnull" id="newAssociazioneForm">
+    <fieldset id="etichette">
+      <?php echo $etichette; ?>
+    </fieldset>
     <input hidden id='fileattuale' type="text" name="file">
     <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
   </form>
@@ -395,7 +397,6 @@ $etichette = stream($_SESSION['etichette'], [
 
   function main() {
     clickPrimoNonEvidenziato();
-    console.log("asda");
   }
 
   function phpNewAssociazione(etichetta) {
@@ -417,13 +418,16 @@ $etichette = stream($_SESSION['etichette'], [
     }
   }
 
+  const etichette = Object.values(document.getElementsByName('etichetta'));
+
   function phpGetAssociazione(file) {
-    selezionaFile(file);
+    etichette.forEach((e) => e.checked = false);
     Object.values(associazioni.children)
       .filter((a) => a.checked && a.name == file)
-      .forEach((a) => Object.values(etichette)
+      .forEach((a) => etichette
         .filter((e) => e.value == a.value)
-        .forEach((e) => e.checked = true));
+        .forEach((e) => e.checked = true)
+      );
   }
 </script>
 
