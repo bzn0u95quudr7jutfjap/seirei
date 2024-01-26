@@ -13,42 +13,38 @@ const TEXT_MODE = 'Content-Type: text/plain; charset=utf-8';
 // QOL
 // ========================================================================================================================
 
-class Stream {
-  public function __construct(private $collection = []) {
-  }
+const map = 0;
+const filter = 3;
+const join = 6;
+const values = 7;
 
-  private function set($collection): Stream {
-    $this->collection = $collection;
-    return $this;
+function stream($collection, $pipeline) {
+  $ris = [];
+  foreach ($collection as $k => $c) {
+    foreach ($pipeline as $line) {
+      [$op, $arg] = $line;
+      switch ($op) {
+        case map:
+          $c = $arg($k, $c);
+          break;
+        case filter:
+          if ($arg($k, $c)) {
+            break;
+          } else {
+            continue 3;
+          }
+        default:
+          break;
+      }
+    }
+    $ris[$k] = $c;
   }
-
-  public function map($function): Stream {
-    return $this->set(array_map($function, $this->collection));
-  }
-
-  public function mapKeyValues($function): Stream {
-    return $this->set(array_map($function, array_keys($this->collection), $this->collection));
-  }
-
-  public function filter($function, $mode = 0): Stream {
-    return $this->set(array_filter($this->collection, $function, $mode));
-  }
-
-  public function get(): array {
-    return $this->collection;
-  }
-
-  public function getValues(): array {
-    return array_values($this->collection);
-  }
-
-  public function join($delimiter): string {
-    return implode($delimiter, $this->collection);
-  }
-}
-
-function stream($collection) {
-  return new Stream($collection);
+  [$op, $arg] = $pipeline[array_key_last($pipeline)];
+  return match ($op) {
+    join => implode($arg, $ris),
+    values => array_values($ris),
+    default => $ris,
+  };
 }
 
 // ========================================================================================================================
@@ -103,14 +99,14 @@ const htmlTableRow = '
 const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
 
 function apply() {
-  $etichette = stream($_SESSION['etichette'])
-    ->filter(fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))
-    ->get();
+  $etichette = stream($_SESSION['etichette'], [
+    [filter, (fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))],
+  ]);
 
-  $successo = stream($_SESSION['associazioni'])
-    ->filter(fn ($e) => array_key_exists($e, $etichette))
-    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $k])
-    ->filter(function ($coll) {
+  $successo = stream($_SESSION['associazioni'], [
+    [filter, (fn ($e) => array_key_exists($e, $etichette))],
+    [map, (fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $k])],
+    [filter, (function ($coll) {
       try {
         [$file, $dir] = $coll;
         [$src, $dst] = ["./$file", "./$dir/$file"];
@@ -118,24 +114,26 @@ function apply() {
       } catch (Exception) {
         return false;
       }
-    })
-    ->get();
+    })],
+  ]);
 
-  $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
-  foreach (stream($successo)->map(fn ($c) => $c[2])->get() as $k) {
+  $_SESSION['files'] = array_diff($_SESSION['files'], array_map(fn ($c) => $c[0], $successo));
+  foreach (array_map(fn ($c) => $c[2], $successo) as $k) {
     unset($_SESSION['associazioni'][$k]);
   }
 
-  $ris = stream($successo)
-    ->map(fn ($coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
-    ->join("\n")
+  $ris = stream($successo, [
+    [map, (fn ($k, $coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])],
+    [map, (fn ($k, $coll) => str_replace(mTableRow, $coll, htmlTableRow))],
+    [join, ("\n")],
+  ])
     . "\n"
-    . stream($_SESSION['associazioni'])
-    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
-    ->map(fn ($coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
-    ->join("\n");
+    . stream($_SESSION['associazioni'], [
+      [map, (fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])],
+      [map, (fn ($k, $coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])],
+      [map, (fn ($k, $coll) => str_replace(mTableRow, $coll, htmlTableRow))],
+      [join, ("\n")]
+    ]);
 
   save();
 ?>
@@ -221,10 +219,10 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // ========================================================================================================================
 
-$files = stream(glob('*'))
-  ->filter(fn ($f) => !is_dir($f))
-  ->map('htmlspecialchars')
-  ->getValues();
+$files = stream(glob('*'), [
+  [filter, (fn ($f) => !is_dir($f))],
+  [map, fn ($k, $v) => htmlspecialchars($v)],
+]);
 
 try {
   $_SESSION = json_decode(file_get_contents(CONFIGFILEJSON), true);
@@ -240,21 +238,23 @@ try {
   ];
 };
 
-$miniature = stream($_SESSION['files'])
-  ->map('htmlspecialchars')
-  ->map(fn ($v) => sprintf('
+$miniature = stream($_SESSION['files'], [
+  [map,  fn ($k, $v) => htmlspecialchars($v)],
+  [map, fn ($k, $v) => sprintf('
   <a target="contenuto" class="miniatura %s" href="./?file=%s">%s</a>
-  ', array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v))
-  ->join("\n");
+  ', array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v)],
+  [join, "\n"]
+]);
 
-$etichette = stream($_SESSION['etichette'])
-  ->mapKeyValues(fn ($k, $v) => sprintf('
+$etichette = stream($_SESSION['etichette'], [
+  [map, fn ($k, $v) => sprintf('
   <span class="etichetta">
     <input type="radio" name="etichetta" value="%d" onclick="phpNewAssociazione(this)">
     <input type="text" value="%s" onchange="phpAggiornaNomeEtichetta(this,%d)" >
   </span>
-', $k, $v, $k))
-  ->join("\n");
+', $k, $v, $k)],
+  [join, "\n"]
+]);
 
 ?>
 
