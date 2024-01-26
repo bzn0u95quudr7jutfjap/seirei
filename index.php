@@ -348,7 +348,7 @@ $etichette = stream($_SESSION['etichette'], [
     <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
     <input name="etichetta" type="text">
   </form>
-  <form>
+  <form action="./" method="post">
     <fieldset hidden id="associazioni">
       <?php
       foreach ($_SESSION['files'] as $file) {
