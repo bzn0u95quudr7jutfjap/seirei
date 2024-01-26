@@ -241,18 +241,18 @@ try {
 $miniature = stream($_SESSION['files'], [
   [map,  fn ($k, $v) => htmlspecialchars($v)],
   [map, fn ($k, $v) => sprintf('
-  <a target="contenuto" class="miniatura %s" href="./?file=%s">%s</a>
-  ', array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v)],
+  <a id="%s" target="contenuto" class="miniatura %s" onclick="selezionaFile(this)" href="./?file=%s">%s</a>
+  ', $v, array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v)],
   [join, "\n"]
 ]);
 
 $etichette = stream($_SESSION['etichette'], [
   [map, fn ($k, $v) => sprintf('
   <span class="etichetta">
-    <input type="radio" name="etichetta" value="%d" onclick="phpNewAssociazione(this)">
-    <input type="text" value="%s" onchange="phpAggiornaNomeEtichetta(this,%d)" >
+    <input type="radio" name="etichetta" value="%s" onclick="phpNewAssociazione(\'%s\')">
+    <input type="text" value="%s">
   </span>
-', $k, $v, $k)],
+', $k, $k, $v)],
   [join, "\n"]
 ]);
 
@@ -337,7 +337,7 @@ $etichette = stream($_SESSION['etichette'], [
   <iframe name="contenuto" id="contenuto"></iframe>
   <form id="etichette" action="./" method="post" target="devnull" id="newAssociazioneForm">
     <?php echo $etichette; ?>
-    <input hidden id='newAssociazioneFile' type="text" name="file">
+    <input hidden id='fileattuale' type="text" name="file">
     <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
   </form>
   <form id="controlli" action="./" method="post">
@@ -345,6 +345,19 @@ $etichette = stream($_SESSION['etichette'], [
     <button type="submit" name="command" value="save">Salva</button>
     <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
     <input name="etichetta" type="text">
+  </form>
+  <form>
+    <fieldset hidden id="associazioni">
+      <?php
+      foreach ($_SESSION['files'] as $file) {
+        $file = htmlspecialchars($file);
+        foreach ($_SESSION['etichette'] as $k => $etichetta) {
+          $selezione = array_key_exists($file, $_SESSION['associazioni']) ? 'selected' : '';
+          echo "<input type='radio' name='$file' value='$k' $selezione>\n";
+        }
+      }
+      ?>
+    </fieldset>
   </form>
 </body>
 
@@ -376,74 +389,41 @@ $etichette = stream($_SESSION['etichette'], [
     ).forEach(
       (elem) => elem.classList.remove(selezione)
     );
-    NEWASSOCIAZIONE.file.value = elem.id;
-    FILE = elem;
+    fileattuale.value = elem.id;
     elem.classList.add(selezione);
-  }
-
-  function print_e() {
-    document.write(e.map((a) => '<p>' + a + '</p>').join('\n'));
   }
 
   function main() {
     clickPrimoNonEvidenziato();
+    console.log("asda");
   }
 
-  function callPhp(data, successFunc, failFunc) {
-    const xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", "index.php", true);
-    xmlhttp.onload = function() {
-      let data;
-      try {
-        data = JSON.parse(this.responseText);
-        const success = data.shift();
-        (success ? successFunc : failFunc)(data);
-      } catch (e) {
-        print_e([e, data, successFunc, failFunc]);
-      }
-    };
-    xmlhttp.send(data);
+  function phpNewAssociazione(etichetta) {
+    const etichettefile = Object.values(associazioni.children)
+      .filter((a) => a.name == fileattuale.value);
+
+    const primocheck = !etichettefile
+      .map((a) => a.checked)
+      .reduce((a, b) => a || b, false);
+
+    etichettefile
+      .filter((a) => a.value == etichetta)
+      .forEach((a) => a.checked = true);
+
+    document.getElementById(fileattuale.value).classList.add('evidenziatura');
+
+    if (primocheck) {
+      clickPrimoNonEvidenziato();
+    }
   }
 
-  function phpAggiornaNomeEtichetta(id, elem) {
-    let data = new FormData();
-    data.append("command", "setEtichetta");
-    data.append("etichetta", id);
-    data.append("nome", elem.value);
-    callPhp(data, () => null, ([prev]) => elem.value = prev);
-  }
-
-  function phpNewAssociazione(elem) {
-    callPhp(new FormData(NEWASSOCIAZIONE.form, NEWASSOCIAZIONE.btn),
-      function([primocheck]) {
-        FILE.classList.add('evidenziatura');
-        if (primocheck) {
-          clickPrimoNonEvidenziato();
-        }
-      },
-      print_e
-    );
-  }
-
-  function phpGetAssociazione(elem) {
-    selezionaFile(elem);
-    let data = new FormData();
-    data.append("command", "getAssociazione");
-    data.append("file", elem.id);
-    callPhp(data,
-      function([radiovalue]) {
-        ETICHETTERADIO.filter(
-          (radio) => radio.value == radiovalue
-        ).forEach(
-          (radio) => radio.checked = true
-        );
-      },
-      function(_) {
-        ETICHETTERADIO.forEach(
-          (radio) => radio.checked = false
-        );
-      }
-    );
+  function phpGetAssociazione(file) {
+    selezionaFile(file);
+    Object.values(associazioni.children)
+      .filter((a) => a.checked && a.name == file)
+      .forEach((a) => Object.values(etichette)
+        .filter((e) => e.value == a.value)
+        .forEach((e) => e.checked = true));
   }
 </script>
 
