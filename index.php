@@ -169,45 +169,11 @@ function new_etichetta() {
   }
 }
 
-function new_associazione() {
-  try {
-    ["file" => $file, "etichetta" => $etichetta] = $_POST;
-    $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
-    $_SESSION['associazioni'][$file] = $etichetta;
-    $res = [true, $primo_check];
-  } catch (Exception) {
-    $res = [false, false];
-  } finally {
-    echo json_encode($res);
-  }
-}
-
-function get_associazione() {
-  try {
-    echo json_encode([true, $_SESSION['associazioni'][$_POST['file']]]);
-  } catch (Exception) {
-    echo json_encode([false, ""]);
-  }
-}
-
-function set_etichetta() {
-  try {
-    $ret = $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
-    echo json_encode([true, $ret]);
-  } catch (Exception) {
-    echo json_encode([false, $_SESSION['etichette'][$_POST['etichetta']]]);
-  }
-}
-
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(true),
     "apply" => apply(),
     "newEtichetta" => new_etichetta(),
-    "setEtichetta" => set_etichetta(),
-    "newAssociazione" => new_associazione(),
-    "getAssociazione" => get_associazione(),
-    default => null,
   };
 }
 
@@ -376,17 +342,13 @@ $etichette = stream($_SESSION['etichette'], [
   function phpNewAssociazione(etichetta) {
     const etichettefile = Object.values(associazioni.children)
       .filter((a) => a.name == fileattuale.value);
-
     const primocheck = !etichettefile
       .map((a) => a.checked)
       .reduce((a, b) => a || b, false);
-
     etichettefile
       .filter((a) => a.value == etichetta)
       .forEach((a) => a.checked = true);
-
     document.getElementById(fileattuale.value).classList.add('evidenziatura');
-
     if (primocheck) {
       clickPrimoNonEvidenziato();
     }
