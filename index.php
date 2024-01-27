@@ -349,12 +349,10 @@ $etichette = stream($_SESSION['etichette'], [
       }
       ?>
     </fieldset>
+    <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+    <input name="etichetta" type="text">
   </form>
   <form action="./" method="post" id="newAssociazioneForm">
-    <fieldset>
-      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-      <input name="etichetta" type="text">
-    </fieldset>
     <fieldset id="etichette">
       <?php echo $etichette; ?>
     </fieldset>
