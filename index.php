@@ -275,6 +275,7 @@ $etichette = stream($_SESSION['etichette'], [
       display: grid;
       grid-template:
         'miniature contenuto controlli' min-content
+        'miniature contenuto newetichette' min-content
         'miniature contenuto etichette' 1fr
         / 200px 1fr 200px;
       gap: 20px;
@@ -303,7 +304,13 @@ $etichette = stream($_SESSION['etichette'], [
       padding: 10px;
     }
 
+    #newetichette {
+      grid-area: newetichette;
+      padding: 10px;
+    }
+
     #miniature,
+    #newetichette,
     #etichette,
     #controlli {
       overflow-y: scroll;
@@ -335,20 +342,9 @@ $etichette = stream($_SESSION['etichette'], [
     <?php echo $miniature; ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
-  <form action="./" method="post" target="devnull" id="newAssociazioneForm">
-    <fieldset id="etichette">
-      <?php echo $etichette; ?>
-    </fieldset>
-    <input hidden id='fileattuale' type="text" name="file">
-    <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
-  </form>
   <form id="controlli" action="./" method="post">
     <button type="submit" name="command" value="apply">Applica modifiche</button>
     <button type="submit" name="command" value="save">Salva</button>
-    <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-    <input name="etichetta" type="text">
-  </form>
-  <form action="./" method="post">
     <fieldset hidden id="associazioni">
       <?php
       foreach ($_SESSION['files'] as $file) {
@@ -360,6 +356,16 @@ $etichette = stream($_SESSION['etichette'], [
       }
       ?>
     </fieldset>
+  </form>
+  <form id="newetichette" action="./" method="post">
+    <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+    <input name="etichetta" type="text">
+  </form>
+  <form action="./" method="post" target="devnull" id="newAssociazioneForm">
+    <fieldset id="etichette">
+      <?php echo $etichette; ?>
+    </fieldset>
+    <input hidden id='fileattuale' type="text" name="file">
   </form>
 </body>
 
