@@ -275,7 +275,6 @@ $etichette = stream($_SESSION['etichette'], [
       display: grid;
       grid-template:
         'miniature contenuto controlli' min-content
-        'miniature contenuto newetichette' min-content
         'miniature contenuto etichette' 1fr
         / 200px 1fr 200px;
       gap: 20px;
@@ -304,13 +303,7 @@ $etichette = stream($_SESSION['etichette'], [
       padding: 10px;
     }
 
-    #newetichette {
-      grid-area: newetichette;
-      padding: 10px;
-    }
-
     #miniature,
-    #newetichette,
     #etichette,
     #controlli {
       overflow-y: scroll;
@@ -357,11 +350,11 @@ $etichette = stream($_SESSION['etichette'], [
       ?>
     </fieldset>
   </form>
-  <form id="newetichette" action="./" method="post">
-    <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-    <input name="etichetta" type="text">
-  </form>
-  <form action="./" method="post" target="devnull" id="newAssociazioneForm">
+  <form action="./" method="post" id="newAssociazioneForm">
+    <fieldset>
+      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
+      <input name="etichetta" type="text">
+    </fieldset>
     <fieldset id="etichette">
       <?php echo $etichette; ?>
     </fieldset>
