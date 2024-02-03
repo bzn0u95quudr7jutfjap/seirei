@@ -336,6 +336,23 @@ try {
 </body>
 
 <script>
+  const primocheck = false;
+
+  function phpGetAssociazione(file) {
+    const cache = Object.values(associazioni.children);
+    cache.forEach((elem) => elem.hidden = true);
+    const display = cache.filter((elem) => elem.name == file);
+    display.forEach((elem) => elem.hidden = false);
+    primocheck = display.reduce(true, (a, elem) => a && elem.checked);
+  }
+  function selezionaFile(elem) {
+    const selezione = 'selezione';
+    Object.values(miniature.children)
+      .filter((elem) => elem.classList.contains(selezione))
+      .forEach((elem) => elem.classList.remove(selezione));
+    elem.classList.add(selezione);
+  }
+
   function clickPrimoNonEvidenziato() {
     Object.values(miniature.children).filter(
       (elem) => !elem.classList.contains('evidenziatura')
@@ -363,26 +380,6 @@ try {
 
   const etichette = Object.values(document.getElementsByName('etichetta'));
 
-  function phpGetAssociazione(file) {
-    etichette.forEach((e) => e.checked = false);
-    Object.values(associazioni.children)
-      .filter((a) => a.checked && a.name == file)
-      .forEach((a) => etichette
-        .filter((e) => e.value == a.value)
-        .forEach((e) => e.checked = true)
-      );
-  }
-
-  function selezionaFile(elem) {
-    const selezione = 'selezione';
-    Object.values(miniature.children).filter(
-      (elem) => elem.classList.contains(selezione)
-    ).forEach(
-      (elem) => elem.classList.remove(selezione)
-    );
-    fileattuale.value = elem.id;
-    elem.classList.add(selezione);
-  }
 </script>
 
 </html>
