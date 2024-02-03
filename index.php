@@ -333,22 +333,6 @@ try {
     </div>
     <input hidden id='fileattuale' type="text" name="file">
   </form>
-  <form action="./" method="post" id="newAssociazioneForm">
-    <fieldset id="etichette">
-      <?php
-      echo implode("\n", array_map(
-        fn ($v, $k) => sprintf('
-        <span class="etichetta">
-          <input type="radio" name="etichetta" value="%s" onclick="phpNewAssociazione(\'%s\')">
-          <input type="text" value="%s">
-        </span>
-        ', $k, $k, $v),
-        $etichette,
-        array_keys($etichette)
-      ));
-      ?>
-    </fieldset>
-  </form>
 </body>
 
 <script>
