@@ -206,24 +206,6 @@ try {
   $etichette = [];
 };
 
-$miniature = implode("\n", array_map(
-  fn ($v) => sprintf('
-  <a id="%s" target="contenuto" class="miniatura %s" onclick="selezionaFile(this);phpGetAssociazione(\'%s\')" href="./?file=%s">%s</a>
-  ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
-  $files
-));
-
-$etichette = implode("\n", array_map(
-  fn ($v, $k) => sprintf('
-  <span class="etichetta">
-    <input type="radio" name="etichetta" value="%s" onclick="phpNewAssociazione(\'%s\')">
-    <input type="text" value="%s">
-  </span>
-', $k, $k, $v),
-  $etichette,
-  array_keys($etichette)
-));
-
 ?>
 
 <!DOCTYPE html>
@@ -300,7 +282,16 @@ $etichette = implode("\n", array_map(
 
 <body onload='main()'>
   <div id="miniature" class="list">
-    <?php echo $miniature; ?>
+    <?php
+    echo implode("\n", array_map(
+      fn ($v) => sprintf('
+        <a id="%s" target="contenuto" class="miniatura %s"
+        onclick="selezionaFile(this);phpGetAssociazione(\'%s\')"
+        href="./?file=%s">%s</a>
+        ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
+      $files
+    ));
+    ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
   <form id="controlli" action="./" method="post">
@@ -308,10 +299,9 @@ $etichette = implode("\n", array_map(
     <button type="submit" name="command" value="save">Salva</button>
     <fieldset hidden id="associazioni">
       <?php
-      foreach ($_SESSION['files'] as $file) {
-        $file = htmlspecialchars($file);
-        foreach ($_SESSION['etichette'] as $k => $etichetta) {
-          $selezione = array_key_exists($file, $_SESSION['associazioni']) ? 'selected' : '';
+      foreach ($files as $f) {
+        foreach ($etichette as $k => $e) {
+          $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
           echo "<input type='radio' name='$file' value='$k' $selezione>\n";
         }
       }
@@ -322,7 +312,18 @@ $etichette = implode("\n", array_map(
   </form>
   <form action="./" method="post" id="newAssociazioneForm">
     <fieldset id="etichette">
-      <?php echo $etichette; ?>
+      <?php
+      echo implode("\n", array_map(
+        fn ($v, $k) => sprintf('
+        <span class="etichetta">
+          <input type="radio" name="etichetta" value="%s" onclick="phpNewAssociazione(\'%s\')">
+          <input type="text" value="%s">
+        </span>
+        ', $k, $k, $v),
+        $etichette,
+        array_keys($etichette)
+      ));
+      ?>
     </fieldset>
     <input hidden id='fileattuale' type="text" name="file">
   </form>
