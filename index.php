@@ -302,8 +302,7 @@ try {
     echo implode("\n", array_map(
       fn ($v) => sprintf('
         <a id="%s" target="contenuto" class="miniatura %s"
-        onclick="selezionaFile(this);phpGetAssociazione(\'%s\')"
-        href="./?file=%s">%s</a>
+        onclick="selectAssoc(this);" href="./?file=%s">%s</a>
         ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
       $files
     ));
@@ -338,19 +337,21 @@ try {
 <script>
   const primocheck = false;
 
-  function phpGetAssociazione(file) {
-    const cache = Object.values(associazioni.children);
-    cache.forEach((elem) => elem.hidden = true);
-    const display = cache.filter((elem) => elem.name == file);
-    display.forEach((elem) => elem.hidden = false);
-    primocheck = display.reduce(true, (a, elem) => a && elem.checked);
-  }
-  function selezionaFile(elem) {
+  function selectAssoc(elem) {
+    // Seleziona il file
     const selezione = 'selezione';
     Object.values(miniature.children)
       .filter((elem) => elem.classList.contains(selezione))
       .forEach((elem) => elem.classList.remove(selezione));
     elem.classList.add(selezione);
+
+    // Ottieni l'associazione
+    const file = elem.id;
+    const cache = Object.values(associazioni.children);
+    cache.forEach((elem) => elem.hidden = true);
+    const display = cache.filter((elem) => elem.name == file);
+    display.forEach((elem) => elem.hidden = false);
+    primocheck = display.reduce(true, (a, elem) => a && elem.checked);
   }
 
   function clickPrimoNonEvidenziato() {
