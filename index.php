@@ -185,42 +185,44 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // ========================================================================================================================
 
-$files = stream(glob('*'), [
-  [filter, (fn ($f) => !is_dir($f))],
-  [map, fn ($k, $v) => htmlspecialchars($v)],
-]);
+$files = array_map(
+  'htmlspecialchars',
+  array_filter(
+    glob('*'),
+    fn ($f) => !is_dir($f)
+  )
+);
 
 try {
-  $_SESSION = json_decode(file_get_contents(CONFIGFILEJSON), true);
-  foreach (array_diff($_SESSION['files'], $files) as $file) {
-    unset($_SESSION['associazioni'][$file]);
+  [
+    'associazioni' => $associazioni,
+    'etichette' => $etichette,
+  ] = json_decode(file_get_contents(CONFIGFILEJSON), true);
+  foreach (array_diff(array_unique(array_keys($associazioni)), $files) as $file) {
+    unset($associazioni[$file]);
   }
-  $_SESSION['files'] = $files;
 } catch (Exception | ValueError) {
-  $_SESSION = [
-    'etichette' => [],
-    'associazioni' => [],
-    'files' => $files
-  ];
+  $associazioni = [];
+  $etichette = [];
 };
 
-$miniature = stream($_SESSION['files'], [
-  [map,  fn ($k, $v) => htmlspecialchars($v)],
-  [map, fn ($k, $v) => sprintf('
+$miniature = implode("\n", array_map(
+  fn ($v) => sprintf('
   <a id="%s" target="contenuto" class="miniatura %s" onclick="selezionaFile(this);phpGetAssociazione(\'%s\')" href="./?file=%s">%s</a>
-  ', $v, array_key_exists($v, $_SESSION['associazioni']) ? 'evidenziatura' : '', $v, $v, $v)],
-  [join, "\n"]
-]);
+  ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
+  $files
+));
 
-$etichette = stream($_SESSION['etichette'], [
-  [map, fn ($k, $v) => sprintf('
+$etichette = implode("\n", array_map(
+  fn ($v, $k) => sprintf('
   <span class="etichetta">
     <input type="radio" name="etichetta" value="%s" onclick="phpNewAssociazione(\'%s\')">
     <input type="text" value="%s">
   </span>
-', $k, $k, $v)],
-  [join, "\n"]
-]);
+', $k, $k, $v),
+  $etichette,
+  array_keys($etichette)
+));
 
 ?>
 
