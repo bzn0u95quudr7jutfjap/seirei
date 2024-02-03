@@ -297,16 +297,17 @@ try {
   <form id="controlli" action="./" method="post">
     <button type="submit" name="command" value="apply">Applica modifiche</button>
     <button type="submit" name="command" value="save">Salva</button>
-    <fieldset hidden id="associazioni">
+    <fieldset id="associazioni">
       <?php
       foreach ($files as $f) {
         foreach ($etichette as $k => $e) {
           $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
-          echo "<input type='radio' name='$file' value='$k' $selezione>\n";
+          echo "<input hidden type='radio' name='$file' value='$k' $selezione>\n";
         }
       }
       ?>
     </fieldset>
+    <input hidden id='fileattuale' type="text" name="file">
     <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
     <input name="etichetta" type="text">
   </form>
@@ -325,7 +326,6 @@ try {
       ));
       ?>
     </fieldset>
-    <input hidden id='fileattuale' type="text" name="file">
   </form>
 </body>
 
