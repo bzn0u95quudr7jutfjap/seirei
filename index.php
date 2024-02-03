@@ -280,7 +280,7 @@ try {
   </style>
 </head>
 
-<body onload='main()'>
+<body>
   <div id="miniature" class="list">
     <?php
     echo implode("\n", array_map(
@@ -338,9 +338,7 @@ try {
     );
   }
 
-  function main() {
-    clickPrimoNonEvidenziato();
-  }
+  clickPrimoNonEvidenziato();
 
   function phpNewAssociazione(etichetta) {
     const etichettefile = Object.values(associazioni.children)
