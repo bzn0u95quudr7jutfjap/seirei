@@ -277,6 +277,22 @@ try {
       grid-template-rows: 30px;
       gap: 6px;
     }
+
+    #etichette,
+    #associazioni {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #associazioniEtichette {
+      display: flex;
+      flex-direction: row;
+    }
+
+    input.etichettaRadio {
+      height: 20px;
+      width: 20px;
+    }
   </style>
 </head>
 
@@ -299,17 +315,22 @@ try {
     <button type="submit" name="command" value="save">Salva</button>
     <button type="button" onclick="newEtichetta()">Nuova directory</button>
     <input name="etichetta" id="newEtichettaText" type="text">
-    <fieldset id="associazioni">
+    <div id="associazioniEtichette">
       <?php
-      foreach ($files as $f) {
-        foreach ($etichette as $k => $e) {
+      $etichettaRadio = '';
+      $etichetteText = '';
+      foreach ($etichette as $k => $e) {
+        $etichetteText .= "<input type='text' name='$k' value='$e'>\n";
+        foreach ($files as $f) {
           $e = htmlspecialchars($e);
           $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
-          echo "<input hidden type='radio' name='$f' value='$k' $selezione value='$e'>\n";
+          $etichettaRadio .= "<input hidden class='etichettaRadio' type='radio' name='$f' value='$k' $selezione value='$e'>\n";
         }
       }
+      echo "<fieldset id='associazioni'>$etichettaRadio</fieldset>";
+      echo "<fieldset id='etichette'>$etichetteText</fieldset>";
       ?>
-    </fieldset>
+    </div>
     <input hidden id='fileattuale' type="text" name="file">
   </form>
   <form action="./" method="post" id="newAssociazioneForm">
