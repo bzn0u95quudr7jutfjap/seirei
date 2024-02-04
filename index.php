@@ -323,7 +323,11 @@ try {
         foreach ($files as $f) {
           $e = htmlspecialchars($e);
           $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
-          $etichettaRadio .= "<input hidden class='etichettaRadio' type='radio' name='$f' value='$k' $selezione value='$e'>\n";
+          $etichettaRadio .= "<input hidden
+          class='etichettaRadio' type='radio'
+          name='$f' value='$k' $selezione value='$e'
+          onclick='phpNewAssociazione(this)'
+          >\n";
         }
       }
       echo "<fieldset id='associazioni'>$etichettaRadio</fieldset>";
@@ -335,7 +339,7 @@ try {
 </body>
 
 <script>
-  const primocheck = false;
+  let primocheck = false;
 
   function selectAssoc(elem) {
     // Seleziona il file
@@ -351,36 +355,23 @@ try {
     cache.forEach((elem) => elem.hidden = true);
     const display = cache.filter((elem) => elem.name == file);
     display.forEach((elem) => elem.hidden = false);
-    primocheck = display.reduce(true, (a, elem) => a && elem.checked);
+    primocheck = !display.reduce((a, elem) => a || elem.checked, false);
   }
 
   function clickPrimoNonEvidenziato() {
-    Object.values(miniature.children).filter(
-      (elem) => !elem.classList.contains('evidenziatura')
-    ).slice(0, 1).forEach(
-      (elem) => elem.click()
-    );
+    Object.values(miniature.children)
+      .filter((elem) => !elem.classList.contains('evidenziatura'))
+      .slice(0, 1).forEach((elem) => elem.click());
   }
 
   clickPrimoNonEvidenziato();
 
-  function phpNewAssociazione(etichetta) {
-    const etichettefile = Object.values(associazioni.children)
-      .filter((a) => a.name == fileattuale.value);
-    const primocheck = !etichettefile
-      .map((a) => a.checked)
-      .reduce((a, b) => a || b, false);
-    etichettefile
-      .filter((a) => a.value == etichetta)
-      .forEach((a) => a.checked = true);
-    document.getElementById(fileattuale.value).classList.add('evidenziatura');
+  function phpNewAssociazione(elem) {
+    document.getElementById(elem.name).classList.add('evidenziatura');
     if (primocheck) {
       clickPrimoNonEvidenziato();
     }
   }
-
-  const etichette = Object.values(document.getElementsByName('etichetta'));
-
 </script>
 
 </html>
