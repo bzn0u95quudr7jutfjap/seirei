@@ -44,28 +44,20 @@ if (count($_GET) > 0) {
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save($refresh = false) {
-  header(TEXT_MODE);
-  print_r($_POST);
-
-  //file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
-  //if ($refresh) {
-  //  header("Location: /");
-  //  die();
-  //}
+  file_put_contents(CONFIGFILEJSON, json_encode($_POST, JSON_FORCE_OBJECT));
+  if ($refresh) {
+    header("Location: /");
+    die();
+  }
 }
 
-const htmlTableRow = '
-      <tr>
-        <td>{{RIS}}</td>
-        <td>{{SRC}}</td>
-        <td>{{DST}}</td>
-      </tr>
-  ';
-const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
-
 function apply() {
-  $ris = '';
-  save();
+  $_POST['etichette'] = array_filter(
+    $_POST['etichette'],
+    fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e))
+  );
+  $_POST['associazioni'] = array_intersect($_POST['associazioni'], array_keys($_POST['etichette']));
+
 ?>
   <!DOCTYPE html>
   <html>
@@ -76,23 +68,34 @@ function apply() {
         <th>Risultato</th>
         <th>Sorgente</th>
         <th>Destinazione</th>
-        <?php echo $ris; ?>
+        <?php
+        echo implode("\n", array_map(
+          fn ($file, $dir) => "<tr><td>$file</td><td>$dir</td><td>" . json_encode(rename("./$file", "./$dir/$file")) . "</td></tr>",
+          array_map('htmlspecialchars_decode', array_keys($_POST['associazioni'])),
+          array_map(fn ($k) => $_POST['etichette'][$k], $_POST['associazioni']),
+        ));
+        ?>
       </tr>
     </table>
   </body>
 
   </html>
 <?php
+
+  $_POST['associazioni'] = [];
+  save();
 }
 
 if (array_key_exists('command', $_POST)) {
-  match ($_POST['command']) {
+  $cmd = $_POST['command'];
+  unset($_POST['command']);
+  match ($cmd) {
     "save" => save(true),
     "apply" => apply(),
   };
 }
 
-if (count($_POST) != 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   die();
 }
 
@@ -216,7 +219,7 @@ try {
     <?php
     echo implode("\n", array_map(
       fn ($v) => sprintf('
-        <a id="file[%s]" target="contenuto" class="miniatura %s"
+        <a id="associazioni[%s]" target="contenuto" class="miniatura %s"
         onclick="selectAssoc(this);" href="./?file=%s">%s</a>
         ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
       $files
@@ -234,13 +237,13 @@ try {
       $etichettaRadio = '';
       $etichetteText = '';
       foreach ($etichette as $k => $e) {
-        $etichetteText .= "<input type='text' name='etichetta[$k]' value='$e'>\n";
+        $etichetteText .= "<input type='text' name='etichette[$k]' value='$e'>\n";
         foreach ($files as $f) {
           $e = htmlspecialchars($e);
           $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
           $etichettaRadio .= "<input hidden
           class='etichettaRadio' type='radio'
-          name='file[$f]' value='$k' $selezione value='$e'
+          name='associazioni[$f]' value='$k' $selezione
           onclick='phpNewAssociazione(this)'
           >\n";
         }
