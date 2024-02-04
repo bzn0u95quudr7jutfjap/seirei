@@ -229,7 +229,6 @@ try {
     <button type="submit" name="command" value="apply">Applica modifiche</button>
     <button type="submit" name="command" value="save">Salva</button>
     <button type="button" onclick="newEtichetta()">Nuova directory</button>
-    <input id="newEtichettaText" type="text">
     <div id="associazioniEtichette">
       <?php
       $etichettaRadio = '';
@@ -288,17 +287,28 @@ try {
     }
   }
 
-  // TODO nuova etichetta
   function newEtichetta() {
-    const nextIdx = 1 + Object.values(etichette.children)
+    const idx = Object.values(etichette.children)
       .map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
       .reduce((a, b) => Math.max(a, b), -Infinity);
+    const nextIdx = idx > -Infinity ? (1 + idx) : 0;
 
-    etichette.innerHTML += `<input type='text' name='etichette[${nextIdx}]' value='Neue Label'>`;
-    associazioni.innerHTML += Object.values(miniature.children)
-      .map((f) => `<input hidden class='etichettaRadio' type='radio'
-          name='${f.id}' value='${nextIdx}' $selezione
-          onclick='phpNewAssociazione(this)' >`).join('\n');
+    const e = document.createElement('input');
+    e.type = 'text';
+    e.name = `etichette[${nextIdx}]`;
+    etichette.appendChild(e);
+
+    Object.values(miniature.children)
+      .forEach(function(f) {
+        const e = document.createElement('input');
+        e.hidden = true;
+        e.classList.add('etichettaRadio');
+        e.type = 'radio';
+        e.name = `${f.id}`;
+        e.value = `${nextIdx}`;
+        e.onclick = () => phpNewAssociazione(e);
+        associazioni.appendChild(e);
+      });
 
     Object.values(miniature.children)
       .filter((elem) => elem.classList.contains('selezione'))
