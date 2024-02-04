@@ -289,6 +289,21 @@ try {
   }
 
   // TODO nuova etichetta
+  function newEtichetta() {
+    const nextIdx = 1 + Object.values(etichette.children)
+      .map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
+      .reduce((a, b) => Math.max(a, b), -Infinity);
+
+    etichette.innerHTML += `<input type='text' name='etichette[${nextIdx}]' value='Neue Label'>`;
+    associazioni.innerHTML += Object.values(miniature.children)
+      .map((f) => `<input hidden class='etichettaRadio' type='radio'
+          name='${f.id}' value='${nextIdx}' $selezione
+          onclick='phpNewAssociazione(this)' >`).join('\n');
+
+    Object.values(miniature.children)
+      .filter((elem) => elem.classList.contains('selezione'))
+      .slice(0, 1).forEach((elem) => elem.click());
+  }
 </script>
 
 </html>
