@@ -82,11 +82,14 @@ if (count($_GET) > 0) {
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save($refresh = false) {
-  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
-  if ($refresh) {
-    header("Location: /");
-    die();
-  }
+  header(TEXT_MODE);
+  print_r($_POST);
+
+  //file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
+  //if ($refresh) {
+  //  header("Location: /");
+  //  die();
+  //}
 }
 
 const htmlTableRow = '
@@ -99,42 +102,7 @@ const htmlTableRow = '
 const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
 
 function apply() {
-  $etichette = stream($_SESSION['etichette'], [
-    [filter, (fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))],
-  ]);
-
-  $successo = stream($_SESSION['associazioni'], [
-    [filter, (fn ($e) => array_key_exists($e, $etichette))],
-    [map, (fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $k])],
-    [filter, (function ($coll) {
-      try {
-        [$file, $dir] = $coll;
-        [$src, $dst] = ["./$file", "./$dir/$file"];
-        return json_encode(rename($src, $dst));
-      } catch (Exception) {
-        return false;
-      }
-    })],
-  ]);
-
-  $_SESSION['files'] = array_diff($_SESSION['files'], array_map(fn ($c) => $c[0], $successo));
-  foreach (array_map(fn ($c) => $c[2], $successo) as $k) {
-    unset($_SESSION['associazioni'][$k]);
-  }
-
-  $ris = stream($successo, [
-    [map, (fn ($k, $coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])],
-    [map, (fn ($k, $coll) => str_replace(mTableRow, $coll, htmlTableRow))],
-    [join, ("\n")],
-  ])
-    . "\n"
-    . stream($_SESSION['associazioni'], [
-      [map, (fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])],
-      [map, (fn ($k, $coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])],
-      [map, (fn ($k, $coll) => str_replace(mTableRow, $coll, htmlTableRow))],
-      [join, ("\n")]
-    ]);
-
+  $ris = '';
   save();
 ?>
   <!DOCTYPE html>
@@ -155,25 +123,10 @@ function apply() {
 <?php
 }
 
-function new_etichetta() {
-  try {
-    $etichetta = $_POST['etichetta'];
-    $key = "etichetta_" . count($_SESSION['etichette']);
-    $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
-    if ($success) {
-      $_SESSION['etichette'][$key] = $etichetta;
-      save(true);
-    }
-  } catch (Exception) {
-    echo "<p>Errore di un nuova etichetta</p>";
-  }
-}
-
 if (array_key_exists('command', $_POST)) {
   match ($_POST['command']) {
     "save" => save(true),
     "apply" => apply(),
-    "newEtichetta" => new_etichetta(),
   };
 }
 
@@ -301,7 +254,7 @@ try {
     <?php
     echo implode("\n", array_map(
       fn ($v) => sprintf('
-        <a id="%s" target="contenuto" class="miniatura %s"
+        <a id="file[%s]" target="contenuto" class="miniatura %s"
         onclick="selectAssoc(this);" href="./?file=%s">%s</a>
         ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
       $files
@@ -313,19 +266,19 @@ try {
     <button type="submit" name="command" value="apply">Applica modifiche</button>
     <button type="submit" name="command" value="save">Salva</button>
     <button type="button" onclick="newEtichetta()">Nuova directory</button>
-    <input name="etichetta" id="newEtichettaText" type="text">
+    <input id="newEtichettaText" type="text">
     <div id="associazioniEtichette">
       <?php
       $etichettaRadio = '';
       $etichetteText = '';
       foreach ($etichette as $k => $e) {
-        $etichetteText .= "<input type='text' name='$k' value='$e'>\n";
+        $etichetteText .= "<input type='text' name='etichetta[$k]' value='$e'>\n";
         foreach ($files as $f) {
           $e = htmlspecialchars($e);
           $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
           $etichettaRadio .= "<input hidden
           class='etichettaRadio' type='radio'
-          name='$f' value='$k' $selezione value='$e'
+          name='file[$f]' value='$k' $selezione value='$e'
           onclick='phpNewAssociazione(this)'
           >\n";
         }
@@ -334,7 +287,6 @@ try {
       echo "<fieldset id='etichette'>$etichetteText</fieldset>";
       ?>
     </div>
-    <input hidden id='fileattuale' type="text" name="file">
   </form>
 </body>
 
@@ -372,6 +324,8 @@ try {
       clickPrimoNonEvidenziato();
     }
   }
+
+  // TODO nuova etichetta
 </script>
 
 </html>
