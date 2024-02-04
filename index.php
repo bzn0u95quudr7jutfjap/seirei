@@ -13,8 +13,6 @@ const TEXT_MODE = 'Content-Type: text/plain; charset=utf-8';
 // DISPLAY DEL CONTENUTO DEI FILE
 // ========================================================================================================================
 
-session_start();
-
 function id($a) {
   return $a;
 }
