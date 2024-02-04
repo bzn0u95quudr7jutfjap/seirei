@@ -10,44 +10,6 @@ set_error_handler(
 const TEXT_MODE = 'Content-Type: text/plain; charset=utf-8';
 
 // ========================================================================================================================
-// QOL
-// ========================================================================================================================
-
-const map = 0;
-const filter = 3;
-const join = 6;
-const values = 7;
-
-function stream($collection, $pipeline) {
-  $ris = [];
-  foreach ($collection as $k => $c) {
-    foreach ($pipeline as $line) {
-      [$op, $arg] = $line;
-      switch ($op) {
-        case map:
-          $c = $arg($k, $c);
-          break;
-        case filter:
-          if ($arg($k, $c)) {
-            break;
-          } else {
-            continue 3;
-          }
-        default:
-          break;
-      }
-    }
-    $ris[$k] = $c;
-  }
-  [$op, $arg] = $pipeline[array_key_last($pipeline)];
-  return match ($op) {
-    join => implode($arg, $ris),
-    values => array_values($ris),
-    default => $ris,
-  };
-}
-
-// ========================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // ========================================================================================================================
 
