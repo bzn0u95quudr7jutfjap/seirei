@@ -237,7 +237,7 @@ try {
         $etichetteText .= "<input type='text' name='etichette[$k]' value='$e'>\n";
         foreach ($files as $f) {
           $e = htmlspecialchars($e);
-          $selezione = array_key_exists($f, $associazioni) ? 'selected' : '';
+          $selezione = array_key_exists($f, $associazioni) && ($associazioni[$f] == $k) ? 'checked' : '';
           $etichettaRadio .= "<input hidden
           class='etichettaRadio' type='radio'
           name='associazioni[$f]' value='$k' $selezione
