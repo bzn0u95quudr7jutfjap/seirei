@@ -10,80 +10,28 @@ set_error_handler(
 const TEXT_MODE = 'Content-Type: text/plain; charset=utf-8';
 
 // ========================================================================================================================
-// QOL
-// ========================================================================================================================
-
-class Stream {
-  public function __construct(private $collection = []) {
-  }
-
-  private function set($collection): Stream {
-    $this->collection = $collection;
-    return $this;
-  }
-
-  public function map($function): Stream {
-    return $this->set(array_map($function, $this->collection));
-  }
-
-  public function mapKeyValues($function): Stream {
-    return $this->set(array_map($function, array_keys($this->collection), $this->collection));
-  }
-
-  public function filter($function, $mode = 0): Stream {
-    return $this->set(array_filter($this->collection, $function, $mode));
-  }
-
-  public function get(): array {
-    return $this->collection;
-  }
-
-  public function getValues(): array {
-    return array_values($this->collection);
-  }
-
-  public function join($delimiter): string {
-    return implode($delimiter, $this->collection);
-  }
-}
-
-function stream($collection) {
-  return new Stream($collection);
-}
-
-function ls() {
-  return stream(glob('*'))
-    ->filter(fn ($f) => !is_dir($f))
-    ->getValues();
-}
-
-// ========================================================================================================================
 // DISPLAY DEL CONTENUTO DEI FILE
 // ========================================================================================================================
 
-session_start();
-
-function display_text($file) {
-  header("Content-Type: text/plain; charset=utf-8");
-  echo filter_var(file_get_contents($file), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-}
-
-function display_other($mime, $file) {
-  header("Content-Type: " . $mime);
-  readfile($file);
+function id($a) {
+  return $a;
 }
 
 if (array_key_exists("file", $_GET)) {
-  $file = $_SESSION['files'][$_GET["file"]];
+  $file = htmlspecialchars_decode($_GET["file"]);
   $mime = mime_content_type($file);
-  match (true) {
-    strpos($mime, 'text') !== false => display_text($file),
-    strpos($mime, 'application') !== false => display_text($file),
-    default => display_other($mime, $file),
+
+  [$mime, $parse] = match (true) {
+    strpos($mime, 'text') !== false => ['text/plain; charset=utf-8', 'id'],
+    strpos($mime, 'application') !== false => ['text/plain; charset=utf-8', 'htmlspecialchars'],
+    default => [$mime, 'id']
   };
+
+  header('Content-Type: ' . $mime);
+  echo $parse(file_get_contents($file));
 }
 
-if (count($_GET) != 0) {
+if (count($_GET) > 0) {
   die();
 }
 
@@ -94,58 +42,20 @@ if (count($_GET) != 0) {
 const CONFIGFILEJSON = ".seireidire.json";
 
 function save($refresh = false) {
-  file_put_contents(CONFIGFILEJSON, json_encode($_SESSION, JSON_FORCE_OBJECT));
+  file_put_contents(CONFIGFILEJSON, json_encode($_POST, JSON_FORCE_OBJECT));
   if ($refresh) {
     header("Location: /");
     die();
   }
 }
 
-const htmlTableRow = '
-      <tr>
-        <td>{{RIS}}</td>
-        <td>{{SRC}}</td>
-        <td>{{DST}}</td>
-      </tr>
-  ';
-const mTableRow = ['{{RIS}}', '{{SRC}}', '{{DST}}'];
-
 function apply() {
-  $etichette = stream($_SESSION['etichette'])
-    ->filter(fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e)))
-    ->get();
+  $_POST['etichette'] = array_filter(
+    $_POST['etichette'],
+    fn ($e) => (($b = file_exists($e)) && is_dir($e)) || (!$b && mkdir($e))
+  );
+  $_POST['associazioni'] = array_intersect($_POST['associazioni'], array_keys($_POST['etichette']));
 
-  $successo = stream($_SESSION['associazioni'])
-    ->filter(fn ($e) => array_key_exists($e, $etichette))
-    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v], $k])
-    ->filter(function ($coll) {
-      try {
-        [$file, $dir] = $coll;
-        [$src, $dst] = ["./$file", "./$dir/$file"];
-        return json_encode(rename($src, $dst));
-      } catch (Exception) {
-        return false;
-      }
-    })
-    ->get();
-
-  $_SESSION['files'] = array_diff($_SESSION['files'], stream($successo)->map(fn ($c) => $c[0])->get());
-  foreach (stream($successo)->map(fn ($c) => $c[2])->get() as $k) {
-    unset($_SESSION['associazioni'][$k]);
-  }
-
-  $ris = stream($successo)
-    ->map(fn ($coll) => ["true", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
-    ->join("\n")
-    . "\n"
-    . stream($_SESSION['associazioni'])
-    ->mapKeyValues(fn ($k, $v) => [$_SESSION['files'][$k], $_SESSION['etichette'][$v]])
-    ->map(fn ($coll) => ["false", './' . ($coll[0]), './' . ($coll[1]) . '/' . ($coll[0])])
-    ->map(fn ($coll) => str_replace(mTableRow, $coll, htmlTableRow))
-    ->join("\n");
-
-  save();
 ?>
   <!DOCTYPE html>
   <html>
@@ -156,72 +66,34 @@ function apply() {
         <th>Risultato</th>
         <th>Sorgente</th>
         <th>Destinazione</th>
-        <?php echo $ris; ?>
+        <?php
+        echo implode("\n", array_map(
+          fn ($file, $dir) => "<tr><td>$file</td><td>$dir</td><td>" . json_encode(rename("./$file", "./$dir/$file")) . "</td></tr>",
+          array_map('htmlspecialchars_decode', array_keys($_POST['associazioni'])),
+          array_map(fn ($k) => $_POST['etichette'][$k], $_POST['associazioni']),
+        ));
+        ?>
       </tr>
     </table>
   </body>
 
   </html>
 <?php
-}
 
-function new_etichetta() {
-  try {
-    $etichetta = $_POST['etichetta'];
-    $key = "etichetta_" . count($_SESSION['etichette']);
-    $success = ($etichetta != "" && !in_array($etichetta, $_SESSION['etichette']));
-    if ($success) {
-      $_SESSION['etichette'][$key] = $etichetta;
-      save(true);
-    }
-  } catch (Exception) {
-    echo "<p>Errore di un nuova etichetta</p>";
-  }
-}
-
-function new_associazione() {
-  try {
-    ["file" => $file, "etichetta" => $etichetta] = $_POST;
-    $primo_check = !array_key_exists($file, $_SESSION['associazioni']);
-    $_SESSION['associazioni'][$file] = $etichetta;
-    $res = [true, $primo_check];
-  } catch (Exception) {
-    $res = [false, false];
-  } finally {
-    echo json_encode($res);
-  }
-}
-
-function get_associazione() {
-  try {
-    echo json_encode([true, $_SESSION['associazioni'][$_POST['file']]]);
-  } catch (Exception) {
-    echo json_encode([false, ""]);
-  }
-}
-
-function set_etichetta() {
-  try {
-    $ret = $_SESSION['etichette'][$_POST['etichetta']] = $_POST['nome'];
-    echo json_encode([true, $ret]);
-  } catch (Exception) {
-    echo json_encode([false, $_SESSION['etichette'][$_POST['etichetta']]]);
-  }
+  $_POST['associazioni'] = [];
+  save();
 }
 
 if (array_key_exists('command', $_POST)) {
-  match ($_POST['command']) {
+  $cmd = $_POST['command'];
+  unset($_POST['command']);
+  match ($cmd) {
     "save" => save(true),
     "apply" => apply(),
-    "newEtichetta" => new_etichetta(),
-    "setEtichetta" => set_etichetta(),
-    "newAssociazione" => new_associazione(),
-    "getAssociazione" => get_associazione(),
-    default => null,
   };
 }
 
-if (count($_POST) != 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   die();
 }
 
@@ -229,52 +101,26 @@ if (count($_POST) != 0) {
 // PAGINA PRINCIPALE
 // ========================================================================================================================
 
-$files = ls();
+$files = array_map(
+  'htmlspecialchars',
+  array_filter(
+    glob('*'),
+    fn ($f) => !is_dir($f)
+  )
+);
 
 try {
-  $_SESSION = stream((array) json_decode(file_get_contents(CONFIGFILEJSON)))
-    ->map(fn ($a) => (array) $a)
-    ->get();
-
-  $common = array_intersect($_SESSION['files'], $files);
-  $max = max(array_keys($_SESSION['files'])) + 1;
-  $diff = array_diff($files, $_SESSION['files']);
-  $diff = count($diff) == 0 ? [] : array_combine(range($max, $max + count($diff) - 1), $diff);
-  $_SESSION['files'] = $diff + $common;
-
-  $_SESSION['associazioni'] = stream($_SESSION['associazioni'])
-    ->filter(fn ($file) => array_key_exists($file, $_SESSION['files']), ARRAY_FILTER_USE_KEY)
-    ->get();
+  [
+    'associazioni' => $associazioni,
+    'etichette' => $etichette,
+  ] = json_decode(file_get_contents(CONFIGFILEJSON), true);
+  foreach (array_diff(array_unique(array_keys($associazioni)), $files) as $file) {
+    unset($associazioni[$file]);
+  }
 } catch (Exception | ValueError) {
-  $_SESSION = [
-    'etichette' => [],
-    'associazioni' => [],
-    'files' => $files
-  ];
+  $associazioni = [];
+  $etichette = [];
 };
-
-const htmlminiatura = '
-  <a target="contenuto" href="./?file={{ID}}">
-    <img class="miniatura {{EVIDENZIATURA}}" id="{{ID}}" alt="{{FILENAME}}" onclick="phpGetAssociazione(this);">
-  </a>
-';
-const mMarcatori = ['{{ID}}', '{{FILENAME}}', '{{EVIDENZIATURA}}'];
-$miniature = stream($_SESSION['files'])
-  ->map(fn ($file) => filter_var($file, FILTER_SANITIZE_FULL_SPECIAL_CHARS))
-  ->mapKeyValues(fn ($k, $v) => [$k, $v, array_key_exists($k, $_SESSION['associazioni']) ? 'evidenziatura' : ''])
-  ->map(fn ($coll) => str_replace(mMarcatori, $coll, htmlminiatura))
-  ->join("\n");
-
-const htmletichetta = '
-  <div class="etichetta" >
-    <input class="radio" type="radio" name="etichetta" value="{{ID}}" onclick="phpNewAssociazione(this)">
-    <input class="text"  type="text"  name="{{ID}}"     id="{{ID}}" onchange="phpAggiornaNomeEtichetta(\'{{ID}}\',this)" value="{{ETICHETTA}}">
-  </div>
-';
-const eMarcatori = ['{{ID}}', '{{ETICHETTA}}'];
-$etichette = stream($_SESSION['etichette'])
-  ->mapKeyValues(fn ($k, $v) => str_replace(eMarcatori, [$k, $v], htmletichetta))
-  ->join("\n");
 
 ?>
 
@@ -282,146 +128,55 @@ $etichette = stream($_SESSION['etichette'])
 <html>
 
 <head>
-  <script>
-    // ===========================================================================================================================
-    // GLOBAL VARS
-    // ===========================================================================================================================
-    let MINIATURE = null;
-    let FILE = null;
-    let ETICHETTERADIO = null;
-    let NEWASSOCIAZIONE = null;
-    let BTN_NEW_ASSOCIAZIONE = null;
-
-    function clickPrimoNonEvidenziato() {
-      MINIATURE.filter(
-        (elem) => !elem.classList.contains('evidenziatura')
-      ).slice(0, 1).forEach(
-        (elem) => elem.click()
-      );
-    }
-
-    function selezionaFile(elem) {
-      const selezione = 'selezione';
-      MINIATURE.filter(
-        (elem) => elem.classList.contains(selezione)
-      ).forEach(
-        (elem) => elem.classList.remove(selezione)
-      );
-      NEWASSOCIAZIONE.file.value = elem.id;
-      FILE = elem;
-      elem.classList.add(selezione);
-    }
-
-    function main() {
-      NEWASSOCIAZIONE = {
-        form: document.getElementById('newAssociazioneForm'),
-        btn: document.getElementById('newAssociazioneBtn'),
-        file: document.getElementById('newAssociazioneFile'),
-      };
-      ETICHETTERADIO = Object.values(document.getElementsByClassName('radio'));
-      MINIATURE = Object.values(document.getElementsByClassName('miniatura'));
-      clickPrimoNonEvidenziato();
-    }
-
-    function callPhp(data, func) {
-      const xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("POST", "index.php", true);
-      xmlhttp.onload = function() {
-        func(JSON.parse(this.responseText));
-      };
-      xmlhttp.send(data);
-    }
-
-    function phpAggiornaNomeEtichetta(id, elem) {
-      let data = new FormData();
-      data.append("command", "setEtichetta");
-      data.append("etichetta", id);
-      data.append("nome", elem.value);
-      callPhp(data,
-        function([success, oldname]) {
-          if (!success) {
-            elem.value = oldname;
-          }
-        }
-      );
-    }
-
-    function phpNewAssociazione(elem) {
-      callPhp(new FormData(
-          NEWASSOCIAZIONE.form,
-          NEWASSOCIAZIONE.btn
-        ),
-        function([success, primocheck]) {
-          if (success) {
-            FILE.classList.add('evidenziatura');
-            if (primocheck) {
-              clickPrimoNonEvidenziato();
-            }
-          } else {
-            alert("ERRORE ASSOCIAZIONE");
-            console.log("ERRORE ASSOCIAZIONE");
-          }
-        }
-      )
-    }
-
-    function phpGetAssociazione(elem) {
-      selezionaFile(elem);
-      let data = new FormData();
-      data.append("command", "getAssociazione");
-      data.append("file", elem.id);
-      callPhp(data,
-        function([success, radiovalue]) {
-          if (success) {
-            ETICHETTERADIO.filter(
-              (radio) => radio.value == radiovalue
-            ).forEach(
-              (radio) => radio.checked = true
-            );
-          } else {
-            ETICHETTERADIO.forEach(
-              (radio) => radio.checked = false
-            );
-          }
-        }
-      );
-    }
-  </script>
-
   <style>
-    html {
+    html,
+    body,
+    input {
+      width: 100%;
       height: 100%;
+      margin: 0px;
     }
 
     body {
-      height: 100%;
-      margin: 0px;
       display: grid;
-      grid-template-columns: min-content auto min-content;
-      grid-template-rows: 100%;
-      justify-items: center;
-      align-items: center;
-    }
-
-    #contenuto {
-      height: 90%;
-      width: 90%;
+      grid-template:
+        'miniature contenuto controlli' min-content
+        'miniature contenuto etichette' 1fr
+        / 200px 1fr 200px;
+      gap: 20px;
+      justify-content: space-around;
+      align-content: space-around;
     }
 
     #miniature {
-      margin: 20px;
-      overflow: scroll;
-      height: 90%;
-      width: 200px;
-      display: flex;
-      flex-direction: column;
+      grid-area: miniature;
+      padding: 10px;
     }
 
-    .miniatura {
-      width: 160px;
-      margin: 10px;
-      margin-right: 20px;
-      border: none;
+    #contenuto {
+      grid-area: contenuto;
+      width: 100%;
+      height: 96%;
+    }
+
+    #controlli {
+      grid-area: controlli;
+      padding: 10px;
+    }
+
+    #etichette {
+      grid-area: etichette;
+      padding: 10px;
+    }
+
+    #miniature,
+    #etichette,
+    #controlli {
+      overflow-y: scroll;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .evidenziatura {
@@ -432,62 +187,134 @@ $etichette = stream($_SESSION['etichette'])
       border: solid lime 2px;
     }
 
-    #controlli {
-      margin: 20px;
-      height: 90%;
+    .etichetta {
       display: grid;
-      grid-template-rows: min-content min-content min-content auto min-content;
-      grid-gap: 10px;
+      grid-template-columns: 30px 1fr;
+      grid-template-rows: 30px;
+      gap: 6px;
     }
 
-    #etichette {
-      overflow: scroll;
-      height: 100%;
+    #etichette,
+    #associazioni {
       display: flex;
       flex-direction: column;
     }
 
-    .etichetta .text {
-      display: inline-block;
-      width: 70%;
+    #associazioniEtichette {
+      display: flex;
+      flex-direction: row;
     }
 
-    .etichetta .radio {
-      display: inline-block;
+    input.etichettaRadio {
       height: 20px;
       width: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
     }
   </style>
 </head>
 
-<body onload='main()'>
-  <div id="miniature">
-    <?php echo $miniature; ?>
+<body>
+  <div id="miniature" class="list">
+    <?php
+    echo implode("\n", array_map(
+      fn ($v) => sprintf('
+        <a id="associazioni[%s]" target="contenuto" class="miniatura %s"
+        onclick="selectAssoc(this);" href="./?file=%s">%s</a>
+        ', $v, array_key_exists($v, $associazioni) ? 'evidenziatura' : '', $v, $v, $v),
+      $files
+    ));
+    ?>
   </div>
   <iframe name="contenuto" id="contenuto"></iframe>
-  <div id="controlli">
-    <form action="./" method="post">
-      <button type="submit" name="command" value="save">Salva</button>
-      <button type="submit" name="command" value="newEtichetta">Nuova directory</button>
-      <input name="etichetta" type="text">
-    </form>
-    <form action="./" method="post" target="devnull" id="newAssociazioneForm">
-      <?php echo $etichette; ?>
-      <input hidden id='newAssociazioneFile' type="text" name="file">
-      <button hidden id='newAssociazioneBtn' name='command' value='newAssociazione'></button>
-    </form>
-    <form action="./" method="post">
-      <button type="submit" name="command" value="apply">Applica modifiche</button>
-    </form>
-
-  </div>
+  <form id="controlli" action="./" method="post">
+    <button type="submit" name="command" value="apply">Applica modifiche</button>
+    <button type="submit" name="command" value="save">Salva</button>
+    <button type="button" onclick="newEtichetta()">Nuova directory</button>
+    <div id="associazioniEtichette">
+      <?php
+      $etichettaRadio = '';
+      $etichetteText = '';
+      foreach ($etichette as $k => $e) {
+        $etichetteText .= "<input type='text' name='etichette[$k]' value='$e'>\n";
+        foreach ($files as $f) {
+          $e = htmlspecialchars($e);
+          $selezione = array_key_exists($f, $associazioni) && ($associazioni[$f] == $k) ? 'checked' : '';
+          $etichettaRadio .= "<input hidden
+          class='etichettaRadio' type='radio'
+          name='associazioni[$f]' value='$k' $selezione
+          onclick='phpNewAssociazione(this)'
+          >\n";
+        }
+      }
+      echo "<fieldset id='associazioni'>$etichettaRadio</fieldset>";
+      echo "<fieldset id='etichette'>$etichetteText</fieldset>";
+      ?>
+    </div>
+  </form>
 </body>
+
+<script>
+  let primocheck = false;
+
+  function selectAssoc(elem) {
+    // Seleziona il file
+    const selezione = 'selezione';
+    Object.values(miniature.children)
+      .filter((elem) => elem.classList.contains(selezione))
+      .forEach((elem) => elem.classList.remove(selezione));
+    elem.classList.add(selezione);
+
+    // Ottieni l'associazione
+    const file = elem.id;
+    const cache = Object.values(associazioni.children);
+    cache.forEach((elem) => elem.hidden = true);
+    const display = cache.filter((elem) => elem.name == file);
+    display.forEach((elem) => elem.hidden = false);
+    primocheck = !display.reduce((a, elem) => a || elem.checked, false);
+  }
+
+  function clickPrimoNonEvidenziato() {
+    Object.values(miniature.children)
+      .filter((elem) => !elem.classList.contains('evidenziatura'))
+      .slice(0, 1).forEach((elem) => elem.click());
+  }
+
+  clickPrimoNonEvidenziato();
+
+  function phpNewAssociazione(elem) {
+    document.getElementById(elem.name).classList.add('evidenziatura');
+    if (primocheck) {
+      clickPrimoNonEvidenziato();
+    }
+  }
+
+  function newEtichetta() {
+    const idx = Object.values(etichette.children)
+      .map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
+      .reduce((a, b) => Math.max(a, b), -Infinity);
+    const nextIdx = idx > -Infinity ? (1 + idx) : 0;
+
+    const e = document.createElement('input');
+    e.type = 'text';
+    e.name = `etichette[${nextIdx}]`;
+    etichette.appendChild(e);
+
+    Object.values(miniature.children)
+      .forEach(function(f) {
+        const e = document.createElement('input');
+        e.hidden = true;
+        e.classList.add('etichettaRadio');
+        e.type = 'radio';
+        e.name = `${f.id}`;
+        e.value = `${nextIdx}`;
+        e.onclick = () => phpNewAssociazione(e);
+        associazioni.appendChild(e);
+      });
+
+    Object.values(miniature.children)
+      .filter((elem) => elem.classList.contains('selezione'))
+      .slice(0, 1).forEach((elem) => elem.click());
+  }
+</script>
 
 </html>
 
