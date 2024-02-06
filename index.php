@@ -255,13 +255,14 @@ try {
 <script>
   let primocheck = false;
 
+  const miniature = () => Object.values(document.getElementById('miniature').children);
   const etichette = () => Object.values(document.getElementsByClassName('etichetta'));
   const associazioni = () => Object.values(document.getElementsByClassName('associazione'));
 
   function selectAssoc(elem) {
     // Seleziona il file
     const selezione = 'selezione';
-    Object.values(miniature.children)
+    miniature()
       .filter((elem) => elem.classList.contains(selezione))
       .forEach((elem) => elem.classList.remove(selezione));
     elem.classList.add(selezione);
@@ -276,7 +277,7 @@ try {
   }
 
   function clickPrimoNonEvidenziato() {
-    Object.values(miniature.children)
+    miniature()
       .filter((elem) => !elem.classList.contains('evidenziatura'))
       .slice(0, 1).forEach((elem) => elem.click());
   }
@@ -301,7 +302,7 @@ try {
     e.name = `etichette[${nextIdx}]`;
     etichette.appendChild(e);
 
-    Object.values(miniature.children)
+    miniature()
       .forEach(function(f) {
         const e = document.createElement('input');
         e.hidden = true;
@@ -313,7 +314,7 @@ try {
         associazioni.appendChild(e);
       });
 
-    Object.values(miniature.children)
+    miniature()
       .filter((elem) => elem.classList.contains('selezione'))
       .slice(0, 1).forEach((elem) => elem.click());
   }
