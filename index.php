@@ -255,6 +255,9 @@ try {
 <script>
   let primocheck = false;
 
+  const etichette = () => Object.values(document.getElementsByClassName('etichetta'));
+  const associazioni = () => Object.values(document.getElementsByClassName('associazione'));
+
   function selectAssoc(elem) {
     // Seleziona il file
     const selezione = 'selezione';
@@ -265,7 +268,7 @@ try {
 
     // Ottieni l'associazione
     const file = elem.id;
-    const cache = Object.values(associazioni.children);
+    const cache = associazioni();
     cache.forEach((elem) => elem.hidden = true);
     const display = cache.filter((elem) => elem.name == file);
     display.forEach((elem) => elem.hidden = false);
@@ -288,7 +291,7 @@ try {
   }
 
   function newEtichetta() {
-    const idx = Object.values(etichette.children)
+    const idx = etichette()
       .map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
       .reduce((a, b) => Math.max(a, b), -Infinity);
     const nextIdx = idx > -Infinity ? (1 + idx) : 0;
