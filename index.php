@@ -187,13 +187,6 @@ try {
       border: solid lime 2px;
     }
 
-    .etichetta {
-      display: grid;
-      grid-template-columns: 30px 1fr;
-      grid-template-rows: 30px;
-      gap: 6px;
-    }
-
     #etichette,
     #associazioni {
       display: flex;
@@ -205,7 +198,14 @@ try {
       flex-direction: row;
     }
 
-    input.etichettaRadio {
+    input.etichetta {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      grid-template-rows: 30px;
+      gap: 6px;
+    }
+
+    input.associazione {
       height: 20px;
       width: 20px;
     }
