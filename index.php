@@ -262,8 +262,7 @@ try {
   function selectAssoc(elem) {
     // Seleziona il file
     const selezione = 'selezione';
-    miniature()
-      .filter((elem) => elem.classList.contains(selezione))
+    miniature().filter((elem) => elem.classList.contains(selezione))
       .forEach((elem) => elem.classList.remove(selezione));
     elem.classList.add(selezione);
 
@@ -277,8 +276,7 @@ try {
   }
 
   function clickPrimoNonEvidenziato() {
-    miniature()
-      .filter((elem) => !elem.classList.contains('evidenziatura'))
+    miniature().filter((elem) => !elem.classList.contains('evidenziatura'))
       .slice(0, 1).forEach((elem) => elem.click());
   }
 
@@ -292,8 +290,7 @@ try {
   }
 
   function newEtichetta() {
-    const idx = etichette()
-      .map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
+    const idx = etichette().map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
       .reduce((a, b) => Math.max(a, b), -Infinity);
     const nextIdx = idx > -Infinity ? (1 + idx) : 0;
 
@@ -302,20 +299,18 @@ try {
     e.name = `etichette[${nextIdx}]`;
     etichette.appendChild(e);
 
-    miniature()
-      .forEach(function(f) {
-        const e = document.createElement('input');
-        e.hidden = true;
-        e.classList.add('etichettaRadio');
-        e.type = 'radio';
-        e.name = `${f.id}`;
-        e.value = `${nextIdx}`;
-        e.onclick = () => phpNewAssociazione(e);
-        associazioni.appendChild(e);
-      });
+    miniature().forEach(function(f) {
+      const e = document.createElement('input');
+      e.hidden = true;
+      e.classList.add('etichettaRadio');
+      e.type = 'radio';
+      e.name = `${f.id}`;
+      e.value = `${nextIdx}`;
+      e.onclick = () => phpNewAssociazione(e);
+      associazioni.appendChild(e);
+    });
 
-    miniature()
-      .filter((elem) => elem.classList.contains('selezione'))
+    miniature().filter((elem) => elem.classList.contains('selezione'))
       .slice(0, 1).forEach((elem) => elem.click());
   }
 </script>
