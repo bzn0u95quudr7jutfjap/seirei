@@ -288,21 +288,25 @@ try {
       .reduce((a, b) => Math.max(a, b), -Infinity);
     const nextIdx = idx > -Infinity ? (1 + idx) : 0;
 
-    const e = document.createElement('input');
-    e.type = 'text';
-    e.name = `etichette[${nextIdx}]`;
-    etichette.appendChild(e);
+    const line = document.createElement('span');
 
-    miniature().forEach(function(f) {
+    miniature().map(function(f) {
       const e = document.createElement('input');
       e.hidden = true;
-      e.classList.add('etichettaRadio');
+      e.classList.add('associazione');
       e.type = 'radio';
       e.name = `${f.id}`;
       e.value = `${nextIdx}`;
       e.onclick = () => phpNewAssociazione(e);
-      associazioni.appendChild(e);
+      line.appendChild(e);
     });
+
+    const e = document.createElement('input');
+    e.type = 'text';
+    e.name = `etichette[${nextIdx}]`;
+    line.appendChild(e);
+
+    associazioniEtichette.appendChild(line);
 
     miniature().filter((elem) => elem.classList.contains('selezione'))
       .slice(0, 1).forEach((elem) => elem.click());
