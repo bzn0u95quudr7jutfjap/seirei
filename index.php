@@ -187,27 +187,23 @@ try {
       border: solid lime 2px;
     }
 
-    #etichette,
-    #associazioni {
-      display: flex;
-      flex-direction: column;
-    }
-
     #associazioniEtichette {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    input.etichetta {
-      display: grid;
-      grid-template-columns: 30px 1fr;
-      grid-template-rows: 30px;
+    #associazioniEtichette span {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-content: center;
       gap: 6px;
     }
 
     input.associazione {
-      height: 20px;
-      width: 20px;
+      height: 40px;
+      width: 40px;
     }
   </style>
 </head>
