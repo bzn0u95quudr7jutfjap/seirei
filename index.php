@@ -234,12 +234,12 @@ try {
       $etichettaRadio = '';
       $etichetteText = '';
       foreach ($etichette as $k => $e) {
-        $etichetteText .= "<input type='text' name='etichette[$k]' value='$e'>\n";
+        $etichetteText .= "<input class='etichetta' type='text' name='etichette[$k]' value='$e'>\n";
         foreach ($files as $f) {
           $e = htmlspecialchars($e);
           $selezione = array_key_exists($f, $associazioni) && ($associazioni[$f] == $k) ? 'checked' : '';
           $etichettaRadio .= "<input hidden
-          class='etichettaRadio' type='radio'
+          class='associazione' type='radio'
           name='associazioni[$f]' value='$k' $selezione
           onclick='phpNewAssociazione(this)'
           >\n";
