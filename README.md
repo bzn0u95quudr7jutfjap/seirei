@@ -1,6 +1,8 @@
-# 清麗ディレクトリ 
+# 清麗ディレクトリ (seirei directori)
 
-Questo NON è un sito web. 
+## Disclaimer 「免責」
+
+Questo NON è un sito web.   
 Gli standard di separazione dei file non sono applicabili a questo progetto.
 
 ## Come usare　「使い方」
