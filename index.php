@@ -139,34 +139,13 @@ try {
 
     body {
       display: grid;
-      grid-template:
-        'miniature contenuto controlli' min-content
-        'miniature contenuto etichette' 1fr
-        / 200px 1fr 200px;
+      grid-template-columns: 200px auto 200px;
       gap: 20px;
-      justify-content: space-around;
-      align-content: space-around;
-    }
-
-    #miniature {
-      grid-area: miniature;
-      padding: 10px;
     }
 
     #contenuto {
-      grid-area: contenuto;
       width: 100%;
       height: 96%;
-    }
-
-    #controlli {
-      grid-area: controlli;
-      padding: 10px;
-    }
-
-    #etichette {
-      grid-area: etichette;
-      padding: 10px;
     }
 
     #miniature,
@@ -177,6 +156,7 @@ try {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      padding: 10px;
     }
 
     .evidenziatura {
