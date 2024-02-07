@@ -244,74 +244,75 @@ try {
       ?>
     </div>
   </form>
-</body>
 
-<script>
-  let primocheck = false;
+  <script>
+    let primocheck = false;
 
-  const miniature = () => Object.values(document.getElementById('miniature').children);
-  const etichette = () => Object.values(document.getElementsByClassName('etichetta'));
-  const associazioni = () => Object.values(document.getElementsByClassName('associazione'));
+    const miniature = () => Object.values(document.getElementById('miniature').children);
+    const etichette = () => Object.values(document.getElementsByClassName('etichetta'));
+    const associazioni = () => Object.values(document.getElementsByClassName('associazione'));
 
-  function selectAssoc(elem) {
-    // Seleziona il file
-    const selezione = 'selezione';
-    miniature().filter((elem) => elem.classList.contains(selezione))
-      .forEach((elem) => elem.classList.remove(selezione));
-    elem.classList.add(selezione);
+    function selectAssoc(elem) {
+      // Seleziona il file
+      const selezione = 'selezione';
+      miniature().filter((elem) => elem.classList.contains(selezione))
+        .forEach((elem) => elem.classList.remove(selezione));
+      elem.classList.add(selezione);
 
-    // Ottieni l'associazione
-    const file = elem.id;
-    const cache = associazioni();
-    cache.forEach((elem) => elem.hidden = true);
-    const display = cache.filter((elem) => elem.name == file);
-    display.forEach((elem) => elem.hidden = false);
-    primocheck = !display.reduce((a, elem) => a || elem.checked, false);
-  }
-
-  function clickPrimoNonEvidenziato() {
-    miniature().filter((elem) => !elem.classList.contains('evidenziatura'))
-      .slice(0, 1).forEach((elem) => elem.click());
-  }
-
-  clickPrimoNonEvidenziato();
-
-  function phpNewAssociazione(elem) {
-    document.getElementById(elem.name).classList.add('evidenziatura');
-    if (primocheck) {
-      clickPrimoNonEvidenziato();
+      // Ottieni l'associazione
+      const file = elem.id;
+      const cache = associazioni();
+      cache.forEach((elem) => elem.hidden = true);
+      const display = cache.filter((elem) => elem.name == file);
+      display.forEach((elem) => elem.hidden = false);
+      primocheck = !display.reduce((a, elem) => a || elem.checked, false);
     }
-  }
 
-  function newEtichetta() {
-    const idx = etichette().map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
-      .reduce((a, b) => Math.max(a, b), -Infinity);
-    const nextIdx = idx > -Infinity ? (1 + idx) : 0;
+    function clickPrimoNonEvidenziato() {
+      miniature().filter((elem) => !elem.classList.contains('evidenziatura'))
+        .slice(0, 1).forEach((elem) => elem.click());
+    }
 
-    const line = document.createElement('span');
+    clickPrimoNonEvidenziato();
 
-    miniature().map(function(f) {
+    function phpNewAssociazione(elem) {
+      document.getElementById(elem.name).classList.add('evidenziatura');
+      if (primocheck) {
+        clickPrimoNonEvidenziato();
+      }
+    }
+
+    function newEtichetta() {
+      const idx = etichette().map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
+        .reduce((a, b) => Math.max(a, b), -Infinity);
+      const nextIdx = idx > -Infinity ? (1 + idx) : 0;
+
+      const line = document.createElement('span');
+
+      miniature().map(function(f) {
+        const e = document.createElement('input');
+        e.hidden = true;
+        e.classList.add('associazione');
+        e.type = 'radio';
+        e.name = `${f.id}`;
+        e.value = `${nextIdx}`;
+        e.onclick = () => phpNewAssociazione(e);
+        line.appendChild(e);
+      });
+
       const e = document.createElement('input');
-      e.hidden = true;
-      e.classList.add('associazione');
-      e.type = 'radio';
-      e.name = `${f.id}`;
-      e.value = `${nextIdx}`;
-      e.onclick = () => phpNewAssociazione(e);
+      e.type = 'text';
+      e.name = `etichette[${nextIdx}]`;
       line.appendChild(e);
-    });
 
-    const e = document.createElement('input');
-    e.type = 'text';
-    e.name = `etichette[${nextIdx}]`;
-    line.appendChild(e);
+      associazioniEtichette.appendChild(line);
 
-    associazioniEtichette.appendChild(line);
+      miniature().filter((elem) => elem.classList.contains('selezione'))
+        .slice(0, 1).forEach((elem) => elem.click());
+    }
+  </script>
 
-    miniature().filter((elem) => elem.classList.contains('selezione'))
-      .slice(0, 1).forEach((elem) => elem.click());
-  }
-</script>
+</body>
 
 </html>
 
