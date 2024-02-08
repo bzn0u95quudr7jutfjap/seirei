@@ -263,9 +263,8 @@ try {
     }
 
     function newEtichetta() {
-      const idx = etichette().map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
-        .reduce((a, b) => Math.max(a, b), -Infinity);
-      const nextIdx = idx > -Infinity ? (1 + idx) : 0;
+      const idx = 1 + etichette().map((e) => Number(/etichette\[(\d+)\]/.exec(e.name)[1]))
+        .reduce((a, b) => Math.max(a, b), -1);
 
       const line = document.createElement('span');
 
@@ -275,14 +274,15 @@ try {
         e.classList.add('associazione');
         e.type = 'radio';
         e.name = `${f.id}`;
-        e.value = `${nextIdx}`;
+        e.value = `${idx}`;
         e.onclick = () => phpNewAssociazione(e);
         line.appendChild(e);
       });
 
       const e = document.createElement('input');
       e.type = 'text';
-      e.name = `etichette[${nextIdx}]`;
+      e.classList.add('etichetta');
+      e.name = `etichette[${idx}]`;
       line.appendChild(e);
 
       associazioniEtichette.appendChild(line);
