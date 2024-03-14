@@ -2,8 +2,8 @@
 
 ## Disclaimer 「免責」
 
-Questo NON è un sito web.   
-Gli standard di separazione dei file non sono applicabili a questo progetto.
+Il problema che voglio risolvere con questo tool mi impedisce
+di separlo in più file.
 
 ## Come usare　「使い方」
 
