@@ -1,9 +1,8 @@
 # 清麗ディレクトリ (seirei directori)
 
-## Disclaimer 「免責」
-
-Il problema che voglio risolvere con questo tool mi impedisce
-di separlo in più file.
+Lo scopo di questo tool è di avere un'interfaccia grafica con la quale esplorare
+rapidamente il contenuto di tanti file contenuti in una cartella e smistarli
+in sottocartelle a seconda del loro contenuto.
 
 ## Come usare　「使い方」
 
