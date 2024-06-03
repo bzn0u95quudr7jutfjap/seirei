@@ -1,4 +1,4 @@
-# 清麗ディレクトリ (seirei directori)
+# 清麗 (seirei)
 
 Lo scopo di questo tool è di avere un'interfaccia grafica con la quale esplorare
 rapidamente il contenuto di tanti file contenuti in una cartella e smistarli
